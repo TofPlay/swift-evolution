@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0504 - Task Cancellation Shields - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-4/se-0504-task-cancellation-shields/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0504 - Task Cancellation Shields">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-4/se-0504-task-cancellation-shields/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-4/">
+                  Swift 6.4
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0504 - Task Cancellation Shields</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0504 - Task Cancellation Shields</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.4</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0504-task-cancellation-shields.md">SE-0504 - Task Cancellation Shields</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit les "task cancellation shields" (boucliers d'annulation de tâche), un mécanisme permettant de masquer temporairement l'état d'annulation d'une tâche au sein d'un bloc de code spécifique.</p>
+<p><strong>Points clés :</strong></p>
+<ul>
+<li><strong>Mécanisme :</strong> Utilisation de <code>withTaskCancellationShield</code> pour exécuter du code (comme le nettoyage de ressources) sans qu'il puisse observer le statut d'annulation de la tâche parente via <code>Task.isCancelled</code> ou <code>Task.checkCancellation</code>.</li>
+<li><strong>Propagation :</strong> Le bouclier empêche la propagation automatique de l'annulation vers les tâches enfants structurées (<code>async let</code>, <code>TaskGroup</code>) tant que le bloc est actif, bien que la tâche parente reste techniquement annulée.</li>
+<li><strong>Limites :</strong> Le bouclier ne s'applique qu'au contexte actuel (méthodes statiques de <code>Task</code>). L'accès via une instance de <code>Task</code> (<code>task.isCancelled</code>) continuera de renvoyer le véritable état d'annulation.</li>
+<li><strong>Outil de débogage :</strong> Introduction de <code>hasActiveCancellationShield</code> pour vérifier si une tâche est actuellement protégée par un bouclier.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0504" tabindex="-1"><a href="#avant-se-0504" class="header-anchor">Avant SE-0504</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">extension</span> <span class="token class-name">Resource</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">cleanup</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Si cette méthode vérifie Task.isCancelled, </span>
+        <span class="token comment">// le nettoyage échouera si la tâche est annulée.</span>
+        system<span class="token punctuation">.</span><span class="token function">performAction</span><span class="token punctuation">(</span><span class="token class-name">CleanupAction</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">example</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> resource <span class="token operator">=</span> <span class="token function">makeResource</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token comment">// WORKAROUND : Utilisation d'une tâche non structurée pour éviter l'annulation</span>
+    <span class="token keyword">await</span> <span class="token class-name">Task</span> <span class="token punctuation">{</span>
+        <span class="token function">assert</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token class-name">Task</span><span class="token punctuation">.</span>isCancelled<span class="token punctuation">)</span>
+        resource<span class="token punctuation">.</span><span class="token function">cleanup</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span><span class="token punctuation">.</span>value
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Actuellement, pour garantir l'exécution d'un code de nettoyage, les développeurs doivent créer des tâches non structurées (<code>Task { ... }</code>), ce qui introduit un overhead de planification (scheduling) et peut poser des problèmes de correction ou de performance.</p>
+<h3 id="apr%C3%A8s-se-0504" tabindex="-1"><a href="#apr%C3%A8s-se-0504" class="header-anchor">Après SE-0504</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">extension</span> <span class="token class-name">Resource</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">cleanup</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        system<span class="token punctuation">.</span><span class="token function">performAction</span><span class="token punctuation">(</span><span class="token class-name">CleanupAction</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">example</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> resource <span class="token operator">=</span> <span class="token function">makeResource</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    
+    <span class="token keyword">await</span> withTaskCancellationShield <span class="token punctuation">{</span>
+        <span class="token comment">// Le code de nettoyage s'exécutera même si la tâche est annulée</span>
+        resource<span class="token punctuation">.</span><span class="token function">cleanup</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Utilisation avec une tâche enfant</span>
+<span class="token class-name">Task</span> <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> withTaskCancellationShield <span class="token punctuation">{</span>
+        <span class="token keyword">async</span> <span class="token keyword">let</span> result <span class="token operator">=</span> <span class="token function">compute</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// La tâche enfant n'est pas annulée immédiatement</span>
+        <span class="token keyword">await</span> result
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition permet d'encapsuler les opérations critiques dans un bloc <code>withTaskCancellationShield</code>, garantissant que l'état d'annulation n'est pas observé, éliminant ainsi le besoin de tâches non structurées pour le nettoyage de ressources.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

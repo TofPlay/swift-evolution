@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0427 - Noncopyable Generics - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-0/se-0427-noncopyable-generics/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0427 - Noncopyable Generics">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-0/se-0427-noncopyable-generics/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-0/">
+                  Swift 6.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0427 - Noncopyable Generics</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0427 - Noncopyable Generics</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0427-noncopyable-generics.md">SE-0427 - Noncopyable Generics</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition étend le système de types de Swift pour permettre l'utilisation des types non-copiables (introduits dans SE-0390) avec les génériques, les protocoles et les existentiels.</p>
+<p>Le mécanisme repose sur l'introduction du protocole <code>Copyable</code>. Par défaut, chaque type (struct, enum, classe, paramètre générique, protocole) conforme désormais implicitement à <code>Copyable</code>. La notation <code>~Copyable</code> est utilisée pour supprimer cette conformance par défaut, permettant ainsi de définir des types qui ne peuvent pas être copiés tout en étant utilisables dans des contextes génériques.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0427" tabindex="-1"><a href="#avant-se-0427" class="header-anchor">Avant SE-0427</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">FileDescriptor</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>filename<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">getFileDescriptor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Optional</span><span class="token operator">&lt;</span><span class="token class-name">FileDescriptor</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token class-name">Optional</span><span class="token punctuation">(</span><span class="token class-name">FileDescriptor</span><span class="token punctuation">(</span>filename<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"test.txt"</span></span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Il était impossible d'utiliser un type non-copiable comme argument générique, ce qui empêchait par exemple l'utilisation de <code>Optional&lt;T&gt;</code> pour un type <code>T</code> non-copiable.</p>
+<h3 id="apr%C3%A8s-se-0427" tabindex="-1"><a href="#apr%C3%A8s-se-0427" class="header-anchor">Après SE-0427</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">FileDescriptor</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>filename<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Les génériques peuvent désormais accepter des types ~Copyable grâce à la suppression de la conformance par défaut</span>
+<span class="token keyword">func</span> <span class="token function-definition function">identity</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>x<span class="token punctuation">:</span> consuming <span class="token class-name">T</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">T</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> x
+<span class="token punctuation">}</span>
+
+<span class="token comment">// La conformance à Copyable est désormais conditionnelle</span>
+<span class="token keyword">enum</span> <span class="token class-name">List</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span><span class="token operator">&gt;</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">case</span> empty
+    <span class="token keyword">case</span> <span class="token function">element</span><span class="token punctuation">(</span><span class="token class-name">T</span><span class="token punctuation">,</span> <span class="token class-name">List</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">extension</span> <span class="token class-name">List</span><span class="token punctuation">:</span> <span class="token class-name">Copyable</span> <span class="token keyword">where</span> <span class="token class-name">T</span><span class="token punctuation">:</span> <span class="token class-name">Copyable</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition introduit la conformance par défaut au protocole <code>Copyable</code>. En utilisant <code>~Copyable</code>, on peut spécifier qu'un paramètre générique ne doit pas être copiable, tout en permettant aux types copiables de l'utiliser également, comblant ainsi le fossé d'expressivité du système de types.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

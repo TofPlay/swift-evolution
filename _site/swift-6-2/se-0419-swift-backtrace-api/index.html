@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0419 - Swift Backtrace API - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-2/se-0419-swift-backtrace-api/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0419 - Swift Backtrace API">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-2/se-0419-swift-backtrace-api/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-2/">
+                  Swift 6.2
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0419 - Swift Backtrace API</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0419 - Swift Backtrace API</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.2</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0419-backtrace-api.md">SE-0419 - Swift Backtrace API</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit une API de backtrace de premier ordre dans la bibliothèque standard de Swift, principalement pour les besoins du développement en ligne de commande et côté serveur. L'objectif est d'offrir une méthode portable et intégrée pour capturer l'état de la pile d'appels (call stack) lors de l'exécution normale du programme, évitant ainsi la dépendance à des packages tiers pour des fonctionnalités de débogage et de diagnostic.</p>
+<p>L'API se compose de deux éléments principaux :</p>
+<ol>
+<li><strong><code>Backtrace</code></strong> : Une structure permettant de capturer l'état actuel de la pile via la méthode <code>capture()</code>. Elle inclut des concepts comme les <code>Address</code> (adresses opaques), les <code>Frame</code> (représentant un cadre de la pile ou un point de reprise asynchrone) et les <code>Image</code> (représentant les images chargées dans l'espace d'adressage).</li>
+<li><strong><code>SymbolicatedBacktrace</code></strong> : Une version "symbolisée" de la backtrace qui convertit les adresses mémoires en informations lisibles par l'humain (noms de fonctions, fichiers sources, numéros de ligne) via la méthode <code>symbolicated()</code>.</li>
+</ol>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0419" tabindex="-1"><a href="#avant-se-0419" class="header-anchor">Avant SE-0419</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Il n'existe pas d'API standard pour capturer la stack trace.</span>
+<span class="token comment">// Les développeurs doivent dépendre de packages tiers non officiels </span>
+<span class="token comment">// ou de fonctions spécifiques à la plateforme (libc/mach) </span>
+<span class="token comment">// qui ne supportent pas nativement Swift Concurrency (async/await).</span>
+</code></pre>
+<p>L'absence d'une API standard oblige les développeurs à utiliser des dépendances externes pour obtenir des traces de pile, et ces implémentations tiers peinent souvent à traverser les cadres (frames) liés à l'asynchronisme de Swift.</p>
+<h3 id="apr%C3%A8s-se-0419" tabindex="-1"><a href="#apr%C3%A8s-se-0419" class="header-anchor">Après SE-0419</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">Runtime</span>
+
+<span class="token comment">// Capture de la stack trace actuelle</span>
+<span class="token keyword">let</span> backtrace <span class="token operator">=</span> <span class="token class-name">Backtrace</span><span class="token punctuation">.</span><span class="token function">capture</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token function">print</span><span class="token punctuation">(</span>backtrace<span class="token punctuation">)</span>
+
+<span class="token comment">// Transformation en backtrace symbolisée pour lecture humaine</span>
+<span class="token keyword">if</span> <span class="token keyword">let</span> symbolicated <span class="token operator">=</span> backtrace<span class="token punctuation">.</span><span class="token function">symbolicated</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>symbolicated<span class="token punctuation">)</span>
+    
+    <span class="token comment">// Accès aux détails des symboles</span>
+    <span class="token keyword">for</span> frame <span class="token keyword">in</span> symbolicated<span class="token punctuation">.</span>frames <span class="token punctuation">{</span>
+        <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Function: </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">frame<span class="token punctuation">.</span>symbolInfo<span class="token operator">?</span><span class="token punctuation">.</span>name <span class="token operator">??</span> <span class="token string-literal"><span class="token string">"unknown"</span></span></span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
+        <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Location: </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">frame<span class="token punctuation">.</span>symbolInfo<span class="token operator">?</span><span class="token punctuation">.</span>sourceLocation<span class="token operator">?</span><span class="token punctuation">.</span>description <span class="token operator">??</span> <span class="token string-literal"><span class="token string">"unknown"</span></span></span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de <code>Backtrace.capture()</code> permet d'obtenir une capture précise du flux d'exécution, incluant le support des points de reprise asynchrones, tandis que <code>symbolicated()</code> permet de traduire ces adresses en informations de code source exploitables.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

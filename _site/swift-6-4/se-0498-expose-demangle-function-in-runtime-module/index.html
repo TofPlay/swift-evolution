@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0498 - Expose demangle function in Runtime module - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-4/se-0498-expose-demangle-function-in-runtime-module/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0498 - Expose demangle function in Runtime module">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-4/se-0498-expose-demangle-function-in-runtime-module/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-4/">
+                  Swift 6.4
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0498 - Expose demangle function in Runtime module</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0498 - Expose demangle function in Runtime module</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.4</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0498-runtime-demangle.md">SE-0498 - Expose demangle function in Runtime module</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit une API officielle dans le module <code>Runtime</code> pour permettre le démaquillage (demangling) des symboles Swift directement depuis un processus en cours. Actuellement, les outils de profilage et de débogage doivent soit exécuter un processus externe (<code>swift-demangle</code>), soit utiliser des APIs internes non officielles, ce qui est coûteux en performance ou risqué pour la stabilité.</p>
+<p>L'API propose deux méthodes :</p>
+<ol>
+<li>Une version simple retournant un <code>String</code>.</li>
+<li>Une version optimisée acceptant un <code>UTF8Span</code> pour une utilisation dans des contextes sensibles à la performance, permettant d'écrire le résultat dans un buffer pré-alloué.</li>
+</ol>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0498" tabindex="-1"><a href="#avant-se-0498" class="header-anchor">Avant SE-0498</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Les symboles sont stockés sous forme de noms "mangled" illisibles</span>
+<span class="token keyword">let</span> mangledName <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"$sSS7cStringSSSPys4Int8VG_tcfC"</span></span>
+<span class="token function">print</span><span class="token punctuation">(</span>mangledName<span class="token punctuation">)</span> 
+<span class="token comment">// Résultat : $sSS7cStringSSSPys4Int8VG_tcfC</span>
+</code></pre>
+<p>L'absence d'API officielle oblige les développeurs à manipuler des chaînes de caractères cryptiques ou à dépendre de fonctions internes comme <code>swift_demangle</code>, qui sont réservées au runtime et peuvent changer sans préavis.</p>
+<h3 id="apr%C3%A8s-se-0498" tabindex="-1"><a href="#apr%C3%A8s-se-0498" class="header-anchor">Après SE-0498</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de l'API officielle du module Runtime</span>
+<span class="token keyword">import</span> <span class="token class-name">Runtime</span>
+
+<span class="token keyword">let</span> mangledName <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"$sSS7cStringSSSPys4Int8VG_tcfC"</span></span>
+
+<span class="token keyword">do</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> demangled <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token function">demangle</span><span class="token punctuation">(</span>mangledName<span class="token punctuation">)</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>demangled<span class="token punctuation">)</span>
+<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Erreur de démaquillage : </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">error</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Approche haute performance avec Span</span>
+<span class="token keyword">var</span> outputSpan<span class="token punctuation">:</span> <span class="token class-name">OutputSpan</span><span class="token operator">&lt;</span>UTF8<span class="token punctuation">.</span><span class="token class-name">CodeUnit</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token operator">...</span> 
+<span class="token keyword">do</span> <span class="token punctuation">{</span>
+    <span class="token keyword">try</span> <span class="token function">demangle</span><span class="token punctuation">(</span>mangledName<span class="token punctuation">,</span> into<span class="token punctuation">:</span> <span class="token operator">&amp;</span>outputSpan<span class="token punctuation">)</span>
+    <span class="token keyword">let</span> utf8 <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token class-name">UTF8Span</span><span class="token punctuation">(</span>validating<span class="token punctuation">:</span> outputSpan<span class="token punctuation">.</span>span<span class="token punctuation">)</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">(</span>copying<span class="token punctuation">:</span> utf8<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token class-name">DemanglingError</span><span class="token punctuation">.</span><span class="token function">truncated</span><span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token keyword">required</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Buffer insuffisant, nécessite </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation"><span class="token keyword">required</span></span><span class="token interpolation-punctuation punctuation">)</span><span class="token string"> octets"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Erreur : </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">error</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition permet désormais de convertir de manière sûre et performante des symboles complexes en formats lisibles par l'humain (ex: <code>Swift.String.init(cString: Swift.UnsafePointer&lt;Swift.Int8&gt;) -&gt; Swift.String</code>) directement au sein de l'application.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

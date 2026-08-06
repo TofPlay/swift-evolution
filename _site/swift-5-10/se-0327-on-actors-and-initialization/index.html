@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0327 - On Actors and Initialization - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-10/se-0327-on-actors-and-initialization/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0327 - On Actors and Initialization">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-10/se-0327-on-actors-and-initialization/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-10/">
+                  Swift 5.10
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0327 - On Actors and Initialization</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0327 - On Actors and Initialization</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.10</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0327-actor-initializers.md">SE-0327 - On Actors and Initialization</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition définit précisément les règles d'isolation pour l'initialisation et la désinitialisation des acteurs et des types isolés à un acteur global (GAIT). Elle introduit le concept d'<strong>isolation sensible au flux</strong> (<em>flow-sensitive isolation</em>) pour permettre des initialiseurs non asynchrones plus flexibles tout en garantissant la sécurité contre les <em>data-races</em>.</p>
+<p>Les points clés incluent :</p>
+<ul>
+<li><strong>Initialiseurs avec <code>self</code> isolé :</strong> Pour les initialiseurs asynchrones, un "bond" (<em>hop</em>) vers l'exécuteur de l'acteur est effectué implicitement dès que <code>self</code> est totalement initialisé.</li>
+<li><strong>Initialiseurs avec <code>self</code> non-isolés :</strong> Dans les initialiseurs non asynchrones ou non-isolés, l'isolation de <code>self</code> "décline" (<em>decays</em>) dès qu'une méthode ou une closure fait échapper <code>self</code>, interdisant l'accès aux propriétés mutables isolées par la suite.</li>
+<li><strong>Délégation d'initialisation :</strong> Simplification de la syntaxe en supprimant le mot-clé <code>convenience</code> pour les acteurs, tout en imposant que les arguments passés depuis l'extérieur d'un acteur soient <code>Sendable</code>.</li>
+<li><strong>Désinitialisation (<code>deinit</code>) :</strong> Les <code>deinit</code> d'acteurs sont restreints pour ne pouvoir accéder qu'aux propriétés <code>Sendable</code>, afin d'éviter les accès concurrents pendant la destruction de l'instance.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0327" tabindex="-1"><a href="#avant-se-0327" class="header-anchor">Avant SE-0327</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">actor</span> <span class="token class-name">Clicker</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> count<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">click</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span>count <span class="token operator">+=</span> <span class="token number">1</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>bad<span class="token punctuation">:</span> <span class="token class-name">Void</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span>count <span class="token operator">=</span> <span class="token number">0</span>
+        <span class="token class-name">Task</span> <span class="token punctuation">{</span>
+            <span class="token keyword">await</span> <span class="token keyword">self</span><span class="token punctuation">.</span><span class="token function">click</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span><span class="token function">click</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// 💥 Mutation qui entre en compétition avec la Task</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Les initialiseurs non-asynchrones de Swift 5.5 imposaient des restrictions trop larges sur l'utilisation de <code>self</code> pour éviter les <em>data-races</em>, rejetant parfois des code pourtant sûr.</p>
+<h3 id="apr%C3%A8s-se-0327" tabindex="-1"><a href="#apr%C3%A8s-se-0327" class="header-anchor">Après SE-0327</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">actor</span> <span class="token class-name">Clicker</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> count<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">click</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span>count <span class="token operator">+=</span> <span class="token number">1</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>ok<span class="token punctuation">:</span> <span class="token class-name">Void</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span>count <span class="token operator">=</span> <span class="token number">0</span>
+        <span class="token class-name">Task</span> <span class="token punctuation">{</span>
+            <span class="token keyword">await</span> <span class="token keyword">self</span><span class="token punctuation">.</span><span class="token function">click</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">nonisolated</span> <span class="token keyword">func</span> <span class="token function-definition function">announce</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"performing a click!"</span></span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span><span class="token function">announce</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// ✅ Accepté : l'analyse de flux prouve que c'est sûr</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Grâce à l'isolation sensible au flux, le compilateur peut désormais prouver qu'une méthode <code>nonisolated</code> ne touche pas aux propriétés mutables de l'acteur, permettant son appel sans erreur de sécurité.</p>
+<h3 id="avant-se-0327-1" tabindex="-1"><a href="#avant-se-0327-1" class="header-anchor">Avant SE-0327</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@MainActor</span>
+<span class="token keyword">class</span> <span class="token class-name">Maria</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> friend<span class="token punctuation">:</span> <span class="token class-name">NonSendableAhmed</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>sharingFriendOf otherMaria<span class="token punctuation">:</span> <span class="token class-name">Maria</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span>friend <span class="token operator">=</span> otherMaria<span class="token punctuation">.</span>friend
+    <span class="token punctuation">}</span>
+    <span class="token keyword">deinit</span> <span class="token punctuation">{</span>
+        friend<span class="token punctuation">.</span>state <span class="token operator">+=</span> <span class="token number">1</span> <span class="token comment">// 💥 Race possible si l'exécuteur est partagé</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Les <code>deinit</code> pouvaient provoquer des <em>data-races</em> lorsque des exécuteurs étaient partagés entre plusieurs instances (cas des GAIT), car l'accès aux propriétés non-<code>Sendable</code> n'était pas sécurisé pendant la destruction.</p>
+<h3 id="apr%C3%A8s-se-0327-1" tabindex="-1"><a href="#apr%C3%A8s-se-0327-1" class="header-anchor">Après SE-0327</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">actor</span> <span class="token class-name">A</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> immutableSendable <span class="token operator">=</span> <span class="token class-name">SendableType</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">var</span> mutableSendable <span class="token operator">=</span> <span class="token class-name">SendableType</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">let</span> nonSendable <span class="token operator">=</span> <span class="token class-name">NonSendableType</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    
+    <span class="token keyword">deinit</span> <span class="token punctuation">{</span>
+        <span class="token omit keyword">_</span> <span class="token operator">=</span> <span class="token keyword">self</span><span class="token punctuation">.</span>immutableSendable <span class="token comment">// ✅ OK</span>
+        <span class="token omit keyword">_</span> <span class="token operator">=</span> <span class="token keyword">self</span><span class="token punctuation">.</span>mutableSendable  <span class="token comment">// ✅ OK</span>
+        <span class="token omit keyword">_</span> <span class="token operator">=</span> <span class="token keyword">self</span><span class="token punctuation">.</span>nonSendable      <span class="token comment">// ❌ Erreur : doit être Sendable</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Désormais, pour garantir la sécurité lors de la destruction, les <code>deinit</code> d'acteurs ne sont autorisés à accéder qu'aux propriétés marquées comme <code>Sendable</code>.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

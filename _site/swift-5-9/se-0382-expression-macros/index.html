@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0382 - Expression Macros - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-9/se-0382-expression-macros/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0382 - Expression Macros">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-9/se-0382-expression-macros/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-9/">
+                  Swift 5.9
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0382 - Expression Macros</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0382 - Expression Macros</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.9</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0382-expression-macros.md">SE-0382 - Expression Macros</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit les <strong>macros d'expression</strong> dans Swift, permettant d'étendre le langage par des transformations syntaxiques arbitraires sur des expressions. Contrairement aux fonctions classiques, ces macros utilisent le symbole <code>#</code> et peuvent manipuler le code source pour générer de nouvelles expressions.</p>
+<p>Le mécanisme repose sur une traduction syntaxique (source-to-source) où une macro reçoit l'arbre syntaxique de son argument et retourne un nouvel arbre syntaxique. L'avantage majeur est que le résultat est vérifié par le compilateur (type-checking) par rapport au type de retour défini dans la signature de la macro, garantissant ainsi la sécurité du code généré.</p>
+<p>Les points clés incluent :</p>
+<ul>
+<li><strong>Signature typée</strong> : Les macros ressemblent à des fonctions (paramètres et type de retour optionnel).</li>
+<li><strong>Sécurité</strong> : Les arguments sont vérifiés avant l'expansion.</li>
+<li><strong>Développement</strong> : Les définitions de macros sont des programmes séparés utilisant <code>swift-syntax</code>.</li>
+<li><strong>Standard Library</strong> : Intégration de macros natives pour remplacer des expressions spéciales (comme <code>#line</code>, <code>#file</code>, <code>#selector</code>).</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0382" tabindex="-1"><a href="#avant-se-0382" class="header-anchor">Avant SE-0382</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> x <span class="token operator">=</span> <span class="token number">10</span>
+<span class="token keyword">let</span> y <span class="token operator">=</span> <span class="token number">20</span>
+<span class="token keyword">let</span> tuple <span class="token operator">=</span> <span class="token punctuation">(</span>x <span class="token operator">+</span> y<span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"x + y"</span></span><span class="token punctuation">)</span>
+</code></pre>
+<p>Actuellement, pour obtenir à la fois la valeur calculée et sa représentation sous forme de chaîne de caractères (le code source), un développeur doit écrire manuellement la répétition de l'expression ou utiliser des outils externes de génération de code non intégrés au langage.</p>
+<h3 id="apr%C3%A8s-se-0382" tabindex="-1"><a href="#apr%C3%A8s-se-0382" class="header-anchor">Après SE-0382</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@freestanding</span><span class="token punctuation">(</span>expression<span class="token punctuation">)</span> macro stringify<span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> value<span class="token punctuation">:</span> <span class="token class-name">T</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token punctuation">(</span><span class="token class-name">T</span><span class="token punctuation">,</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"ExampleMacros"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"StringifyMacro"</span></span><span class="token punctuation">)</span>
+
+<span class="token keyword">let</span> x <span class="token operator">=</span> <span class="token number">10</span>
+<span class="token keyword">let</span> y <span class="token operator">=</span> <span class="token number">20</span>
+<span class="token keyword">let</span> result <span class="token operator">=</span> <span class="token other-directive property">#stringify</span><span class="token punctuation">(</span>x <span class="token operator">+</span> y<span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro</span>
+<span class="token keyword">import</span> <span class="token class-name">SwiftSyntax</span>
+<span class="token keyword">import</span> <span class="token class-name">SwiftSyntaxBuilder</span>
+<span class="token keyword">import</span> <span class="token class-name">SwiftSyntaxMacros</span>
+
+<span class="token keyword">public</span> <span class="token keyword">struct</span> <span class="token class-name">StringifyMacro</span><span class="token punctuation">:</span> <span class="token class-name">ExpressionMacro</span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">func</span> <span class="token function-definition function">expansion</span><span class="token punctuation">(</span>
+        of node<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">FreestandingMacroExpansionSyntax</span><span class="token punctuation">,</span>
+        <span class="token keyword">in</span> context<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">MacroExpansionContext</span>
+    <span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">ExprSyntax</span> <span class="token punctuation">{</span>
+        <span class="token keyword">guard</span> <span class="token keyword">let</span> argument <span class="token operator">=</span> node<span class="token punctuation">.</span>argumentList<span class="token punctuation">.</span>first<span class="token operator">?</span><span class="token punctuation">.</span>expression <span class="token keyword">else</span> <span class="token punctuation">{</span>
+            <span class="token function">fatalError</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"compiler bug: the macro does not have any arguments"</span></span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> <span class="token string-literal"><span class="token string">"(</span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">argument</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">, </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">literal<span class="token punctuation">:</span> argument<span class="token punctuation">.</span>description</span><span class="token interpolation-punctuation punctuation">)</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation du macro</span>
+<span class="token keyword">let</span> result <span class="token operator">=</span> <span class="token other-directive property">#stringify</span><span class="token punctuation">(</span>x <span class="token operator">+</span> y<span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code généré par la macro (Expansion)</span>
+<span class="token punctuation">(</span>x <span class="token operator">+</span> y<span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"x + y"</span></span><span class="token punctuation">)</span>
+</code></pre>
+<p>La macro <code>#stringify</code> capture l'expression passée en argument (<code>x + y</code>), l'évalue et génère un tuple contenant la valeur calculée ainsi qu'une chaîne de caractères contenant le texte source de l'expression originale.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0397 - Freestanding Declaration Macros - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-9/se-0397-freestanding-declaration-macros/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0397 - Freestanding Declaration Macros">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-9/se-0397-freestanding-declaration-macros/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-9/">
+                  Swift 5.9
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0397 - Freestanding Declaration Macros</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0397 - Freestanding Declaration Macros</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.9</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0397-freestanding-declaration-macros.md">SE-0397 - Freestanding Declaration Macros</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit les <strong>macros de déclaration non liées (freestanding declaration macros)</strong>. Alors que les macros d'expression (SE-0382) permettent de générer des valeurs, les macros de déclaration permettent de générer de nouvelles déclarations (structs, enums, variables, etc.) n'importe où une déclaration est autorisée.</p>
+<p>Elles utilisent la syntaxe <code>#</code> et sont définies avec l'attribut <code>@freestanding(declaration)</code>. Elles permettent notamment de générer des modèles de données à partir de templates (comme du JSON) ou de remplacer des directives comme <code>#warning</code> et <code>#error</code> par des macros natives.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0397" tabindex="-1"><a href="#avant-se-0397" class="header-anchor">Avant SE-0397</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Impossible de générer une structure ou une variable</span>
+<span class="token comment">// via une macro sans utiliser des outils externes comme gyb</span>
+</code></pre>
+<p>L'absence de macros de déclaration limite la capacité du langage à générer du code structurel (comme des modèles de données) directement depuis des templates ou des fichiers de configuration au moment de la compilation.</p>
+<h3 id="apr%C3%A8s-se-0397" tabindex="-1"><a href="#apr%C3%A8s-se-0397" class="header-anchor">Après SE-0397</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro</span>
+<span class="token attribute atrule">@freestanding</span><span class="token punctuation">(</span>declaration<span class="token punctuation">,</span> names<span class="token punctuation">:</span> arbitrary<span class="token punctuation">)</span> macro <span class="token function">jsonModel</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyMacros"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"JSONModelMacro"</span></span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Implémentation du macro</span>
+<span class="token keyword">struct</span> <span class="token class-name">JSONModelMacro</span><span class="token punctuation">:</span> <span class="token class-name">DeclarationMacro</span> <span class="token punctuation">{</span>
+    <span class="token keyword">static</span> <span class="token keyword">func</span> <span class="token function-definition function">expansion</span><span class="token punctuation">(</span>of node<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">FreestandingMacroExpansionSyntax</span><span class="token punctuation">,</span> <span class="token keyword">in</span> context<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">MacroExpansionContext</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">DeclSyntax</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Logique pour analyser le JSON et retourner des declaraciones (struct, var...)</span>
+        <span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token punctuation">]</span> 
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation du macro</span>
+<span class="token keyword">struct</span> <span class="token class-name">JSONValue</span><span class="token punctuation">:</span> <span class="token class-name">Codable</span> <span class="token punctuation">{</span>
+    <span class="token other-directive property">#jsonModel</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"""
+    {
+        "name": "Produce",
+        "price": 20.0
+    }
+    """</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code généré par la macro (Expansion)</span>
+<span class="token keyword">struct</span> <span class="token class-name">JSONValue</span><span class="token punctuation">:</span> <span class="token class-name">Codable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> name<span class="token punctuation">:</span> <span class="token class-name">String</span>
+    <span class="token keyword">var</span> price<span class="token punctuation">:</span> <span class="token class-name">Double</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Cette solution permet de générer automatiquement le boilerplate nécessaire (propriétés, types imbriqués) pour correspondre à un format de données, réduisant ainsi les erreurs manuelles et la répétition de code.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

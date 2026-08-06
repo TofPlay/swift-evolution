@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0326 - Enable multi-statement closure parameter/result type inference - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-7/se-0326-enable-multi-statement-closure-parameter-result-type-inference/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0326 - Enable multi-statement closure parameter/result type i…">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-7/se-0326-enable-multi-statement-closure-parameter-result-type-inference/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-7/">
+                  Swift 5.7
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0326 - Enable multi-statement closure parameter/result type inference</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0326 - Enable multi-statement closure parameter/result type inference</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.7</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0326-extending-multi-statement-closure-inference.md">SE-0326 - Enable multi-statement closure parameter/result type inference</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition améliore l'inférence des types pour les fermetures (closures) comportant plusieurs instructions.</p>
+<p>Auparavant, les fermetures multi-instructions étaient type-checkées séparément du contexte d'appel, empêchant la propagation de l'information du corps vers l'extérieur. Cela créait un "mur" de comportement : une simple instruction supplémentaire pouvait faire échouer l'inférence des types de paramètres ou de retour.</p>
+<p>La nouvelle approche unifie le comportement des fermetures à instruction unique et multi-instructions :</p>
+<ul>
+<li>L'information de type est désormais propagée depuis le corps de la closure vers le contexte d'appel.</li>
+<li>Le type du premier paramètre anonyme définit son type pour toute la durée du contexte.</li>
+<li>La première instruction <code>return</code> définit le type de retour de la closure.</li>
+<li>Le typage est réalisé de manière incrémentielle (de haut en bas dans le corps) pour éviter les erreurs de complexité excessive.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0326" tabindex="-1"><a href="#avant-se-0326" class="header-anchor">Avant SE-0326</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">map</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>fn<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">T</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">T</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token function">fn</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+<span class="token keyword">func</span> <span class="token function-definition function">doSomething</span><span class="token operator">&lt;</span><span class="token class-name">U</span><span class="token punctuation">:</span> <span class="token class-name">BinaryInteger</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token omit keyword">_</span><span class="token punctuation">:</span> <span class="token class-name">U</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span> <span class="token punctuation">{</span> <span class="token comment">/* processing */</span> <span class="token punctuation">}</span>
+
+<span class="token comment">// Échoue ou infère Void de manière incorrecte car la closure </span>
+<span class="token comment">// est traitée séparément du contexte de 'map'</span>
+<span class="token keyword">let</span> <span class="token omit keyword">_</span> <span class="token operator">=</span> map <span class="token punctuation">{</span> 
+    logger<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"About to call 'doSomething($0)'"</span></span><span class="token punctuation">)</span> 
+    <span class="token function">doSomething</span><span class="token punctuation">(</span><span class="token short-argument">$0</span><span class="token punctuation">)</span> 
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'ajout d'une instruction (<code>logger.info</code>) transforme la closure en multi-instructions, brisant l'inférence du type <code>T</code> qui dépendait auparavant du résultat de <code>doSomething</code>.</p>
+<h3 id="apr%C3%A8s-se-0326" tabindex="-1"><a href="#apr%C3%A8s-se-0326" class="header-anchor">Après SE-0326</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">map</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>fn<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">T</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">T</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token function">fn</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+<span class="token keyword">func</span> <span class="token function-definition function">doSomething</span><span class="token operator">&lt;</span><span class="token class-name">U</span><span class="token punctuation">:</span> <span class="token class-name">BinaryInteger</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token omit keyword">_</span><span class="token punctuation">:</span> <span class="token class-name">U</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span> <span class="token punctuation">{</span> <span class="token comment">/* processing */</span> <span class="token punctuation">}</span>
+
+<span class="token comment">// Réussit : le compilateur voit 'doSomething($0)' </span>
+<span class="token comment">// et infère le type de la closure via le corps.</span>
+<span class="token keyword">let</span> <span class="token omit keyword">_</span> <span class="token operator">=</span> map <span class="token punctuation">{</span> 
+    logger<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"About to call 'doSomething($0)'"</span></span><span class="token punctuation">)</span> 
+    <span class="token function">doSomething</span><span class="token punctuation">(</span><span class="token short-argument">$0</span><span class="token punctuation">)</span> 
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Le compilateur est désormais capable d'inférer les types même avec plusieurs instructions, rendant le comportement cohérent avec les fermetures à instruction unique.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

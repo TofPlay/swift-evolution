@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0334 - Pointer API Usability Improvements - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-7/se-0334-pointer-api-usability-improvements/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0334 - Pointer API Usability Improvements">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-7/se-0334-pointer-api-usability-improvements/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-7/">
+                  Swift 5.7
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0334 - Pointer API Usability Improvements</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0334 - Pointer API Usability Improvements</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.7</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0334-pointer-usability-improvements.md">SE-0334 - Pointer API Usability Improvements</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit des améliorations ergonomiques pour les types <code>UnsafePointer</code> et leurs variantes (<code>Mutable</code> et <code>Raw</code>) afin de simplifier l'utilisation de la mémoire non sécurisée sans en masquer la nature "unsafe".</p>
+<p>Les améliorations incluent :</p>
+<ul>
+<li><strong>Alignement automatique</strong> : Ajout de méthodes (<code>alignedUp</code>, <code>alignedDown</code>) pour obtenir des pointeurs alignés selon un type <code>T</code> ou un multiple spécifique, évitant des calculs manuels complexes.</li>
+<li><strong>Accès aux membres via KeyPath</strong> : Possibilité d'obtenir un pointeur vers une propriété spécifique d'une structure (aggregate) en utilisant les <code>KeyPath</code>, facilitant l'interopérabilité avec des APIs C comme <code>pthreads</code>.</li>
+<li><strong>Comparaison polymorphe</strong> : Ajout de surcharges d'opérateurs (<code>==</code>, <code>!=</code>, <code>&lt;</code>, etc.) permettant de comparer des pointeurs de types différents représentant la même adresse mémoire, évitant ainsi des conversions manuelles systématiques vers <code>UnsafeRawPointer</code>.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0334" tabindex="-1"><a href="#avant-se-0334" class="header-anchor">Avant SE-0334</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Calcul complexe pour l'alignement manuel</span>
+<span class="token keyword">let</span> tOffset <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token class-name">MemoryLayout</span><span class="token operator">&lt;</span><span class="token class-name">AtomicOptionalRepresentation</span><span class="token operator">&gt;</span><span class="token punctuation">.</span>size <span class="token operator">+</span> tMask<span class="token punctuation">)</span> <span class="token operator">&amp;</span> <span class="token operator">~</span>tMask
+<span class="token keyword">let</span> t <span class="token operator">=</span> rawValue<span class="token punctuation">.</span><span class="token function">advanced</span><span class="token punctuation">(</span>by<span class="token punctuation">:</span> tOffset<span class="token punctuation">)</span>
+
+<span class="token comment">// Accès difficile aux propriétés d'une structure pour une API C</span>
+<span class="token keyword">var</span> scheduling <span class="token operator">=</span> <span class="token class-name">ThreadSchedulingParameters</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">var</span> e <span class="token operator">=</span> <span class="token function">withUnsafeMutableBytes</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> <span class="token operator">&amp;</span>scheduling<span class="token punctuation">)</span> <span class="token punctuation">{</span> bytes <span class="token keyword">in</span>
+    <span class="token keyword">let</span> o1 <span class="token operator">=</span> <span class="token class-name">MemoryLayout</span><span class="token operator">&lt;</span><span class="token class-name">ThreadSchedulingParameters</span><span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token function">offset</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> <span class="token punctuation">\</span><span class="token punctuation">.</span>policy<span class="token punctuation">)</span><span class="token operator">!</span>
+    <span class="token keyword">let</span> policy_p <span class="token operator">=</span> bytes<span class="token punctuation">.</span>baseAddress<span class="token operator">!</span><span class="token punctuation">.</span><span class="token function">advanced</span><span class="token punctuation">(</span>by<span class="token punctuation">:</span> o1<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">assumingMemoryBound</span><span class="token punctuation">(</span>to<span class="token punctuation">:</span> <span class="token class-name">Int32</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
+    <span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Comparaison nécessitant une conversion de type</span>
+<span class="token keyword">let</span> ptr1<span class="token punctuation">:</span> <span class="token class-name">UnsafePointer</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token operator">...</span>
+<span class="token keyword">let</span> ptr2<span class="token punctuation">:</span> <span class="token class-name">UnsafePointer</span><span class="token operator">&lt;</span><span class="token class-name">String</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token operator">...</span>
+<span class="token keyword">if</span> <span class="token class-name">UnsafeRawPointer</span><span class="token punctuation">(</span>ptr1<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token class-name">UnsafeRawPointer</span><span class="token punctuation">(</span>ptr2<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">/* ... */</span> <span class="token punctuation">}</span>
+</code></pre>
+<p>Les manipulations manuelles de l'offset et les conversions de type systématiques pour la comparaison augmentent la complexité du code et le risque d'erreurs humaines.</p>
+<h3 id="apr%C3%A8s-se-0334" tabindex="-1"><a href="#apr%C3%A8s-se-0334" class="header-anchor">Après SE-0334</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Alignement simplifié</span>
+<span class="token keyword">let</span> t <span class="token operator">=</span> rawValue<span class="token punctuation">.</span><span class="token function">advanced</span><span class="token punctuation">(</span>by<span class="token punctuation">:</span> <span class="token class-name">MemoryLayout</span><span class="token operator">&lt;</span><span class="token class-name">AtomicOptionalRepresentation</span><span class="token operator">&gt;</span><span class="token punctuation">.</span>size<span class="token punctuation">)</span>
+                 <span class="token punctuation">.</span><span class="token function">alignedUp</span><span class="token punctuation">(</span><span class="token keyword">for</span><span class="token punctuation">:</span> <span class="token class-name">T</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Accès aux membres via KeyPath</span>
+<span class="token keyword">var</span> e <span class="token operator">=</span> <span class="token function">withUnsafeMutablePointer</span><span class="token punctuation">(</span>to<span class="token punctuation">:</span> <span class="token operator">&amp;</span>scheduling<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">pthread_getschedparam</span><span class="token punctuation">(</span>thread<span class="token punctuation">,</span> <span class="token short-argument">$0</span><span class="token punctuation">.</span><span class="token function">pointer</span><span class="token punctuation">(</span>to<span class="token punctuation">:</span> <span class="token punctuation">\</span><span class="token punctuation">.</span>policy<span class="token punctuation">)</span><span class="token operator">!</span><span class="token punctuation">,</span> <span class="token short-argument">$0</span><span class="token punctuation">.</span><span class="token function">pointer</span><span class="token punctuation">(</span>to<span class="token punctuation">:</span> <span class="token punctuation">\</span><span class="token punctuation">.</span>parameters<span class="token punctuation">)</span><span class="token operator">!</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Comparaison directe de pointeurs de types différents</span>
+<span class="token keyword">if</span> ptr1 <span class="token operator">==</span> ptr2 <span class="token punctuation">{</span> <span class="token comment">/* ... */</span> <span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition rend le code plus lisible et réduit la charge cognitive en utilisant des abstractions de haut niveau (KeyPath) et des fonctions utilitaires pour la gestion de l'alignement et des comparaisons de mémoire.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

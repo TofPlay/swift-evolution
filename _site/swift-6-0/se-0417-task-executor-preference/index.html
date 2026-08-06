@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0417 - Task Executor Preference - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-0/se-0417-task-executor-preference/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0417 - Task Executor Preference">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-0/se-0417-task-executor-preference/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-0/">
+                  Swift 6.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0417 - Task Executor Preference</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0417 - Task Executor Preference</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0417-task-executor-preference.md">SE-0417 - Task Executor Preference</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit le concept de "préférence d'exécuteur de tâche" (<em>task executor preference</em>). Actuellement, les fonctions asynchrones non isolées basculent systématiquement vers le pool global de threads de Swift Concurrency. Cette approche, bien que sécurisée, peut entraîner des changements de contexte (<em>context switching</em>) coûteux dans des systèmes haute performance (comme les serveurs basés sur des boucles d'événements).</p>
+<p>Le nouveau mécanisme permet de définir un exécuteur spécifique pour une tâche, lequel est "collant" (<em>sticky</em>) et se propage à toute la hiérarchie de tâches structurées (comme les <code>TaskGroup</code> ou <code>async let</code>). Si une préférence est définie, les fonctions non isolées s'exécuteront sur cet exécuteur plutôt que de basculer vers le pool global. Cette préférence peut également influencer l'endroit où les "acteurs par défaut" (ceux sans exécuteur personnalisé) exécutent leur code, sans pour autant rompre l'isolation des acteurs.</p>
+<h3 id="avant-se-0417" tabindex="-1"><a href="#avant-se-0417" class="header-anchor">Avant SE-0417</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">nonisolatedAsyncFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token operator">-&gt;</span> <span class="token class-name">Int</span> <span class="token punctuation">{</span>
+    <span class="token comment">// S'exécute toujours sur le pool global de Swift Concurrency</span>
+    <span class="token keyword">return</span> <span class="token number">42</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">await</span> <span class="token function">nonisolatedAsyncFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
+</code></pre>
+<p>Les fonctions asynchrones non isolées basculent systématiquement vers l'exécuteur global concurrent par défaut, ce qui empêche de contrôler précisément le thread d'exécution pour optimiser les performances.</p>
+<h3 id="apr%C3%A8s-se-0417" tabindex="-1"><a href="#apr%C3%A8s-se-0417" class="header-anchor">Après SE-0417</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation d'un exécuteur personnalisé via une préférence de tâche</span>
+<span class="token keyword">let</span> myExecutor <span class="token operator">=</span> <span class="token class-name">MyCustomExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token class-name">Task</span><span class="token punctuation">(</span>executorPreference<span class="token punctuation">:</span> myExecutor<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// S'exécute sur myExecutor</span>
+    <span class="token keyword">await</span> <span class="token function">nonisolatedAsyncFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Utilisation via une portée spécifique</span>
+<span class="token keyword">await</span> <span class="token function">withTaskExecutorPreference</span><span class="token punctuation">(</span>myExecutor<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Toutes les tâches structurées ici utiliseront myExecutor</span>
+    <span class="token keyword">async</span> <span class="token keyword">let</span> value <span class="token operator">=</span> <span class="token function">nonisolatedAsyncFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">await</span> value
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition permet de spécifier un exécuteur via <code>Task(executorPreference:)</code> ou <code>withTaskExecutorPreference</code>. Les fonctions asynchrones non isolées au sein de ces tâches utiliseront l'exécuteur préféré, réduisant ainsi les changements de contexte inutiles tout en maintenant l'isolation des acteurs.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0462 - Task Priority Escalation APIs - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-2/se-0462-task-priority-escalation-apis/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0462 - Task Priority Escalation APIs">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-2/se-0462-task-priority-escalation-apis/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-2/">
+                  Swift 6.2
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0462 - Task Priority Escalation APIs</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0462 - Task Priority Escalation APIs</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.2</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0462-task-priority-escalation-apis.md">SE-0462 - Task Priority Escalation APIs</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit des API permettant aux développeurs de réagir et de participer au mécanisme d'escalation de priorité des tâches dans le modèle de concurrence structurée de Swift.</p>
+<p>Actuellement, l'escalation est automatique pour les hiérarchies de tâches structurées (via <code>TaskGroup</code> ou <code>async let</code>). Cependant, lorsqu'un développeur utilise des tâches non structurées (comme dans <code>AsyncSequence</code> où une tâche doit survivre à l'appel de l'itérateur), le lien de parenté est rompu et l'escalation automatique ne peut pas propager la priorité vers la tâche "consommatrice" non structurée.</p>
+<p>La proposition introduit deux éléments majeurs :</p>
+<ol>
+<li><strong><code>withTaskPriorityEscalationHandler</code></strong> : Une fonction qui permet de surveiller les changements de priorité au sein d'un bloc de code. Elle accepte un gestionnaire exécuté chaque fois que la priorité de la tâche est augmentée.</li>
+<li><strong><code>Task.escalatePriority(of:to:)</code></strong> : Une méthode permettant de propager manuellement une nouvelle priorité à une tâche spécifique.</li>
+</ol>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0462" tabindex="-1"><a href="#avant-se-0462" class="header-anchor">Avant SE-0462</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code illustrant l'état AVANT la proposition</span>
+<span class="token keyword">struct</span> <span class="token class-name">AsyncMergeSequenceIterator</span><span class="token punctuation">:</span> <span class="token class-name">AsyncIterator</span> <span class="token punctuation">{</span>
+    <span class="token keyword">struct</span> <span class="token class-name">State</span> <span class="token punctuation">{</span>
+        <span class="token keyword">var</span> task<span class="token punctuation">:</span> <span class="token class-name">Task</span><span class="token operator">&lt;</span><span class="token class-name">Void</span><span class="token punctuation">,</span> any <span class="token class-name">Error</span><span class="token operator">&gt;?</span> <span class="token comment">// tâche non structurée consommatrice</span>
+        <span class="token keyword">var</span> buffer<span class="token punctuation">:</span> <span class="token class-name">Deque</span><span class="token operator">&lt;</span><span class="token class-name">Element</span><span class="token operator">&gt;</span>
+        <span class="token comment">// ...</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">let</span> state <span class="token operator">=</span> <span class="token class-name">Mutex</span><span class="token operator">&lt;</span><span class="token class-name">State</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token class-name">State</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">func</span> <span class="token function-definition function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">Element</span><span class="token operator">?</span> <span class="token punctuation">{</span>
+        <span class="token comment">// ...</span>
+        <span class="token comment">// ICI : On ne peut pas savoir si la priorité de la tâche </span>
+        <span class="token comment">// parente a augmenté pour propager l'escalation à `state.task`</span>
+        <span class="token keyword">try</span> <span class="token keyword">await</span> withTaskCancellationHandler <span class="token punctuation">{</span>
+            <span class="token keyword">try</span> <span class="token keyword">await</span> withCheckedContinuation <span class="token punctuation">{</span> cont <span class="token keyword">in</span>
+                <span class="token keyword">self</span><span class="token punctuation">.</span>state<span class="token punctuation">.</span>withLock <span class="token punctuation">{</span> <span class="token short-argument">$0</span><span class="token punctuation">.</span>consumerContinuation <span class="token operator">=</span> cont <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span> onCancel<span class="token punctuation">:</span> <span class="token punctuation">{</span> <span class="token comment">/* cancellation */</span> <span class="token punctuation">}</span>
+        <span class="token comment">// ...</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de tâches non structurées (comme <code>Task { ... }</code>) rompt la hiérarchie de concurrence, empêchant ainsi l'escalation automatique de la priorité de la tâche parente vers la tâche qui gère réellement le travail en arrière-plan.</p>
+<h3 id="apr%C3%A8s-se-0462" tabindex="-1"><a href="#apr%C3%A8s-se-0462" class="header-anchor">Après SE-0462</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code illustrant l'état APRÈS la proposition</span>
+<span class="token keyword">await</span> withTaskPriorityEscalationHandler <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> withCheckedContinuation <span class="token punctuation">{</span> cc <span class="token keyword">in</span>
+        <span class="token keyword">let</span> task <span class="token operator">=</span> <span class="token class-name">Task</span> <span class="token punctuation">{</span> cc<span class="token punctuation">.</span><span class="token function">resume</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+        
+        <span class="token comment">// ... logique de stockage de la tâche ...</span>
+
+        <span class="token keyword">if</span> <span class="token keyword">let</span> newPriority <span class="token punctuation">{</span>
+            <span class="token class-name">Task</span><span class="token punctuation">.</span><span class="token function">escalatePriority</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> task<span class="token punctuation">,</span> to<span class="token punctuation">:</span> newPriority<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span> onPriorityEscalated<span class="token punctuation">:</span> <span class="token punctuation">{</span> oldPriority<span class="token punctuation">,</span> newPriority <span class="token keyword">in</span>
+    <span class="token comment">// Réagir à l'escalation pour propager la priorité à une tâche non structurée</span>
+    m<span class="token punctuation">.</span>withLock <span class="token punctuation">{</span> state <span class="token keyword">in</span>
+        <span class="token keyword">switch</span> state <span class="token punctuation">{</span>
+        <span class="token keyword">case</span> <span class="token punctuation">.</span><span class="token function">task</span><span class="token punctuation">(</span><span class="token keyword">let</span> task<span class="token punctuation">)</span><span class="token punctuation">:</span>
+            <span class="token class-name">Task</span><span class="token punctuation">.</span><span class="token function">escalatePriority</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> task<span class="token punctuation">,</span> to<span class="token punctuation">:</span> newPriority<span class="token punctuation">)</span>
+        <span class="token keyword">case</span> <span class="token punctuation">.</span><span class="token function">priority</span><span class="token punctuation">(</span><span class="token keyword">let</span> priority<span class="token punctuation">)</span><span class="token punctuation">:</span>
+            <span class="token comment">// ...</span>
+        <span class="token keyword">default</span><span class="token punctuation">:</span>
+            <span class="token keyword">break</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition permet de capturer le changement de priorité via le handler et de réagir manuellement en utilisant <code>Task.escalatePriority(of:to:)</code> pour remonter la nouvelle priorité vers les tâches non structurées, garantissant ainsi une exécution efficace même en dehors de la hiérarchie structurée stricte.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

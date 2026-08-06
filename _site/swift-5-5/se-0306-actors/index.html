@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0306 - Actors - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-5/se-0306-actors/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0306 - Actors">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-5/se-0306-actors/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-5/">
+                  Swift 5.5
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0306 - Actors</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0306 - Actors</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.5</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0306-actors.md">SE-0306 - Actors</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit les <strong>actors</strong> dans Swift pour résoudre le problème de la gestion de l'état mutable partagé dans un environnement concurrent. Un <code>actor</code> est un type de référence qui protège ses données via l'<strong>isolation d'acteur</strong>, garantissant qu'un seul thread accède à ses propriétés mutables à la fois.</p>
+<p>Points clés :</p>
+<ul>
+<li><strong>Isolation d'acteur</strong> : Les propriétés et méthodes d'un acteur sont isolées sur <code>self</code>. L'accès depuis l'extérieur doit être soit asynchrone (via <code>await</code>), soit porter sur des propriétés immuables (<code>let</code>) au sein du même module.</li>
+<li><strong>Réentrance</strong> : Les acteurs sont par défaut réentrants, ce qui signifie qu'une fonction peut être suspendue (via <code>await</code>) et qu'une autre tâche peut s'intercaler avant que la première ne reprenne. Cela évite les deadlocks mais nécessite de la prudence avec les invariants d'état.</li>
+<li><strong>Conformité Sendable</strong> : Pour garantir la sécurité, toutes les communications entre acteurs (appels de fonctions, retours de valeurs) doivent utiliser des types conformes au protocole <code>Sendable</code>.</li>
+<li><strong>Protocole Actor</strong> : Définit une interface pour les types acteurs, permettant des abstractions génériques.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0306" tabindex="-1"><a href="#avant-se-0306" class="header-anchor">Avant SE-0306</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">class</span> <span class="token class-name">BankAccount</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> balance<span class="token punctuation">:</span> <span class="token class-name">Double</span>
+    
+    <span class="token keyword">init</span><span class="token punctuation">(</span>balance<span class="token punctuation">:</span> <span class="token class-name">Double</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span>balance <span class="token operator">=</span> balance
+    <span class="token punctuation">}</span>
+    
+    <span class="token keyword">func</span> <span class="token function-definition function">transfer</span><span class="token punctuation">(</span>amount<span class="token punctuation">:</span> <span class="token class-name">Double</span><span class="token punctuation">,</span> to other<span class="token punctuation">:</span> <span class="token class-name">BankAccount</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> amount <span class="token operator">&lt;=</span> balance <span class="token punctuation">{</span>
+            <span class="token keyword">self</span><span class="token punctuation">.</span>balance <span class="token operator">-=</span> amount
+            other<span class="token punctuation">.</span>balance <span class="token operator">+=</span> amount
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de classes pour gérer un état partagé nécessite une synchronisation manuelle (verrous, files d'attente) pour éviter les "data races", ce qui est complexe et sujet aux erreurs humaines.</p>
+<h3 id="apr%C3%A8s-se-0306" tabindex="-1"><a href="#apr%C3%A8s-se-0306" class="header-anchor">Après SE-0306</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">actor</span> <span class="token class-name">BankAccount</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> balance<span class="token punctuation">:</span> <span class="token class-name">Double</span>
+    
+    <span class="token keyword">init</span><span class="token punctuation">(</span>balance<span class="token punctuation">:</span> <span class="token class-name">Double</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span>balance <span class="token operator">=</span> balance
+    <span class="token punctuation">}</span>
+    
+    <span class="token keyword">func</span> <span class="token function-definition function">transfer</span><span class="token punctuation">(</span>amount<span class="token punctuation">:</span> <span class="token class-name">Double</span><span class="token punctuation">,</span> to other<span class="token punctuation">:</span> <span class="token class-name">BankAccount</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> amount <span class="token operator">&lt;=</span> balance <span class="token punctuation">{</span>
+            <span class="token keyword">self</span><span class="token punctuation">.</span>balance <span class="token operator">-=</span> amount
+            <span class="token keyword">await</span> other<span class="token punctuation">.</span><span class="token function">deposit</span><span class="token punctuation">(</span>amount<span class="token punctuation">:</span> amount<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token keyword">func</span> <span class="token function-definition function">deposit</span><span class="token punctuation">(</span>amount<span class="token punctuation">:</span> <span class="token class-name">Double</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span>balance <span class="token operator">+=</span> amount
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Utilisation</span>
+<span class="token keyword">let</span> accountA <span class="token operator">=</span> <span class="token class-name">BankAccount</span><span class="token punctuation">(</span>balance<span class="token punctuation">:</span> <span class="token number">100.0</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> accountB <span class="token operator">=</span> <span class="token class-name">BankAccount</span><span class="token punctuation">(</span>balance<span class="token punctuation">:</span> <span class="token number">50.0</span><span class="token punctuation">)</span>
+
+<span class="token keyword">await</span> accountA<span class="token punctuation">.</span><span class="token function">transfer</span><span class="token punctuation">(</span>amount<span class="token punctuation">:</span> <span class="token number">20.0</span><span class="token punctuation">,</span> to<span class="token punctuation">:</span> accountB<span class="token punctuation">)</span>
+<span class="token function">print</span><span class="token punctuation">(</span><span class="token keyword">await</span> accountA<span class="token punctuation">.</span>balance<span class="token punctuation">)</span> <span class="token comment">// 80.0</span>
+</code></pre>
+<p>L'utilisation du mot-clé <code>actor</code> assure que l'accès à <code>balance</code> est protégé. Le compilateur empêche toute modification directe depuis l'extérieur, forçant l'utilisation de méthodes <code>async</code> ou l'accès asynchrone, éliminant ainsi les accès concurrents non sécurisés.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swift 5.7 - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-7/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Swift 5.7">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-7/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <span aria-current="page">Swift 5.7</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>Swift 5.7</h1>
+<h2 id="introduction" tabindex="-1"><a href="#introduction" class="header-anchor">Introduction</a></h2>
+<p>Cette page liste l'ensemble des propositions d'évolution de la version Swift 5.7</p>
+<h2 id="liste-des-se" tabindex="-1"><a href="#liste-des-se" class="header-anchor">Liste des SE</a></h2>
+<p>Il y a 32 propositions :</p>
+<ul>
+<li><a href="/swift-5-7/se-0292-package-registry-service/">SE-0292 - Package Registry Service</a></li>
+<li><a href="/swift-5-7/se-0302-sendable-and-sendable-closures/">SE-0302 - Sendable and @Sendable closures</a></li>
+<li><a href="/swift-5-7/se-0309-unlock-existential-types-for-all-protocols/">SE-0309 - Unlock existential types for all protocols</a></li>
+<li><a href="/swift-5-7/se-0326-enable-multi-statement-closure-parameter-result-type-inference/">SE-0326 - Enable multi-statement closure parameter-result type inference</a></li>
+<li><a href="/swift-5-7/se-0328-structural-opaque-result-types/">SE-0328 - Structural Opaque Result Types</a></li>
+<li><a href="/swift-5-7/se-0329-clock-instant-and-duration/">SE-0329 - Clock, Instant, and Duration</a></li>
+<li><a href="/swift-5-7/se-0333-expand-usability-of-withmemoryrebound/">SE-0333 - Expand usability of withMemoryRebound</a></li>
+<li><a href="/swift-5-7/se-0334-pointer-api-usability-improvements/">SE-0334 - Pointer API Usability Improvements</a></li>
+<li><a href="/swift-5-7/se-0336-distributed-actor-isolation/">SE-0336 - Distributed Actor Isolation</a></li>
+<li><a href="/swift-5-7/se-0338-clarify-the-execution-of-non-actor-isolated-async-functions/">SE-0338 - Clarify the Execution of Non-Actor-Isolated Async Functions</a></li>
+<li><a href="/swift-5-7/se-0339-module-aliasing-for-disambiguation/">SE-0339 - Module Aliasing For Disambiguation</a></li>
+<li><a href="/swift-5-7/se-0340-unavailable-from-async-attribute/">SE-0340 - Unavailable From Async Attribute</a></li>
+<li><a href="/swift-5-7/se-0341-opaque-parameter-declarations/">SE-0341 - Opaque Parameter Declarations</a></li>
+<li><a href="/swift-5-7/se-0343-concurrency-in-top-level-code/">SE-0343 - Concurrency in Top-level Code</a></li>
+<li><a href="/swift-5-7/se-0344-distributed-actor-runtime/">SE-0344 - Distributed Actor Runtime</a></li>
+<li><a href="/swift-5-7/se-0345-if-let-shorthand-for-shadowing-an-existing-optional-variable/">SE-0345 - if let shorthand for shadowing an existing optional variable</a></li>
+<li><a href="/swift-5-7/se-0346-lightweight-same-type-requirements-for-primary-associated-types/">SE-0346 - Lightweight same-type requirements for primary associated types</a></li>
+<li><a href="/swift-5-7/se-0347-type-inference-from-default-expressions/">SE-0347 - Type inference from default expressions</a></li>
+<li><a href="/swift-5-7/se-0348-buildpartialblock-for-result-builders/">SE-0348 - buildPartialBlock for Result Builders</a></li>
+<li><a href="/swift-5-7/se-0349-unaligned-loads-and-stores-from-raw-memory/">SE-0349 - Unaligned Loads and Stores from Raw Memory</a></li>
+<li><a href="/swift-5-7/se-0350-regex-type-and-overview/">SE-0350 - Regex Type and Overview</a></li>
+<li><a href="/swift-5-7/se-0351-regex-builder-dsl/">SE-0351 - Regex Builder DSL</a></li>
+<li><a href="/swift-5-7/se-0352-implicitly-opened-existentials/">SE-0352 - Implicitly Opened Existentials</a></li>
+<li><a href="/swift-5-7/se-0353-constrained-existential-types/">SE-0353 - Constrained Existential Types</a></li>
+<li><a href="/swift-5-7/se-0354-regex-literals/">SE-0354 - Regex Literals</a></li>
+<li><a href="/swift-5-7/se-0355-regex-syntax-and-runtime-construction/">SE-0355 - Regex Syntax and Runtime Construction</a></li>
+<li><a href="/swift-5-7/se-0356-swift-snippets/">SE-0356 - Swift Snippets</a></li>
+<li><a href="/swift-5-7/se-0357-regex-powered-string-processing-algorithms/">SE-0357 - Regex-powered string processing algorithms</a></li>
+<li><a href="/swift-5-7/se-0358-primary-associated-types-in-the-standard-library/">SE-0358 - Primary Associated Types in the Standard Library</a></li>
+<li><a href="/swift-5-7/se-0360-opaque-result-types-with-limited-availability/">SE-0360 - Opaque result types with limited availability</a></li>
+<li><a href="/swift-5-7/se-0361-extensions-on-bound-generic-types/">SE-0361 - Extensions on bound generic types</a></li>
+<li><a href="/swift-5-7/se-0363-unicode-for-string-processing/">SE-0363 - Unicode for String Processing</a></li>
+</ul>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

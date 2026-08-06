@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0393 - Value and Type Parameter Packs - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-9/se-0393-value-and-type-parameter-packs/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0393 - Value and Type Parameter Packs">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-9/se-0393-value-and-type-parameter-packs/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-9/">
+                  Swift 5.9
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0393 - Value and Type Parameter Packs</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0393 - Value and Type Parameter Packs</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.9</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0393-parameter-packs.md">SE-0393 - Value and Type Parameter Packs</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit le support des génériques variadiques dans Swift via l'utilisation des <strong>Parameter Packs</strong> (paquets de paramètres). Avant cette évolution, les fonctions génériques étaient limitées à un nombre fixe de paramètres de type, obligeant les développeurs à multiplier les surcharges pour gérer des nombres différents d'arguments (ex: pour les opérateurs de comparaison de tuples) ou à utiliser des types comme <code>Any</code>.</p>
+<p>La proposition introduit deux concepts fondamentaux :</p>
+<ol>
+<li><strong>Type Parameter Packs</strong> : Permettent d'abstraire sur un nombre variable de types. On utilise le mot-clé <code>each</code> pour déclarer un paquet de types et <code>repeat</code> pour effectuer une expansion (répétition).</li>
+<li><strong>Value Parameter Packs</strong> : Permettent de manipuler un nombre variable de valeurs de types distincts dans les fonctions.</li>
+</ol>
+<p>Le mécanisme repose sur le concept de <strong>Pack Expansion</strong>, qui permet de répéter un motif sur chaque élément du paquet, et sur l'introduction de règles de type pour assurer la cohérence (notamment via les "same-shape requirements" pour garantir que deux paquets ont la même longueur).</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0393" tabindex="-1"><a href="#avant-se-0393" class="header-anchor">Avant SE-0393</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token operator">&lt;</span> <span class="token operator">&lt;</span><span class="token class-name">A</span><span class="token punctuation">,</span> <span class="token class-name">B</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>lhs<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token class-name">A</span><span class="token punctuation">,</span> <span class="token class-name">B</span><span class="token punctuation">)</span><span class="token punctuation">,</span> rhs<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token class-name">A</span><span class="token punctuation">,</span> <span class="token class-name">B</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Bool</span> <span class="token keyword">where</span> <span class="token class-name">A</span><span class="token punctuation">:</span> <span class="token class-name">Comparable</span><span class="token punctuation">,</span> <span class="token class-name">B</span><span class="token punctuation">:</span> <span class="token class-name">Comparable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> lhs<span class="token punctuation">.</span><span class="token number">0</span> <span class="token operator">==</span> rhs<span class="token punctuation">.</span><span class="token number">0</span> <span class="token operator">&amp;&amp;</span> lhs<span class="token punctuation">.</span><span class="token number">1</span> <span class="token operator">==</span> rhs<span class="token punctuation">.</span><span class="token number">1</span> <span class="token comment">// simplification</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token operator">&lt;</span> <span class="token operator">&lt;</span><span class="token class-name">A</span><span class="token punctuation">,</span> <span class="token class-name">B</span><span class="token punctuation">,</span> <span class="token class-name">C</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>lhs<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token class-name">A</span><span class="token punctuation">,</span> <span class="token class-name">B</span><span class="token punctuation">,</span> <span class="token class-name">C</span><span class="token punctuation">)</span><span class="token punctuation">,</span> rhs<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token class-name">A</span><span class="token punctuation">,</span> <span class="token class-name">B</span><span class="token punctuation">,</span> <span class="token class-name">C</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Bool</span> <span class="token keyword">where</span> <span class="token class-name">A</span><span class="token punctuation">:</span> <span class="token class-name">Comparable</span><span class="token punctuation">,</span> <span class="token class-name">B</span><span class="token punctuation">:</span> <span class="token class-name">Comparable</span><span class="token punctuation">,</span> <span class="token class-name">C</span><span class="token punctuation">:</span> <span class="token class-name">Comparable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> lhs<span class="token punctuation">.</span><span class="token number">0</span> <span class="token operator">==</span> rhs<span class="token punctuation">.</span><span class="token number">0</span> <span class="token operator">&amp;&amp;</span> lhs<span class="token punctuation">.</span><span class="token number">1</span> <span class="token operator">==</span> rhs<span class="token punctuation">.</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> lhs<span class="token punctuation">.</span><span class="token number">2</span> <span class="token operator">==</span> rhs<span class="token punctuation">.</span><span class="token number">2</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Pour gérer des tuples de tailles différentes, il était nécessaire de créer manuellement une surcharge pour chaque nombre d'éléments (2, 3, 4, etc.), ce qui est lourd et difficile à maintenir.</p>
+<h3 id="apr%C3%A8s-se-0393" tabindex="-1"><a href="#apr%C3%A8s-se-0393" class="header-anchor">Après SE-0393</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token operator">&lt;</span>each <span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token class-name">Comparable</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>lhs<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token keyword">repeat</span> each <span class="token class-name">Element</span><span class="token punctuation">)</span><span class="token punctuation">,</span> rhs<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token keyword">repeat</span> each <span class="token class-name">Element</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Bool</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Logique de comparaison sur chaque élément</span>
+    <span class="token keyword">return</span> <span class="token boolean">true</span> 
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Grâce aux paquets de types, une seule déclaration peut désormais accepter un nombre arbitraire de paramètres de type, tant qu'ils respectent la contrainte de conformité, simplifiant radicalement les API génériques.</p>
+<h3 id="avant-se-0393-1" tabindex="-1"><a href="#avant-se-0393-1" class="header-anchor">Avant SE-0393</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">tupleMaker</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>values<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token class-name">T</span><span class="token punctuation">,</span> <span class="token class-name">T</span><span class="token punctuation">,</span> <span class="token class-name">T</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token punctuation">(</span><span class="token class-name">T</span><span class="token punctuation">,</span> <span class="token class-name">T</span><span class="token punctuation">,</span> <span class="token class-name">T</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> values
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> result <span class="token operator">=</span> <span class="token function">tupleMaker</span><span class="token punctuation">(</span>values<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Les fonctions génériques ne pouvaient traiter qu'un seul type <code>T</code>, rendant impossible le traitement de tuples contenant des types mixtes (ex: <code>(Int, String, Double)</code>) de manière générique.</p>
+<h3 id="apr%C3%A8s-se-0393-1" tabindex="-1"><a href="#apr%C3%A8s-se-0393-1" class="header-anchor">Après SE-0393</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">tuplify</span><span class="token operator">&lt;</span>each <span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> <span class="token label important">value</span><span class="token punctuation">:</span> <span class="token keyword">repeat</span> each <span class="token class-name">T</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token punctuation">(</span><span class="token keyword">repeat</span> each <span class="token class-name">T</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token keyword">repeat</span> value<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> result <span class="token operator">=</span> <span class="token function">tuplify</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"hello"</span></span><span class="token punctuation">,</span> <span class="token number">3.14</span><span class="token punctuation">)</span> <span class="token comment">// Résultat: (Int, String, Double)</span>
+</code></pre>
+<p>Les paquets de valeurs permettent de recevoir des arguments de types différents et de les retourner sous forme de tuple, chaque élément conservant son type d'origine sans perte d'information.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0495 - C compatible functions and enums - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-3/se-0495-c-compatible-functions-and-enums/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0495 - C compatible functions and enums">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-3/se-0495-c-compatible-functions-and-enums/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-3/">
+                  Swift 6.3
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0495 - C compatible functions and enums</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0495 - C compatible functions and enums</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.3</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0495-cdecl.md">SE-0495 - C compatible functions and enums</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit des mécanismes pour faciliter l'interopérabilité entre Swift et le langage C. Elle formalise l'usage de l'attribut expérimental <code>@_cdecl</code> en introduisant l'attribut <code>@c</code>.</p>
+<p>Les points clés incluent :</p>
+<ul>
+<li><strong>Attribut <code>@c</code></strong> : Permet de marquer des fonctions globales comme étant appelables depuis le C, utilisant la convention d'appel C. Il impose une vérification de type pour garantir que les signatures ne contiennent que des types représentables en C.</li>
+<li><strong>Enums <code>@c</code></strong> : Permet de marquer des énumérations pour qu'elles soient représentables en C, nécessitant un type brut (raw type) compatible avec un entier C.</li>
+<li><strong>Extension de <code>@objc</code></strong> : L'attribut <code>@objc</code> est désormais accepté sur les fonctions globales pour permettre une interopérabilité avec Objective-C.</li>
+<li><strong>Support de <code>@implementation</code></strong> : Étend l'attribut <code>@implementation</code> aux fonctions globales marquées <code>@c</code> ou <code>@objc</code>, permettant d'implémenter en Swift des fonctions déclarées dans un header C ou Objective-C.</li>
+<li><strong>Header de compatibilité</strong> : Mise à jour du header généré pour inclure une section spécifique au C, permettant une intégration transparente dans des projets mixtes.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0495" tabindex="-1"><a href="#avant-se-0495" class="header-anchor">Avant SE-0495</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@_cdecl</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"ma_fonction_c"</span></span><span class="token punctuation">)</span>
+<span class="token keyword">func</span> <span class="token function-definition function">maFonctionSwift</span><span class="token punctuation">(</span>valeur<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Int</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> valeur
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de <code>@_cdecl</code> est expérimentale et peut entraîner des comportements imprévus ou des changements d'interface lors des mises à jour du compilateur. De plus, elle ne fournit pas de vérification de type stricte pour la représentabilité C.</p>
+<h3 id="apr%C3%A8s-se-0495" tabindex="-1"><a href="#apr%C3%A8s-se-0495" class="header-anchor">Après SE-0495</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@c</span>
+<span class="token keyword">func</span> <span class="token function-definition function">maFonctionC</span><span class="token punctuation">(</span>valeur<span class="token punctuation">:</span> <span class="token class-name">CInt</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">CInt</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> valeur
+<span class="token punctuation">}</span>
+
+<span class="token attribute atrule">@c</span> <span class="token keyword">enum</span> <span class="token class-name">MonEnum</span><span class="token punctuation">:</span> <span class="token class-name">CInt</span> <span class="token punctuation">{</span>
+    <span class="token keyword">case</span> premier
+    <span class="token keyword">case</span> second
+<span class="token punctuation">}</span>
+
+<span class="token attribute atrule">@c</span> <span class="token attribute atrule">@implementation</span>
+<span class="token keyword">func</span> <span class="token function-definition function">fonctionDepuisHeader</span><span class="token punctuation">(</span>valeur<span class="token punctuation">:</span> <span class="token class-name">CInt</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">CInt</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> valeur
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'attribut <code>@c</code> formalise l'interopérabilité, garantit que les types utilisés sont compatibles avec le langage C et permet une intégration propre via le header de compatibilité et l'attribut <code>@implementation</code>.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

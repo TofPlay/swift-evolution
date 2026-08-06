@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0389 - Attached Macros - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-9/se-0389-attached-macros/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0389 - Attached Macros">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-9/se-0389-attached-macros/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-9/">
+                  Swift 5.9
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0389 - Attached Macros</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0389 - Attached Macros</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.9</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0389-attached-macros.md">SE-0389 - Attached Macros</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Les macros attachées permettent d'étendre les déclarations existantes via des transformations syntaxiques. Elles se divisent en plusieurs rôles spécialisés :</p>
+<ul>
+<li><strong>Peer macros</strong> : Ajoutent des déclarations au même niveau que la cible.</li>
+<li><strong>Member macros</strong> : Introduisent de nouveaux membres (propriétés, méthodes) dans un type.</li>
+<li><strong>Accessor macros</strong> : Transforment une propriété stockée en propriété calculée (get/set).</li>
+<li><strong>Member attribute macros</strong> : Appliquent des attributs sur les membres d'un type.</li>
+<li><strong>Conformance macros</strong> : Ajoutent des conformités à des protocoles.</li>
+</ul>
+<hr>
+<h3 id="peer-macros" tabindex="-1"><a href="#peer-macros" class="header-anchor">Peer macros</a></h3>
+<p>Les <strong>Peer macros</strong> génèrent de nouvelles déclarations au même niveau que la déclaration cible (ex: générer une version asynchrone d'une fonction synchrone).</p>
+<h3 id="apr%C3%A8s-se-0389" tabindex="-1"><a href="#apr%C3%A8s-se-0389" class="header-anchor">Après SE-0389</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro</span>
+<span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>peer<span class="token punctuation">,</span> names<span class="token punctuation">:</span> overloaded<span class="token punctuation">)</span>
+<span class="token keyword">public</span> macro <span class="token class-name">AddCompletionHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MacroExamplesImplementation"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"AddCompletionHandlerMacro"</span></span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Implémentation du macro</span>
+<span class="token keyword">public</span> <span class="token keyword">struct</span> <span class="token class-name">AddCompletionHandlerMacro</span><span class="token punctuation">:</span> <span class="token class-name">PeerMacro</span> <span class="token punctuation">{</span>
+  <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">func</span> <span class="token function-definition function">expansion</span><span class="token punctuation">(</span>
+    of node<span class="token punctuation">:</span> <span class="token class-name">AttributeSyntax</span><span class="token punctuation">,</span>
+    providingPeersOf declaration<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">DeclSyntaxProtocol</span><span class="token punctuation">,</span>
+    <span class="token keyword">in</span> context<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">MacroExpansionContext</span>
+  <span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">DeclSyntax</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
+    <span class="token keyword">guard</span> <span class="token keyword">var</span> funcDecl <span class="token operator">=</span> declaration<span class="token punctuation">.</span><span class="token keyword">as</span><span class="token punctuation">(</span><span class="token class-name">FunctionDeclSyntax</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+      <span class="token keyword">throw</span> <span class="token class-name">CustomError</span><span class="token punctuation">.</span><span class="token function">message</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"@addCompletionHandler only works on functions"</span></span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    <span class="token comment">// Logique de transformation de la signature et du corps...</span>
+    <span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token class-name">DeclSyntax</span><span class="token punctuation">(</span>funcDecl<span class="token punctuation">)</span><span class="token punctuation">]</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation du macro</span>
+<span class="token attribute atrule">@AddCompletionHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">func</span> <span class="token function-definition function">fetchUser</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token operator">-&gt;</span> <span class="token class-name">User</span> <span class="token punctuation">{</span>
+  <span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code généré par la macro (Expansion)</span>
+<span class="token keyword">func</span> <span class="token function-definition function">fetchUser</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">,</span> completionHandler<span class="token punctuation">:</span> <span class="token attribute atrule">@escaping</span> <span class="token punctuation">(</span><span class="token class-name">User</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token class-name">Task</span> <span class="token punctuation">{</span>
+    <span class="token function">completionHandler</span><span class="token punctuation">(</span><span class="token keyword">await</span> <span class="token function">fetchUser</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> id<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Les peer macros permettent de créer des variantes de fonctions (surcharges) ou des propriétés de support sans modifier la déclaration originale.</p>
+<hr>
+<h3 id="member-macros" tabindex="-1"><a href="#member-macros" class="header-anchor">Member macros</a></h3>
+<p>Les <strong>Member macros</strong> ajoutent des membres (propriétés, méthodes, types) à l'intérieur d'un type (class, struct, enum).</p>
+<h3 id="apr%C3%A8s-se-0389-1" tabindex="-1"><a href="#apr%C3%A8s-se-0389-1" class="header-anchor">Après SE-0389</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro</span>
+<span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>member<span class="token punctuation">,</span> names<span class="token punctuation">:</span> arbitrary<span class="token punctuation">)</span>
+<span class="token keyword">public</span> macro <span class="token class-name">CaseDetection</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MacroExamplesImplementation"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"CaseDetectionMacro"</span></span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Implémentation du macro</span>
+<span class="token keyword">public</span> <span class="token keyword">enum</span> <span class="token class-name">CaseDetectionMacro</span><span class="token punctuation">:</span> <span class="token class-name">MemberMacro</span> <span class="token punctuation">{</span>
+  <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">func</span> <span class="token function-definition function">expansion</span><span class="token punctuation">(</span>
+    of node<span class="token punctuation">:</span> <span class="token class-name">AttributeSyntax</span><span class="token punctuation">,</span>
+    providingMembersOf declaration<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">DeclGroupSyntax</span><span class="token punctuation">,</span>
+    conformingTo<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">TypeSyntax</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token keyword">in</span> context<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">MacroExpansionContext</span>
+  <span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">DeclSyntax</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
+    declaration<span class="token punctuation">.</span>memberBlock<span class="token punctuation">.</span>members
+      <span class="token punctuation">.</span>compactMap <span class="token punctuation">{</span> <span class="token short-argument">$0</span><span class="token punctuation">.</span>decl<span class="token punctuation">.</span><span class="token keyword">as</span><span class="token punctuation">(</span><span class="token class-name">EnumCaseDeclSyntax</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+      <span class="token punctuation">.</span>map <span class="token punctuation">{</span> <span class="token short-argument">$0</span><span class="token punctuation">.</span>elements<span class="token punctuation">.</span>first<span class="token operator">!</span><span class="token punctuation">.</span>name <span class="token punctuation">}</span>
+      <span class="token punctuation">.</span>map <span class="token punctuation">{</span> <span class="token punctuation">(</span><span class="token short-argument">$0</span><span class="token punctuation">,</span> <span class="token short-argument">$0</span><span class="token punctuation">.</span>initialUppercased<span class="token punctuation">)</span> <span class="token punctuation">}</span>
+      <span class="token punctuation">.</span>map <span class="token punctuation">{</span> original<span class="token punctuation">,</span> uppercased <span class="token keyword">in</span>
+        <span class="token string-literal"><span class="token string">"""
+        var is</span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">raw<span class="token punctuation">:</span> uppercased</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">: Bool {
+          if case .</span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">raw<span class="token punctuation">:</span> original</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string"> = self { return true }
+          return false
+        }
+        """</span></span>
+      <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation du macro</span>
+<span class="token attribute atrule">@CaseDetection</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">enum</span> <span class="token class-name">Direction</span> <span class="token punctuation">{</span>
+  <span class="token keyword">case</span> north<span class="token punctuation">,</span> south<span class="token punctuation">,</span> east<span class="token punctuation">,</span> west
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code généré par la macro (Expansion)</span>
+<span class="token keyword">enum</span> <span class="token class-name">Direction</span> <span class="token punctuation">{</span>
+  <span class="token keyword">case</span> north<span class="token punctuation">,</span> south<span class="token punctuation">,</span> east<span class="token punctuation">,</span> west
+  <span class="token keyword">var</span> isNorth<span class="token punctuation">:</span> <span class="token class-name">Bool</span> <span class="token punctuation">{</span> <span class="token keyword">if</span> <span class="token keyword">case</span> <span class="token punctuation">.</span>north <span class="token operator">=</span> <span class="token keyword">self</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token boolean">true</span> <span class="token punctuation">}</span><span class="token punctuation">;</span> <span class="token keyword">return</span> <span class="token boolean">false</span> <span class="token punctuation">}</span>
+  <span class="token keyword">var</span> isSouth<span class="token punctuation">:</span> <span class="token class-name">Bool</span> <span class="token punctuation">{</span> <span class="token keyword">if</span> <span class="token keyword">case</span> <span class="token punctuation">.</span>south <span class="token operator">=</span> <span class="token keyword">self</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token boolean">false</span> <span class="token punctuation">}</span><span class="token punctuation">;</span> <span class="token keyword">return</span> <span class="token boolean">false</span> <span class="token punctuation">}</span>
+  <span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Les member macros simplifient la création de boilerplate pour les énumérations ou les structures (ex: génération automatique de propriétés basées sur les cas d'un enum).</p>
+<hr>
+<h3 id="accessor-macros" tabindex="-1"><a href="#accessor-macros" class="header-anchor">Accessor macros</a></h3>
+<p>Les <strong>Accessor macros</strong> modifient l'accès à une propriété en remplaçant sa valeur stockée par un bloc de code <code>get</code> ou <code>set</code>.</p>
+<h3 id="apr%C3%A8s-se-0389-1-1" tabindex="-1"><a href="#apr%C3%A8s-se-0389-1-1" class="header-anchor">Après SE-0389</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro</span>
+<span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>accessor<span class="token punctuation">)</span>
+<span class="token keyword">public</span> macro <span class="token class-name">EnvironmentValue</span><span class="token punctuation">(</span><span class="token keyword">for</span> key<span class="token punctuation">:</span> any <span class="token class-name">EnvironmentKey</span><span class="token punctuation">.</span><span class="token keyword">Type</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MacroExamplesImplementation"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"EnvironmentValueMacro"</span></span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Implémentation du macro</span>
+<span class="token keyword">public</span> <span class="token keyword">struct</span> <span class="token class-name">EnvironmentValueMacro</span><span class="token punctuation">:</span> <span class="token class-name">AccessorMacro</span> <span class="token punctuation">{</span>
+  <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">func</span> <span class="token function-definition function">expansion</span><span class="token punctuation">(</span>
+    of node<span class="token punctuation">:</span> <span class="token class-name">AttributeSyntax</span><span class="token punctuation">,</span>
+    providingAccessorsOf declaration<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">DeclSyntaxProtocol</span><span class="token punctuation">,</span>
+    <span class="token keyword">in</span> context<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">MacroExpansionContext</span>
+  <span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">AccessorDeclSyntax</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
+    <span class="token keyword">guard</span> <span class="token keyword">let</span> argument <span class="token operator">=</span> node<span class="token punctuation">.</span>arguments<span class="token operator">?</span><span class="token punctuation">.</span>first<span class="token operator">?</span><span class="token punctuation">.</span>expression <span class="token keyword">else</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">[</span>
+      <span class="token string-literal"><span class="token string">"get { self[</span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">argument</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">] }"</span></span><span class="token punctuation">,</span>
+      <span class="token string-literal"><span class="token string">"set { self[</span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">argument</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">] = newValue }"</span></span>
+    <span class="token punctuation">]</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation du macro</span>
+<span class="token attribute atrule">@EnvironmentValue</span><span class="token punctuation">(</span><span class="token keyword">for</span><span class="token punctuation">:</span> <span class="token punctuation">\</span><span class="token punctuation">.</span>myKey<span class="token punctuation">)</span>
+<span class="token keyword">var</span> myValue<span class="token punctuation">:</span> <span class="token class-name">String</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code généré par la macro (Expansion)</span>
+<span class="token keyword">var</span> myValue<span class="token punctuation">:</span> <span class="token class-name">String</span> <span class="token punctuation">{</span>
+  <span class="token keyword">get</span> <span class="token punctuation">{</span> <span class="token keyword">self</span><span class="token punctuation">[</span><span class="token punctuation">\</span><span class="token punctuation">.</span>myKey<span class="token punctuation">]</span> <span class="token punctuation">}</span>
+  <span class="token keyword">set</span> <span class="token punctuation">{</span> <span class="token keyword">self</span><span class="token punctuation">[</span><span class="token punctuation">\</span><span class="token punctuation">.</span>myKey<span class="token punctuation">]</span> <span class="token operator">=</span> newValue <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Les accessor macros permettent de déléguer le stockage d'une propriété à un dictionnaire ou un gestionnaire externe, transformant une propriété simple en propriété calculée.</p>
+<hr>
+<h3 id="member-attribute-macros" tabindex="-1"><a href="#member-attribute-macros" class="header-anchor">Member attribute macros</a></h3>
+<p>Les <strong>Member attribute macros</strong> ne créent pas de nouveaux membres, mais appliquent des attributs (comme <code>@objc</code> ou <code>@available</code>) sur les membres existants.</p>
+<h3 id="apr%C3%A8s-se-0389-1-1-1" tabindex="-1"><a href="#apr%C3%A8s-se-0389-1-1-1" class="header-anchor">Après SE-0389</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro</span>
+<span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>memberAttribute<span class="token punctuation">)</span>
+<span class="token keyword">public</span> macro <span class="token function">memberDeprecated</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MacroExamplesImplementation"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MemberDeprecatedMacro"</span></span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Implémentation du macro</span>
+<span class="token keyword">public</span> <span class="token keyword">enum</span> <span class="token class-name">MemberDeprecatedMacro</span><span class="token punctuation">:</span> <span class="token class-name">MemberAttributeMacro</span> <span class="token punctuation">{</span>
+  <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">func</span> <span class="token function-definition function">expansion</span><span class="token punctuation">(</span>
+    of node<span class="token punctuation">:</span> <span class="token class-name">AttributeSyntax</span><span class="token punctuation">,</span>
+    attachedTo declaration<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">DeclGroupSyntax</span><span class="token punctuation">,</span>
+    providingAttributesFor member<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">DeclSyntaxProtocol</span><span class="token punctuation">,</span>
+    <span class="token keyword">in</span> context<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">MacroExpansionContext</span>
+  <span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">AttributeSyntax</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"@available(*, deprecated)"</span></span><span class="token punctuation">]</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation du macro</span>
+<span class="token attribute atrule">@memberDeprecated</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">struct</span> <span class="token class-name">OldAPI</span> <span class="token punctuation">{</span>
+  <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code généré par la macro (Expansion)</span>
+<span class="token keyword">struct</span> <span class="token class-name">OldAPI</span> <span class="token punctuation">{</span>
+  <span class="token attribute atrule">@available</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">,</span> deprecated<span class="token punctuation">)</span>
+  <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Les member attribute macros sont principalement utilisées pour des raisons de métadonnées, comme la gestion de la compatibilité ou l'interopérabilité avec Objective-C.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

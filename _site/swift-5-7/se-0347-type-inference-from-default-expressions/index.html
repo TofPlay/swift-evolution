@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0347 - Type inference from default expressions - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-7/se-0347-type-inference-from-default-expressions/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0347 - Type inference from default expressions">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-7/se-0347-type-inference-from-default-expressions/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-7/">
+                  Swift 5.7
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0347 - Type inference from default expressions</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0347 - Type inference from default expressions</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.7</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0347-type-inference-from-default-exprs.md">SE-0347 - Type inference from default expressions</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition modifie la sémantique de l'inférence de type pour permettre l'utilisation d'expressions de valeur par défaut (types concrets) pour déduire les paramètres génériques lorsqu'un appel au site omet l'argument.</p>
+<p>Auparavant, l'utilisation d'une valeur par défaut concrète pour un paramètre générique (ex: <code>func compute&lt;C: Collection&gt;(_ values: C = [0, 1, 2])</code>) était impossible car le compilateur exigeait que la valeur par défaut soit compatible avec <em>tous</em> les types concrets possibles de <code>C</code>. Pour contourner cela, les développeurs devaient utiliser des surcharges de méthodes ou des extensions contraintes, ce qui complexifiait les API.</p>
+<p>Les nouvelles règles permettent l'inférence si :</p>
+<ol>
+<li>Le paramètre générique est le type direct du paramètre (ou un type imbriqué comme <code>[T?]</code>).</li>
+<li>Le paramètre générique n'est utilisé que dans un seul emplacement de la liste des paramètres.</li>
+<li>La valeur par défaut satisfait toutes les contraintes (conformance, layout) du paramètre générique.</li>
+</ol>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0347" tabindex="-1"><a href="#avant-se-0347" class="header-anchor">Avant SE-0347</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">protocol</span> <span class="token class-name">Flags</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token keyword">struct</span> <span class="token class-name">DefaultFlags</span><span class="token punctuation">:</span> <span class="token class-name">Flags</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">Box</span><span class="token operator">&lt;</span><span class="token class-name">F</span><span class="token punctuation">:</span> <span class="token class-name">Flags</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>dimensions<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">,</span> flags<span class="token punctuation">:</span> <span class="token class-name">F</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">/* ... */</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Impossibilité de fournir une valeur par défaut concrète pour F</span>
+<span class="token comment">// error: default argument value of type 'DefaultFlags' cannot be converted to type 'F'</span>
+<span class="token keyword">extension</span> <span class="token class-name">Box</span> <span class="token keyword">where</span> <span class="token class-name">F</span> <span class="token operator">==</span> <span class="token class-name">DefaultFlags</span> <span class="token punctuation">{</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>dimensions<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">,</span> flags<span class="token punctuation">:</span> <span class="token class-name">F</span> <span class="token operator">=</span> <span class="token class-name">DefaultFlags</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'impossibilité de typer une valeur par défaut via un paramètre générique obligeait à utiliser des extensions contraintes ou des surcharges, ce qui nuisait à la clarté de l'API et brisait la génération des initialisateurs membres (memberwise initializers).</p>
+<h3 id="apr%C3%A8s-se-0347" tabindex="-1"><a href="#apr%C3%A8s-se-0347" class="header-anchor">Après SE-0347</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">protocol</span> <span class="token class-name">Flags</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token keyword">struct</span> <span class="token class-name">DefaultFlags</span><span class="token punctuation">:</span> <span class="token class-name">Flags</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">Box</span><span class="token operator">&lt;</span><span class="token class-name">F</span><span class="token punctuation">:</span> <span class="token class-name">Flags</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>dimensions<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">,</span> flags<span class="token punctuation">:</span> <span class="token class-name">F</span> <span class="token operator">=</span> <span class="token class-name">DefaultFlags</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// F est inféré comme DefaultFlags si l'argument est omis</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token keyword">func</span> <span class="token function-definition function">ship</span><span class="token operator">&lt;</span><span class="token class-name">S</span><span class="token punctuation">:</span> <span class="token class-name">Flags</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>flags<span class="token punctuation">:</span> <span class="token class-name">S</span> <span class="token operator">=</span> <span class="token class-name">DefaultFlags</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Fonctionne également pour les méthodes génériques</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> box <span class="token operator">=</span> <span class="token class-name">Box</span><span class="token punctuation">(</span>dimensions<span class="token punctuation">:</span> <span class="token number">10</span><span class="token punctuation">)</span> <span class="token comment">// F est inféré comme DefaultFlags</span>
+box<span class="token punctuation">.</span><span class="token function">ship</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Utilise la valeur par défaut</span>
+</code></pre>
+<p>La proposition permet une syntaxe concise et intuitive. L'inférence de type se fait par création d'une contrainte de conversion du type de l'expression par défaut vers le type du paramètre, garantissant que les types génériques sont résolus sans surcharge de code.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

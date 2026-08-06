@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0497 - Controlling function definition visibility in clients - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-3/se-0497-controlling-function-definition-visibility-in-clients/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0497 - Controlling function definition visibility in clients">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-3/se-0497-controlling-function-definition-visibility-in-clients/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-3/">
+                  Swift 6.3
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0497 - Controlling function definition visibility in clients</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0497 - Controlling function definition visibility in clients</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.3</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0497-definition-visibility.md">SE-0497 - Controlling function definition visibility in clients</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit l'attribut <code>@export</code> pour permettre aux développeurs de décider précisément comment une fonction est partagée avec les autres modules. Jusqu'ici, avec <code>@inlinable</code>, une fonction était soit "totalement ouverte" (on peut voir son code pour l'optimiser), soit "fermée".</p>
+<p>Le problème est que l'optimisation automatique peut parfois "fuiter" des détails internes (le code source d'une fonction) vers des modules qui ne devraient pas y avoir accès. <code>@export</code> sépare deux besoins :</p>
+<ol>
+<li><strong>L'interface :</strong> Est-ce que je crée un "nom" (symbole) pour que d'autres puissent appeler ma fonction ?</li>
+<li><strong>L'implémentation :</strong> Est-ce que je donne mon "code source" (définition) pour que d'autres puissent l'intégrer directement dans leur propre code pour gagner en vitesse ?</li>
+</ol>
+<p>Cela est crucial pour l'<strong>Embedded Swift</strong> (systèmes très limités en mémoire) et pour éviter que des modules dépendants ne se retrouvent avec des fonctions "cachées" qui n'auraient pas dû être visibles.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0497" tabindex="-1"><a href="#avant-se-0497" class="header-anchor">Avant SE-0497</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Actuellement, on utilise @inlinable</span>
+<span class="token attribute atrule">@inlinable</span> 
+<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">maFonction</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Le client voit le code (pour l'optimisation) </span>
+    <span class="token comment">// ET un symbole est créé dans le binaire.</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>On ne peut pas choisir de donner le code sans créer de symbole, ni de créer un symbole sans donner le code de manière garantie.</p>
+<h3 id="apr%C3%A8s-se-0497" tabindex="-1"><a href="#apr%C3%A8s-se-0497" class="header-anchor">Après SE-0497</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Option 1 : On veut juste qu'on puisse appeler la fonction, sans voir son code</span>
+<span class="token attribute atrule">@export</span><span class="token punctuation">(</span>interface<span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">fonctionS</span>écurisé<span class="token function">e</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Le client peut l'appeler, mais ne peut pas copier son code (pas d'inlining).</span>
+    <span class="token comment">// Cela protège les détails internes du module.</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Option 2 : On veut que le code soit ultra-rapide (inlined) mais sans créer de symbole</span>
+<span class="token attribute atrule">@export</span><span class="token punctuation">(</span>implementation<span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">fonctionOptimis</span>é<span class="token function">e</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Le client reçoit le code pour l'intégrer directement, </span>
+    <span class="token comment">// mais il n'y a pas de "nom" de fonction stocké dans le binaire.</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'attribut <code>@export</code> permet donc de choisir entre la <strong>performance maximale</strong> (en donnant le code) et la <strong>sécurité/stabilité</strong> (en ne donnant qu'un point d'entrée fixe sans divulguer l'implémentation).</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0405 - String Initializers with Encoding Validation - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-0/se-0405-string-initializers-with-encoding-validation/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0405 - String Initializers with Encoding Validation">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-0/se-0405-string-initializers-with-encoding-validation/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-0/">
+                  Swift 6.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0405 - String Initializers with Encoding Validation</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0405 - String Initializers with Encoding Validation</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0405-string-validating-initializers.md">SE-0405 - String Initializers with Encoding Validation</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit de nouveaux initialisateurs optionnels pour le type <code>String</code> permettant de valider l'encodage des données d'entrée. Actuellement, la conversion de données vers une <code>String</code> via la bibliothèque standard tente souvent de "réparer" les séquences Unicode malformées. Or, pour des cas critiques comme le décodage JSON ou le traitement de sources non fiables, il est impératif que l'initialisation échoue (retourne <code>nil</code>) si une erreur d'encodage est détectée, afin d'éviter de traiter des données corrompues. La proposition inclut également un initialisateur de commodité pour gérer les types <code>Int8</code> (courants en interopérabilité C) et clarifie l'API existante pour les chaînes C en renommant les fonctions pour éviter les ambiguïtés.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0405" tabindex="-1"><a href="#avant-se-0405" class="header-anchor">Avant SE-0405</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> invalidUTF16<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">UInt16</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">0x41</span><span class="token punctuation">,</span> <span class="token number">0x42</span><span class="token punctuation">,</span> <span class="token number">0xd801</span><span class="token punctuation">]</span>
+<span class="token keyword">let</span> string <span class="token operator">=</span> <span class="token class-name">String</span><span class="token punctuation">(</span>invalidUTF16<span class="token punctuation">)</span>
+</code></pre>
+<p>L'initialisation standard de <code>String</code> peut tenter de réparer ou de transformer les éléments Unicode invalides pour produire une chaîne, ce qui peut masquer des erreurs de données lors de la réception depuis un réseau ou un fichier.</p>
+<h3 id="apr%C3%A8s-se-0405" tabindex="-1"><a href="#apr%C3%A8s-se-0405" class="header-anchor">Après SE-0405</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> invalidUTF16<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">UInt16</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">0x41</span><span class="token punctuation">,</span> <span class="token number">0x42</span><span class="token punctuation">,</span> <span class="token number">0xd801</span><span class="token punctuation">]</span>
+<span class="token keyword">let</span> string <span class="token operator">=</span> <span class="token class-name">String</span><span class="token punctuation">(</span>validating<span class="token punctuation">:</span> invalidUTF16<span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> UTF16<span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
+<span class="token comment">// string est nil</span>
+</code></pre>
+<p>Le nouvel initialisateur <code>init(validating:as:)</code> vérifie la conformité de l'encodage et retourne <code>nil</code> si une séquence est malformée, garantissant l'intégrité des données traitées.</p>
+<h3 id="avant-se-0405-1" tabindex="-1"><a href="#avant-se-0405-1" class="header-anchor">Avant SE-0405</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> cString<span class="token punctuation">:</span> <span class="token class-name">UnsafePointer</span><span class="token operator">&lt;</span><span class="token class-name">CChar</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token comment">// ...</span>
+<span class="token keyword">let</span> string <span class="token operator">=</span> <span class="token class-name">String</span><span class="token punctuation">(</span>validatingUTF8<span class="token punctuation">:</span> cString<span class="token punctuation">)</span>
+</code></pre>
+<p>L'étiquette <code>validatingUTF8</code> pour une chaîne C est ambiguë car elle ne précise pas explicitement si elle attend une chaîne terminée par un caractère nul (null-terminated).</p>
+<h3 id="apr%C3%A8s-se-0405-1" tabindex="-1"><a href="#apr%C3%A8s-se-0405-1" class="header-anchor">Après SE-0405</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> cString<span class="token punctuation">:</span> <span class="token class-name">UnsafePointer</span><span class="token operator">&lt;</span><span class="token class-name">CChar</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token comment">// ...</span>
+<span class="token keyword">let</span> string <span class="token operator">=</span> <span class="token class-name">String</span><span class="token punctuation">(</span>validatingCString<span class="token punctuation">:</span> cString<span class="token punctuation">)</span>
+</code></pre>
+<p>Le renommage en <code>validatingCString</code> clarifie explicitement que l'initialiseur attend une chaîne de caractères C se terminant par un caractère nul, améliorant la lisibilité et la sécurité du code.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

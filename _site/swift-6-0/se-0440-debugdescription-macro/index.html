@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0440 - DebugDescription Macro - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-0/se-0440-debugdescription-macro/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0440 - DebugDescription Macro">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-0/se-0440-debugdescription-macro/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-0/">
+                  Swift 6.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0440 - DebugDescription Macro</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0440 - DebugDescription Macro</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0440-debug-description-macro.md">SE-0440 - DebugDescription Macro</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit la macro <code>@DebugDescription</code> pour la bibliothèque standard. L'objectif est de permettre aux développeurs de définir un résumé personnalisé pour leurs types de données, qui sera directement utilisé par le debugger (LLDB) sous forme de "Type Summary".</p>
+<p>Actuellement, l'utilisation de <code>CustomDebugStringConvertible</code> nécessite une évaluation d'expression par le debugger (via la commande <code>po</code>), ce qui peut être lent, instable ou impossible dans certains contextes (comme l'affichage des variables dans l'interface de l'IDE ou lors de l'analyse de crashlogs). La macro <code>@DebugDescription</code> résout ce problème en traduisant automatiquement une implémentation Swift compatible en une syntaxe de résumé LLDB (Summary String) intégrée directement dans le binaire, permettant ainsi un affichage rapide et sûr sans exécution de code dans le processus débogué.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0440" tabindex="-1"><a href="#avant-se-0440" class="header-anchor">Avant SE-0440</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">Organization</span><span class="token punctuation">:</span> <span class="token class-name">CustomDebugStringConvertible</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> id<span class="token punctuation">:</span> <span class="token class-name">String</span>
+    <span class="token keyword">var</span> name<span class="token punctuation">:</span> <span class="token class-name">String</span>
+    <span class="token keyword">var</span> manager<span class="token punctuation">:</span> <span class="token class-name">Person</span>
+    <span class="token keyword">var</span> members<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Person</span><span class="token punctuation">]</span>
+
+    <span class="token keyword">var</span> debugDescription<span class="token punctuation">:</span> <span class="token class-name">String</span> <span class="token punctuation">{</span>
+        <span class="token string-literal"><span class="token string">"#</span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">id</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string"> </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">name</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string"> (</span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">manager<span class="token punctuation">.</span>name</span><span class="token interpolation-punctuation punctuation">)</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Pour voir le résultat dans le debugger, l'utilisateur doit exécuter manuellement <code>po team</code> dans la console. L'affichage via l'interface graphique (variable view) montrera un arbre de propriétés complet et potentiellement très volumineux, plutôt que le résumé souhaité.</p>
+<h3 id="apr%C3%A8s-se-0440" tabindex="-1"><a href="#apr%C3%A8s-se-0440" class="header-anchor">Après SE-0440</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@DebugDescription</span>
+<span class="token keyword">struct</span> <span class="token class-name">Organization</span><span class="token punctuation">:</span> <span class="token class-name">CustomDebugStringConvertible</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> id<span class="token punctuation">:</span> <span class="token class-name">String</span>
+    <span class="token keyword">var</span> name<span class="token punctuation">:</span> <span class="token class-name">String</span>
+    <span class="token keyword">var</span> manager<span class="token punctuation">:</span> <span class="token class-name">Person</span>
+    <span class="token keyword">var</span> members<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Person</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro</span>
+<span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>member<span class="token punctuation">)</span>
+<span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>memberAttribute<span class="token punctuation">)</span>
+<span class="token keyword">public</span> macro <span class="token class-name">DebugDescription</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"SwiftMacros"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"DebugDescriptionMacro"</span></span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Implémentation du macro</span>
+<span class="token keyword">struct</span> <span class="token class-name">DebugDescriptionMacroImplementation</span><span class="token punctuation">:</span> <span class="token class-name">MemberMacro</span> <span class="token punctuation">{</span>
+    <span class="token keyword">static</span> <span class="token keyword">func</span> <span class="token function-definition function">expansion</span><span class="token punctuation">(</span><span class="token operator">...</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">CodeBlockItemSyntax</span><span class="token punctuation">]</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation du macro</span>
+<span class="token attribute atrule">@DebugDescription</span>
+<span class="token keyword">struct</span> <span class="token class-name">Organization</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> id<span class="token punctuation">:</span> <span class="token class-name">String</span>
+    <span class="token keyword">var</span> name<span class="token punctuation">:</span> <span class="token class-name">String</span>
+    <span class="token keyword">var</span> manager<span class="token punctuation">:</span> <span class="token class-name">Person</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code généré par la macro (Expansion)</span>
+<span class="token comment">// #${var.id} ${var.name} (${var.manager.name})</span>
+</code></pre>
+<p>La macro extrait la logique de la propriété <code>debugDescription</code> (ou <code>description</code> ou <code>lldbDescription</code>) et l'injecte sous la forme d'une propriété statique <code>_lldb_summary</code> compatible avec LLDB. Cela permet au debugger d'afficher le résumé formaté directement dans l'interface utilisateur sans exécuter de code Swift.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

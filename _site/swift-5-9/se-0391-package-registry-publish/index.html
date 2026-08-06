@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0391 - Package Registry Publish - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-9/se-0391-package-registry-publish/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0391 - Package Registry Publish">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-9/se-0391-package-registry-publish/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-9/">
+                  Swift 5.9
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0391 - Package Registry Publish</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0391 - Package Registry Publish</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.9</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0391-package-registry-publish.md">SE-0391 - Package Registry Publish</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition vise à standardiser le processus de publication de paquets vers des registres Swift. Jusqu'à présent, SwiftPM ne proposait aucun outil pour publier, obligeant les auteurs à gérer manuellement l'archivage, la métadonnée et l'interaction avec l'API du registre. La proposition introduit une commande <code>swift package-registry publish</code> qui automatise ces étapes. Elle définit également un standard pour les métadonnées de publication (format JSON via un schéma strict) et introduit un mécanisme de signature des paquets (format CMS) pour garantir l'authenticité du code. Enfin, elle introduit des options de sécurité pour l'utilisateur final, permettant de configurer la manière dont SwiftPM doit réagir face à un paquet non signé ou un certificat non approuvé.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0391" tabindex="-1"><a href="#avant-se-0391" class="header-anchor">Avant SE-0391</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// 1. L'auteur doit créer manuellement une archive source</span>
+<span class="token comment">// swift package archive-source --output package.zip</span>
+
+<span class="token comment">// 2. L'auteur doit préparer un fichier JSON de métadonnées manuellement</span>
+<span class="token comment">// { "description": "Ma super librairie", "licenseURL": "..." }</span>
+
+<span class="token comment">// 3. L'auteur doit appeler manuellement l'API du registre via une commande HTTP/cURL</span>
+<span class="token comment">// curl -X PUT "https://registry.example.com/user/package/version" -F "archive=@package.zip" ...</span>
+</code></pre>
+<p>La publication est un processus manuel, fragmenté et sujet aux erreurs, car SwiftPM ne gère pas l'interaction directe avec le registre pour la publication.</p>
+<h3 id="apr%C3%A8s-se-0391" tabindex="-1"><a href="#apr%C3%A8s-se-0391" class="header-anchor">Après SE-0391</a></h3>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Une seule commande automatise tout le processus
+swift package-registry publish &lt;id&gt; &lt;version&gt; --url &lt;registry-url&gt;
+</code></pre>
+<p>La commande <code>publish</code> gère automatiquement la création de l'archive, l'intégration des métadonnées, la signature (si configurée) et l'envoi au registre via l'API standardisée.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

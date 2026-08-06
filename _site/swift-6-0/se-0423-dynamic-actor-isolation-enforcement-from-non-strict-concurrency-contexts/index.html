@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0423 - Dynamic actor isolation enforcement from non-strict-concurrency contexts - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-0/se-0423-dynamic-actor-isolation-enforcement-from-non-strict-concurrency-contexts/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0423 - Dynamic actor isolation enforcement from non-strict-co…">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-0/se-0423-dynamic-actor-isolation-enforcement-from-non-strict-concurrency-contexts/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-0/">
+                  Swift 6.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0423 - Dynamic actor isolation enforcement from non-strict-concurrency contexts</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0423 - Dynamic actor isolation enforcement from non-strict-concurrency contexts</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0423-dynamic-actor-isolation.md">SE-0423 - Dynamic actor isolation enforcement from non-strict-concurrency contexts</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit une vérification de l'isolation des acteurs à l'exécution (runtime) pour les fonctions synchrones. L'objectif est de renforcer la sécurité contre les "data races" lors de l'interopérabilité avec des bibliothèques n'utilisant pas encore le contrôle strict de la concurrence (mode non-Swift 6 ou annotations <code>@preconcurrency</code>).</p>
+<p>Le système cible trois scénarios principaux où l'isolation pourrait être perdue :</p>
+<ol>
+<li><strong>Conformités de protocoles <code>@preconcurrency</code></strong> : Lorsqu'une méthode isolée implémente une exigence de protocole non isolée.</li>
+<li><strong>Thunks <code>@objc</code></strong> : Pour garantir que les méthodes isolées d'une classe appelées depuis l'Objective-C respectent l'isolation.</li>
+<li><strong>Passage de fonctions isolées</strong> : Lorsque des fonctions isolées sont passées à des API qui effacent leur isolation.</li>
+<li><strong>Importations inter-modules</strong> : Pour assurer la sécurité lors de l'appel de fonctions Swift 6 depuis du code compilé en mode de langage antérieur.</li>
+</ol>
+<p>Si une violation d'isolation est détectée, le programme s'arrête via une erreur au runtime, évitant ainsi des comportements indéterminés dus aux accès concurrents.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0423" tabindex="-1"><a href="#avant-se-0423" class="header-anchor">Avant SE-0423</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">NotMyLibrary</span>
+
+<span class="token attribute atrule">@MainActor</span>
+<span class="token keyword">class</span> <span class="token class-name">MyViewController</span><span class="token punctuation">:</span> <span class="token class-name">ViewDelegateProtocol</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">respondToUIEvent</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// implementation...</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Le compilateur génère une erreur car <code>respondToUIEvent</code> est isolée <code>@MainActor</code> mais doit satisfaire une exigence de protocole <code>nonisolated</code>. Le développeur est souvent forcé d'utiliser <code>MainActor.assumeIsolated</code>, ce qui fait perdre la sécurité statique.</p>
+<h3 id="apr%C3%A8s-se-0423" tabindex="-1"><a href="#apr%C3%A8s-se-0423" class="header-anchor">Après SE-0423</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">NotMyLibrary</span>
+
+<span class="token attribute atrule">@MainActor</span>
+<span class="token keyword">class</span> <span class="token class-name">MyViewController</span><span class="token punctuation">:</span> <span class="token attribute atrule">@preconcurrency</span> <span class="token class-name">ViewDelegateProtocol</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">respondToUIEvent</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// implementation...</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'annotation <code>@preconcurrency</code> sur la conformité permet de supprimer l'erreur de compilation. Si la fonction est appelée hors du <code>MainActor</code> depuis un module non sécurisé, une vérification au runtime interviendra pour stopper l'exécution avant qu'une corruption de données ne survienne.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

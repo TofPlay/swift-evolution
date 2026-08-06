@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0461 - Run nonisolated async functions on the caller's actor by default - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-2/se-0461-run-nonisolated-async-functions-on-the-caller-s-actor-by-default/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0461 - Run nonisolated async functions on the caller's actor…">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-2/se-0461-run-nonisolated-async-functions-on-the-caller-s-actor-by-default/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-2/">
+                  Swift 6.2
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0461 - Run nonisolated async functions on the caller's actor by default</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0461 - Run nonisolated async functions on the caller's actor by default</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.2</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0461-async-function-isolation.md">SE-0461 - Run nonisolated async functions on the caller's actor by default</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition modifie la sémantique d'exécution des fonctions asynchrones <code>nonisolated</code>. Par défaut, elles s'exécuteront désormais sur l'acteur de l'appelant plutôt que de basculer vers un exécuteur générique. Ce changement vise à uniformiser le comportement des fonctions <code>nonisolated</code> (synchrones et asynchrones) et à améliorer l'ergonomie de la sécurité contre les <em>data-races</em>.</p>
+<p>Deux nouveaux attributs sont introduits pour contrôler explicitement l'isolation :</p>
+<ul>
+<li><code>nonisolated(nonsending)</code> : (Comportement par défaut sous Swift 6.2+) Indique que la fonction s'exécute sur l'acteur de l'appelant et que les arguments/résultats ne franchissent pas de frontière d'isolation.</li>
+<li><code>@concurrent</code> : Indique explicitement que la fonction doit basculer hors de l'acteur de l'appelant pour s'exécuter de manière concurrente.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0461" tabindex="-1"><a href="#avant-se-0461" class="header-anchor">Avant SE-0461</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">class</span> <span class="token class-name">NotSendable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">performSync</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">performAsync</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">actor</span> <span class="token class-name">MyActor</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> x<span class="token punctuation">:</span> <span class="token class-name">NotSendable</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">call</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+        x<span class="token punctuation">.</span><span class="token function">performSync</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// okay</span>
+        <span class="token keyword">await</span> x<span class="token punctuation">.</span><span class="token function">performAsync</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// error (data-race safety error)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'appel à <code>performAsync</code> provoque une erreur car la fonction quitte l'acteur pour s'exécuter sur un exécuteur générique, créant un risque de concurrence sur l'objet <code>x</code> qui n'est pas <code>Sendable</code>.</p>
+<h3 id="apr%C3%A8s-se-0461" tabindex="-1"><a href="#apr%C3%A8s-se-0461" class="header-anchor">Après SE-0461</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">class</span> <span class="token class-name">NotSendable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">performSync</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
+    <span class="token keyword">nonisolated</span><span class="token punctuation">(</span>nonsending<span class="token punctuation">)</span> <span class="token keyword">func</span> <span class="token function-definition function">performAsync</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">actor</span> <span class="token class-name">MyActor</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> x<span class="token punctuation">:</span> <span class="token class-name">NotSendable</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">call</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+        x<span class="token punctuation">.</span><span class="token function">performSync</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// okay</span>
+        <span class="token keyword">await</span> x<span class="token punctuation">.</span><span class="token function">performAsync</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// okay</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Avec la nouvelle sémantique, <code>performAsync</code> s'exécute sur l'acteur de l'appelant par défaut. La fonction ne quitte plus l'acteur, ce qui permet d'utiliser des types non <code>Sendable</code> sans erreur de sécurité.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

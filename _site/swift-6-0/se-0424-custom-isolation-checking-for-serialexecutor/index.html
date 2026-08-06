@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0424 - Custom isolation checking for SerialExecutor - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-0/se-0424-custom-isolation-checking-for-serialexecutor/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0424 - Custom isolation checking for SerialExecutor">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-0/se-0424-custom-isolation-checking-for-serialexecutor/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-0/">
+                  Swift 6.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0424 - Custom isolation checking for SerialExecutor</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0424 - Custom isolation checking for SerialExecutor</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0424-custom-isolation-checking-for-serialexecutor.md">SE-0424 - Custom isolation checking for SerialExecutor</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Actuellement, les mécanismes de vérification d'isolation de la Swift Concurrency runtime (comme <code>assumeIsolated</code> ou <code>assertIsolated</code>) comparent l'exécuteur actuel de la tâche avec l'exécuteur attendu. Cependant, si du code est exécuté sur l'exécuteur d'un acteur via un mécanisme externe (par exemple, une <code>DispatchQueue</code> sans être lié à une <code>Task</code> Swift), la runtime ne reconnaît pas l'isolation, provoquant un crash alors que l'accès à l'état de l'acteur est en réalité sûr.</p>
+<p>La proposition introduit un nouveau protocole <code>checkIsolated()</code> dans <code>SerialExecutor</code>. Ce mécanisme sert de "dernier recours" : si la comparaison standard échoue, la runtime appelle <code>checkIsolated()</code> sur l'exécuteur attendu. Si l'exécuteur est capable de prouver qu'il est actuellement sur son thread de travail (via une logique personnalisée), la vérification d'isolation réussit.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0424" tabindex="-1"><a href="#avant-se-0424" class="header-anchor">Avant SE-0424</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">Dispatch</span>
+
+<span class="token keyword">actor</span> <span class="token class-name">Caplin</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> queue<span class="token punctuation">:</span> <span class="token class-name">DispatchSerialQueue</span> <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token keyword">init</span><span class="token punctuation">(</span>label<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"CoolQueue"</span></span><span class="token punctuation">)</span>
+    <span class="token keyword">var</span> num<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token comment">// état isolé de l'acteur</span>
+    
+    <span class="token keyword">nonisolated</span> <span class="token keyword">var</span> unownedExecutor<span class="token punctuation">:</span> <span class="token class-name">UnownedSerialExecutor</span> <span class="token punctuation">{</span>
+        queue<span class="token punctuation">.</span><span class="token function">asUnownedSerialExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token keyword">nonisolated</span> <span class="token keyword">func</span> <span class="token function-definition function">connect</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        queue<span class="token punctuation">.</span><span class="token keyword">async</span> <span class="token punctuation">{</span> 
+            <span class="token comment">// Le code s'exécute sur la queue, mais sans Task Swift associée</span>
+            <span class="token keyword">self</span><span class="token punctuation">.</span>queue<span class="token punctuation">.</span><span class="token function">assertIsolated</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// CRASH : L'assumption d'exécuteur est incorrecte</span>
+            <span class="token keyword">self</span><span class="token punctuation">.</span>assumeIsolated <span class="token punctuation">{</span> caplin <span class="token keyword">in</span>
+                caplin<span class="token punctuation">.</span>num <span class="token operator">+=</span> <span class="token number">1</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Le code exécuté via <code>queue.async</code> ne possède pas de contexte de tâche Swift. Par conséquent, la runtime ne peut pas confirmer l'isolation, entraînant un crash lors de l'appel à <code>assertIsolated</code> ou <code>assumeIsolated</code>, même si l'exécution est séquentielle et sûre.</p>
+<h3 id="apr%C3%A8s-se-0424" tabindex="-1"><a href="#apr%C3%A8s-se-0424" class="header-anchor">Après SE-0424</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">Dispatch</span>
+
+<span class="token keyword">extension</span> <span class="token class-name">DispatchSerialQueue</span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">checkIsolated</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Utilise l'API Dispatch pour vérifier si on est bien sur la queue</span>
+        <span class="token function">dispatchPrecondition</span><span class="token punctuation">(</span>condition<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token function">onQueue</span><span class="token punctuation">(</span><span class="token keyword">self</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">actor</span> <span class="token class-name">Caplin</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> queue<span class="token punctuation">:</span> <span class="token class-name">DispatchSerialQueue</span> <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token keyword">init</span><span class="token punctuation">(</span>label<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"CoolQueue"</span></span><span class="token punctuation">)</span>
+    <span class="token keyword">var</span> num<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+    
+    <span class="token keyword">nonisolated</span> <span class="token keyword">var</span> unownedExecutor<span class="token punctuation">:</span> <span class="token class-name">UnownedSerialExecutor</span> <span class="token punctuation">{</span>
+        queue<span class="token punctuation">.</span><span class="token function">asUnownedExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token keyword">nonisolated</span> <span class="token keyword">func</span> <span class="token function-definition function">connect</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        queue<span class="token punctuation">.</span><span class="token keyword">async</span> <span class="token punctuation">{</span>
+            <span class="token comment">// La runtime appelle maintenant checkIsolated() sur la queue</span>
+            <span class="token comment">// Ce qui permet de valider l'isolation malgré l'absence de Task</span>
+            <span class="token keyword">self</span><span class="token punctuation">.</span>queue<span class="token punctuation">.</span><span class="token function">assertIsolated</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
+            <span class="token keyword">self</span><span class="token punctuation">.</span>assumeIsolated <span class="token punctuation">{</span> caplin <span class="token keyword">in</span>
+                caplin<span class="token punctuation">.</span>num <span class="token operator">+=</span> <span class="token number">1</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'implémentation de <code>checkIsolated()</code> sur <code>DispatchSerialQueue</code> permet à la runtime de confirmer que le thread actuel est bien celui de la queue, validant ainsi l'isolation de manière dynamique même pour le code qui n'est pas lié à une <code>Task</code>.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

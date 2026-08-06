@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0429 - Partial consumption of noncopyable values - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-0/se-0429-partial-consumption-of-noncopyable-values/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0429 - Partial consumption of noncopyable values">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-0/se-0429-partial-consumption-of-noncopyable-values/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-0/">
+                  Swift 6.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0429 - Partial consumption of noncopyable values</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0429 - Partial consumption of noncopyable values</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0429-partial-consumption.md">SE-0429 - Partial consumption of noncopyable values</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit la possibilité de consommer individuellement les champs non-copiables d'un agrégat (struct ou enum) si celui-ci ne possède pas de <code>deinit</code> ou s'il est défini dans le module courant (ou marqué <code>@frozen</code> s'il est importé). Actuellement, la consommation d'un type non-copiable est atomique : l'intégralité de l'objet doit être consommée d'un coup. Cette modification permet de manipuler des structures complexes contenant des ressources uniques sans avoir à créer des solutions de contournement complexes. Elle autorise également la consommation partielle des champs à l'intérieur du <code>deinit</code> de l'agrégat lui-même.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0429" tabindex="-1"><a href="#avant-se-0429" class="header-anchor">Avant SE-0429</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">Unique</span> <span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">Pair</span> <span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> first<span class="token punctuation">:</span> <span class="token class-name">Unique</span>
+    <span class="token keyword">let</span> second<span class="token punctuation">:</span> <span class="token class-name">Unique</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">extension</span> <span class="token class-name">Pair</span> <span class="token punctuation">{</span>
+    consuming <span class="token keyword">func</span> <span class="token function-definition function">swap</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Pair</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token class-name">Pair</span><span class="token punctuation">(</span>
+            first<span class="token punctuation">:</span> second<span class="token punctuation">,</span> <span class="token comment">// erreur: cannot partially consume 'self'</span>
+            second<span class="token punctuation">:</span> first  <span class="token comment">// erreur: cannot partially consume 'self'</span>
+        <span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Actuellement, il est impossible de consommer un champ spécifique d'un type non-copiable sans consommer l'instance entière, ce qui empêche des opérations simples comme l'inversion de l'ordre des éléments dans un couple.</p>
+<h3 id="apr%C3%A8s-se-0429" tabindex="-1"><a href="#apr%C3%A8s-se-0429" class="header-anchor">Après SE-0429</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">Unique</span> <span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">Pair</span> <span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> first<span class="token punctuation">:</span> <span class="token class-name">Unique</span>
+    <span class="token keyword">let</span> second<span class="token punctuation">:</span> <span class="token class-name">Unique</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">extension</span> <span class="token class-name">Pair</span> <span class="token punctuation">{</span>
+    consuming <span class="token keyword">func</span> <span class="token function-definition function">swap</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Pair</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token class-name">Pair</span><span class="token punctuation">(</span>first<span class="token punctuation">:</span> second<span class="token punctuation">,</span> second<span class="token punctuation">:</span> first<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition permet de consommer chaque champ <code>Unique</code> de manière indépendante au sein de la fonction <code>swap</code>, rendant l'inversion des éléments parfaitement légale et syntaxiquement simple.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

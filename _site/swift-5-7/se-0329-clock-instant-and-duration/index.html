@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0329 - Clock, Instant, and Duration - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-7/se-0329-clock-instant-and-duration/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0329 - Clock, Instant, and Duration">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-7/se-0329-clock-instant-and-duration/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-7/">
+                  Swift 5.7
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0329 - Clock, Instant, and Duration</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0329 - Clock, Instant, and Duration</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.7</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0329-clock-instant-duration.md">SE-0329 - Clock, Instant, and Duration Proposal</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit une API standardisée et hautement précise pour la manipulation du temps en Swift, structurée autour de trois concepts fondamentaux :</p>
+<ul>
+<li><strong>Clock</strong> : Un protocole définissant une source de temps, capable de fournir l'heure actuelle (<code>now</code>) et de gérer la mise en veille (<code>sleep</code>).</li>
+<li><strong>Instant</strong> : Un point précis dans le temps, lié à un <code>Clock</code> spécifique, permettant des comparaisons et des calculs de durée.</li>
+<li><strong>Duration</strong> : Une mesure du temps écoulé entre deux instants, implémentée avec une haute précision (secondes et attosecondes).</li>
+</ul>
+<p>L'API introduit des implémentations concrètes comme <code>ContinuousClock</code> (pour la mesure de performance, ne s'arrêtant pas quand le système dort) et <code>SuspendingClock</code> (qui s'arrête quand le système est en veille), tout en déléguant la gestion des calendriers et des fuseaux horaires à <code>Foundation</code> via <code>Date</code> et <code>UTCClock</code>.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0329" tabindex="-1"><a href="#avant-se-0329" class="header-anchor">Avant SE-0329</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de types existants et disparates</span>
+<span class="token keyword">let</span> interval<span class="token punctuation">:</span> <span class="token class-name">TimeInterval</span> <span class="token operator">=</span> <span class="token number">5.0</span>
+<span class="token keyword">let</span> dispatchTime <span class="token operator">=</span> <span class="token class-name">DispatchTime</span><span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// La mesure de performance est souvent moins précise ou moins ergonomique</span>
+<span class="token keyword">let</span> start <span class="token operator">=</span> <span class="token class-name">DispatchTime</span><span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token comment">// ... code ...</span>
+<span class="token keyword">let</span> end <span class="token operator">=</span> <span class="token class-name">DispatchTime</span><span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> nanoSeconds <span class="token operator">=</span> end<span class="token punctuation">.</span>uptimeNanoseconds <span class="token operator">-</span> start<span class="token punctuation">.</span>uptimeNanoseconds
+</code></pre>
+<p>L'absence d'un système unifié forçait les développeurs à manipuler des types différents (<code>TimeInterval</code>, <code>DispatchTime</code>, <code>Date</code>) qui ne sont pas directement comparables de manière sécurisée, et compliquait la gestion de la précision et de la mise en veille des tâches.</p>
+<h3 id="apr%C3%A8s-se-0329" tabindex="-1"><a href="#apr%C3%A8s-se-0329" class="header-anchor">Après SE-0329</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation des nouveaux types Clock, Instant et Duration</span>
+<span class="token keyword">let</span> clock <span class="token operator">=</span> <span class="token class-name">ContinuousClock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> deadline <span class="token operator">=</span> clock<span class="token punctuation">.</span>now <span class="token operator">+</span> <span class="token punctuation">.</span><span class="token function">seconds</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Mesure de performance ergonomique</span>
+<span class="token keyword">let</span> elapsed <span class="token operator">=</span> clock<span class="token punctuation">.</span>measure <span class="token punctuation">{</span>
+    <span class="token comment">// ... code à mesurer ...</span>
+<span class="token punctuation">}</span>
+<span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Temps écoulé : </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">elapsed</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
+
+<span class="token comment">// Mise en veille précise avec tolérance</span>
+<span class="token keyword">try</span> <span class="token keyword">await</span> <span class="token class-name">Task</span><span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span>until<span class="token punctuation">:</span> deadline<span class="token punctuation">,</span> tolerance<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token function">milliseconds</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">,</span> clock<span class="token punctuation">:</span> clock<span class="token punctuation">)</span>
+</code></pre>
+<p>La nouvelle API permet une approche par "divulgation progressive" : les développeurs peuvent utiliser des durées simples (<code>.seconds(5)</code>) tout en bénéficiant d'une précision interne extrême, et la séparation entre les types de clocks évite les erreurs de logique entre le temps réel (UTC) et le temps monotone (Uptime).</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

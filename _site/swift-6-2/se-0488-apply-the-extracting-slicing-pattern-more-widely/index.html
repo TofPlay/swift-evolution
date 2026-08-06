@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0488 - Apply the extracting() slicing pattern more widely - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-2/se-0488-apply-the-extracting-slicing-pattern-more-widely/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0488 - Apply the extracting() slicing pattern more widely">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-2/se-0488-apply-the-extracting-slicing-pattern-more-widely/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-2/">
+                  Swift 6.2
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0488 - Apply the extracting() slicing pattern more widely</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0488 - Apply the extracting() slicing pattern more widely</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.2</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0488-extracting.md">SE-0488 - Apply the extracting() slicing pattern more widely</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit une famille de méthodes nommées <code>extracting()</code> pour gérer le découpage (slicing) de conteneurs dont les éléments sont non-copiables ou non-échappables.</p>
+<p>Dans le protocole <code>Collection</code> standard, le découpage via les subscripts ne fonctionne pas pour les types non-copiables ou non-échappables. La solution propose une syntaxe explicite via <code>extracting()</code> pour :</p>
+<ul>
+<li><code>Span</code> et <code>RawSpan</code>.</li>
+<li>La famille <code>UnsafeBufferPointer</code> (et ses variantes mutables/brutes).</li>
+</ul>
+<p>Ces méthodes permettent de créer des tranches (slices) tout en gérant correctement les dépendances de durée de vie (lifetime), en utilisant des attributs comme <code>@_lifetime(copy self)</code> pour les types échappables ou des variantes non sécurisées (<code>@unsafe</code>) pour les opérations sans validation de bornes.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0488" tabindex="-1"><a href="#avant-se-0488" class="header-anchor">Avant SE-0488</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Les types non-copiables ou les conteneurs non-échappables </span>
+<span class="token comment">// ne peuvent pas utiliser le subscripting classique [range] </span>
+<span class="token comment">// pour le découpage sans violer les règles de ownership.</span>
+
+<span class="token keyword">let</span> buffer <span class="token operator">=</span> <span class="token class-name">UnsafeBufferPointer</span><span class="token punctuation">(</span>buffer<span class="token punctuation">:</span> <span class="token punctuation">[</span>element1<span class="token punctuation">,</span> element2<span class="token punctuation">,</span> element3<span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token comment">// Le découpage classique via subscript ne fonctionne pas </span>
+<span class="token comment">// de la même manière pour les types non-copiables.</span>
+</code></pre>
+<p>Le pattern de découpage établi par le protocole <code>Collection</code> ne peut pas être généralisé pour les éléments non-copiables ou les conteneurs non-échappables.</p>
+<h3 id="apr%C3%A8s-se-0488" tabindex="-1"><a href="#apr%C3%A8s-se-0488" class="header-anchor">Après SE-0488</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> buffer <span class="token operator">=</span> <span class="token class-name">UnsafeBufferPointer</span><span class="token punctuation">(</span>buffer<span class="token punctuation">:</span> <span class="token punctuation">[</span>element1<span class="token punctuation">,</span> element2<span class="token punctuation">,</span> element3<span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Utilisation de la nouvelle famille de méthodes extracting()</span>
+<span class="token keyword">let</span> slice <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token operator">..&lt;</span><span class="token number">2</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> firstTwo <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span>first<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> droppedFirst <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span>droppingFirst<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> unsafeSlice <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span>unchecked<span class="token punctuation">:</span> <span class="token number">0</span><span class="token operator">..&lt;</span><span class="token number">1</span><span class="token punctuation">)</span>
+</code></pre>
+<p>La proposition introduit des méthodes explicites comme <code>extracting(_:)</code>, <code>extracting(first:)</code>, <code>extracting(droppingFirst:)</code>, etc., permettant de découper ces conteneurs de manière sécurisée et conforme aux règles d'ownership de Swift.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

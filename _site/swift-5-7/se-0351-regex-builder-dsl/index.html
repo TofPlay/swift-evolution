@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0351 - Regex builder DSL - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-7/se-0351-regex-builder-dsl/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0351 - Regex builder DSL">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-7/se-0351-regex-builder-dsl/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-7/">
+                  Swift 5.7
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0351 - Regex builder DSL</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0351 - Regex builder DSL</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.7</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0351-regex-builder.md">SE-0351 - Regex builder DSL</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit <code>RegexBuilder</code>, un DSL (Domain Specific Language) basé sur les <code>result-builders</code> pour la création et la composition d'expressions régulières de manière déclarative.</p>
+<p>L'objectif est de résoudre les problèmes de lisibilité, de maintenance et de sécurité des expressions régulières textuelles classiques en offrant :</p>
+<ul>
+<li>Une syntaxe structurée et indentée facilitant la lecture de la hiérarchie des motifs.</li>
+<li>L'utilisation de la complétion de code via l'API.</li>
+<li>Un typage fort pour les captures, permettant de transformer directement les correspondances en types Swift structurés (via des closures de transformation).</li>
+<li>Une composition modulaire grâce au protocole <code>RegexComponent</code>.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0351" tabindex="-1"><a href="#avant-se-0351" class="header-anchor">Avant SE-0351</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Regex textuelle classique (difficile à lire, pas de complétion, typage brut)</span>
+<span class="token keyword">let</span> regex <span class="token operator">=</span> <span class="token operator">/</span><span class="token punctuation">(</span><span class="token constant">CREDIT</span><span class="token operator">|</span><span class="token constant">DEBIT</span><span class="token punctuation">)</span><span class="token punctuation">\</span>s<span class="token operator">+</span><span class="token punctuation">(</span><span class="token punctuation">\</span>d<span class="token punctuation">{</span><span class="token number">2</span><span class="token punctuation">}</span><span class="token punctuation">\</span>d<span class="token punctuation">{</span><span class="token number">2</span><span class="token punctuation">}</span><span class="token punctuation">\</span>d<span class="token punctuation">{</span><span class="token number">4</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">\</span>s<span class="token operator">+</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">\</span>w<span class="token punctuation">\</span>s<span class="token punctuation">]</span><span class="token operator">+</span><span class="token punctuation">\</span>w<span class="token punctuation">)</span><span class="token punctuation">\</span>s<span class="token operator">+</span><span class="token punctuation">(</span><span class="token punctuation">\</span>$<span class="token punctuation">\</span>d<span class="token operator">+</span><span class="token punctuation">\</span><span class="token punctuation">.</span><span class="token punctuation">\</span>d<span class="token punctuation">{</span><span class="token number">2</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token operator">/</span>
+
+<span class="token keyword">if</span> <span class="token keyword">let</span> match <span class="token operator">=</span> <span class="token keyword">try</span> regex<span class="token punctuation">.</span><span class="token function">firstMatch</span><span class="token punctuation">(</span><span class="token keyword">in</span><span class="token punctuation">:</span> statement<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// On récupère des Substring bruts, sans typage métier</span>
+    <span class="token keyword">let</span> kind <span class="token operator">=</span> match<span class="token punctuation">.</span>output<span class="token punctuation">.</span><span class="token number">1</span> <span class="token comment">// "CREDIT"</span>
+    <span class="token keyword">let</span> date <span class="token operator">=</span> match<span class="token punctuation">.</span>output<span class="token punctuation">.</span><span class="token number">2</span> <span class="token comment">// "04062020"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La syntaxe textuelle est dense, les caractères spéciaux (<code>\s</code>, <code>\d</code>, <code>( )</code>) sont difficiles à lire et les groupes de capture ne retournent que des <code>Substring</code>, obligeant à un parsing manuel ultérieur.</p>
+<h3 id="apr%C3%A8s-se-0351" tabindex="-1"><a href="#apr%C3%A8s-se-0351" class="header-anchor">Après SE-0351</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">RegexBuilder</span>
+
+<span class="token comment">// Définition d'un pattern structuré et typé</span>
+<span class="token keyword">let</span> statementPattern <span class="token operator">=</span> <span class="token class-name">Regex</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Capture avec transformation directe en enum</span>
+    <span class="token class-name">TryCapture</span> <span class="token punctuation">{</span>
+        <span class="token class-name">ChoiceOf</span> <span class="token punctuation">{</span> <span class="token string-literal"><span class="token string">"CREDIT"</span></span> <span class="token string-literal"><span class="token string">"DEBIT"</span></span> <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span> transform<span class="token punctuation">:</span> <span class="token punctuation">{</span> <span class="token class-name">TransactionKind</span><span class="token punctuation">(</span>rawValue<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">(</span><span class="token short-argument">$0</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+    
+    <span class="token class-name">OneOrMore</span><span class="token punctuation">(</span><span class="token punctuation">.</span>whitespace<span class="token punctuation">)</span>
+    
+    <span class="token comment">// Capture de la date avec transformation en type custom</span>
+    <span class="token class-name">TryCapture</span> <span class="token punctuation">{</span>
+        <span class="token class-name">Repeat</span><span class="token punctuation">(</span><span class="token punctuation">.</span>digit<span class="token punctuation">,</span> count<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span>
+        <span class="token class-name">Repeat</span><span class="token punctuation">(</span><span class="token punctuation">.</span>digit<span class="token punctuation">,</span> count<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span>
+        <span class="token class-name">Repeat</span><span class="token punctuation">(</span><span class="token punctuation">.</span>digit<span class="token punctuation">,</span> count<span class="token punctuation">:</span> <span class="token number">4</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span> transform<span class="token punctuation">:</span> <span class="token punctuation">{</span> <span class="token class-name">Date</span><span class="token punctuation">(</span>mmddyyyy<span class="token punctuation">:</span> <span class="token short-argument">$0</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Utilisation</span>
+<span class="token keyword">for</span> match <span class="token keyword">in</span> statement<span class="token punctuation">.</span><span class="token function">matches</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> statementPattern<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Les captures sont directement des types métier (TransactionKind, Date)</span>
+    <span class="token keyword">let</span> <span class="token punctuation">(</span>line<span class="token punctuation">,</span> kind<span class="token punctuation">,</span> date<span class="token punctuation">)</span> <span class="token operator">=</span> match<span class="token punctuation">.</span>output
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"</span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">kind</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string"> le </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">date</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Le DSL permet de construire la regex de manière hiérarchique. L'utilisation de <code>TryCapture</code> avec une closure <code>transform</code> permet de convertir immédiatement le texte capturé en un objet métier (Enum ou Struct), rendant le code beaucoup plus robuste et lisible.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

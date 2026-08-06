@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0410 - Low-Level Atomic Operations ⚛︎ - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-0/se-0410-low-level-atomic-operations/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0410 - Low-Level Atomic Operations ⚛︎">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-0/se-0410-low-level-atomic-operations/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-0/">
+                  Swift 6.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0410 - Low-Level Atomic Operations ⚛︎</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0410 - Low-Level Atomic Operations ⚛︎</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0410-atomics.md">SE-0410 - Low-Level Atomic Operations ⚛︎</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit un ensemble limité d'opérations atomiques de bas niveau dans la bibliothèque standard via un nouveau module nommé <code>Synchronization</code>. L'objectif est de permettre aux développeurs de systèmes d'implémenter des structures de données concurrentes et des primitives de synchronisation performantes directement en Swift, avec un overhead minimal.</p>
+<p>Les points clés incluent :</p>
+<ul>
+<li><strong>Modèle de mémoire</strong> : Adoption du modèle C/C++ avec des ordonnancements explicites (<code>.relaxed</code>, <code>.acquiring</code>, <code>.releasing</code>, <code>.acquiringAndReleasing</code>, <code>.sequentiallyConsistent</code>).</li>
+<li><strong>Type <code>Atomic&lt;Value&gt;</code></strong> : Un nouveau type non-copiable (<code>~Copyable</code>) qui encapsule une valeur et fournit des opérations sécurisées.</li>
+<li><strong>Protocoles</strong> : Introduction de <code>AtomicRepresentable</code> et <code>AtomicOptionalRepresentable</code> pour mapper les types Swift vers leurs représentations de stockage atomique.</li>
+<li><strong>Sécurité du langage</strong> : Interdiction des liaisons <code>var</code> et des paramètres <code>inout</code> pour les types atomiques afin d'éviter les violations des règles d'exclusivité dynamique et garantir l'atomicité réelle.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0410" tabindex="-1"><a href="#avant-se-0410" class="header-anchor">Avant SE-0410</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de verrous classiques pour protéger un compteur</span>
+<span class="token keyword">class</span> <span class="token class-name">Counter</span> <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token keyword">var</span> value <span class="token operator">=</span> <span class="token number">0</span>
+    <span class="token keyword">private</span> <span class="token keyword">let</span> lock <span class="token operator">=</span> <span class="token class-name">NSLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">func</span> <span class="token function-definition function">increment</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        lock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        value <span class="token operator">+=</span> <span class="token number">1</span>
+        lock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">func</span> <span class="token function-definition function">getValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Int</span> <span class="token punctuation">{</span>
+        lock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token keyword">defer</span> <span class="token punctuation">{</span> lock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> value
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de verrous (locks) peut introduire une latence importante et des risques de contention ou de blocage dans les systèmes de haute performance.</p>
+<h3 id="apr%C3%A8s-se-0410" tabindex="-1"><a href="#apr%C3%A8s-se-0410" class="header-anchor">Après SE-0410</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">Synchronization</span>
+
+<span class="token keyword">let</span> counter <span class="token operator">=</span> <span class="token class-name">Atomic</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Incrémentation atomique sans verrou</span>
+counter<span class="token punctuation">.</span><span class="token function">wrappingAdd</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> ordering<span class="token punctuation">:</span> <span class="token punctuation">.</span>relaxed<span class="token punctuation">)</span>
+
+<span class="token comment">// Lecture atomique</span>
+<span class="token keyword">let</span> currentValue <span class="token operator">=</span> counter<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span>ordering<span class="token punctuation">:</span> <span class="token punctuation">.</span>relaxed<span class="token punctuation">)</span>
+</code></pre>
+<p>L'utilisation d'opérations atomiques permet d'effectuer des mutations sur un compteur de manière efficace et sans verrou, en utilisant directement les instructions CPU appropriées.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0381 - DiscardingTaskGroups - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-9/se-0381-discardingtaskgroups/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0381 - DiscardingTaskGroups">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-9/se-0381-discardingtaskgroups/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-9/">
+                  Swift 5.9
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0381 - DiscardingTaskGroups</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0381 - DiscardingTaskGroups</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.9</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0381-task-group-discard-results.md">SE-0381 - DiscardingTaskGroups</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit deux nouveaux types de groupes de tâches pour la concurrence structurée : <code>DiscardingTaskGroup</code> et <code>ThrowingDiscardingTaskGroup</code>.</p>
+<p>Actuellement, les <code>TaskGroup</code> classiques conservent les résultats (ou les objets <code>Task</code> eux-mêmes) de chaque tâche enfant jusqu'à ce qu'ils soient explicitement consommés via <code>next()</code> ou une itération. Dans des scénarios de services à longue durée (comme des serveurs HTTP acceptant des connexions en boucle), cela provoque une fuite de mémoire car les objets <code>Task</code> s'accumulent indéfiniment dans le groupe.</p>
+<p>Les nouveaux groupes de "discarding" résolvent ce problème en :</p>
+<ol>
+<li>Déchargeant et libérant immédiatement les ressources de la tâche enfant dès sa complétion.</li>
+<li>Ne proposant pas de méthode <code>next()</code> ni de conformité à <code>AsyncSequence</code>, car le résultat est intentionnellement ignoré.</li>
+<li>Gérant l'erreur de manière "tout ou rien" : pour les versions <code>Throwing</code>, la première erreur rencontrée annule automatiquement le groupe et toutes les tâches sœurs, puis est propagée.</li>
+</ol>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0381" tabindex="-1"><a href="#avant-se-0381" class="header-anchor">Avant SE-0381</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">try</span> <span class="token keyword">await</span> <span class="token function">withThrowingTaskGroup</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> <span class="token class-name">Void</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> group <span class="token keyword">in</span>
+    <span class="token keyword">while</span> <span class="token keyword">let</span> newConnection <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token keyword">await</span> listeningSocket<span class="token punctuation">.</span><span class="token function">accept</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        group<span class="token punctuation">.</span>addTask <span class="token punctuation">{</span> 
+            <span class="token keyword">await</span> <span class="token function">handleConnection</span><span class="token punctuation">(</span>newConnection<span class="token punctuation">)</span> 
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Dans ce code, chaque tâche enfant terminée est conservée en mémoire par le groupe de tâches en attendant que l'utilisateur appelle <code>group.next()</code>. Pour un serveur tournant pendant des jours, cela entraîne une consommation de mémoire croissante (fuite de mémoire) car les milliers de tâches terminées ne sont jamais "nettoyées".</p>
+<h3 id="apr%C3%A8s-se-0381" tabindex="-1"><a href="#apr%C3%A8s-se-0381" class="header-anchor">Après SE-0381</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">try</span> <span class="token keyword">await</span> withThrowingDiscardingTaskGroup <span class="token punctuation">{</span> group <span class="token keyword">in</span>
+    <span class="token keyword">while</span> <span class="token keyword">let</span> newConnection <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token keyword">await</span> listeningSocket<span class="token punctuation">.</span><span class="token function">accept</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        group<span class="token punctuation">.</span>addTask <span class="token punctuation">{</span> 
+            <span class="token keyword">await</span> <span class="token function">handleConnection</span><span class="token punctuation">(</span>newConnection<span class="token punctuation">)</span> 
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Avec <code>withThrowingDiscardingTaskGroup</code>, les ressources de chaque tâche <code>handleConnection</code> sont libérées immédiatement après la fin de l'exécution de la tâche, sans attendre une consommation manuelle. Cela permet de faire tourner des boucles de serveur indéfiniment sans fuite de mémoire.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

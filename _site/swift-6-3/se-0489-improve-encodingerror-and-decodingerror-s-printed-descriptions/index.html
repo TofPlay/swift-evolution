@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0489 - Improve EncodingError and DecodingError's printed descriptions - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-3/se-0489-improve-encodingerror-and-decodingerror-s-printed-descriptions/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0489 - Improve EncodingError and DecodingError's printed desc…">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-3/se-0489-improve-encodingerror-and-decodingerror-s-printed-descriptions/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-3/">
+                  Swift 6.3
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0489 - Improve EncodingError and DecodingError's printed descriptions</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0489 - Improve EncodingError and DecodingError's printed descriptions</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.3</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0489-codable-error-printing.md">SE-0489 - Improve EncodingError and DecodingError's printed descriptions</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Actuellement, <code>EncodingError</code> et <code>DecodingError</code> ne fournissent pas de description de débogage personnalisée, ce qui produit des messages très verbeux et difficiles à lire (ex: incluant des structures <code>CodingKeys</code> complexes et des répétitions). La proposition consiste à conformer ces deux types au protocole <code>CustomDebugStringConvertible</code> afin de fournir des messages de débogage clairs, lisibles et structurés, facilitant ainsi le diagnostic des erreurs lors du développement.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0489" tabindex="-1"><a href="#avant-se-0489" class="header-anchor">Avant SE-0489</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">Person</span><span class="token punctuation">:</span> <span class="token class-name">Codable</span> <span class="token punctuation">{</span> 
+    <span class="token keyword">var</span> name<span class="token punctuation">:</span> <span class="token class-name">String</span> 
+    <span class="token keyword">var</span> home<span class="token punctuation">:</span> <span class="token class-name">Home</span> 
+<span class="token punctuation">}</span>
+<span class="token keyword">struct</span> <span class="token class-name">Home</span><span class="token punctuation">:</span> <span class="token class-name">Codable</span> <span class="token punctuation">{</span> <span class="token keyword">var</span> city<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">;</span> <span class="token keyword">var</span> country<span class="token punctuation">:</span> <span class="token class-name">Country</span> <span class="token punctuation">}</span>
+<span class="token keyword">struct</span> <span class="token class-name">Country</span><span class="token punctuation">:</span> <span class="token class-name">Codable</span> <span class="token punctuation">{</span> <span class="token keyword">var</span> name<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">;</span> <span class="token keyword">var</span> population<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> jsonData <span class="token operator">=</span> <span class="token class-name">Data</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"""
+[ { "name": "Ada Lovelace", "home": { "city": "London", "country": { "name": "England" } } } ]
+"""</span></span><span class="token punctuation">.</span>utf8<span class="token punctuation">)</span>
+
+<span class="token keyword">do</span> <span class="token punctuation">{</span>
+    <span class="token omit keyword">_</span> <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token class-name">JSONDecoder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">decode</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token class-name">Person</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">,</span> from<span class="token punctuation">:</span> jsonData<span class="token punctuation">)</span>
+<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'erreur générée par l'absence du champ <code>population</code> est illisible pour un développeur :
+<code>keyNotFound(CodingKeys(stringValue: "population", intValue: nil), Swift.DecodingError.Context(codingPath: [_CodingKey(stringValue: "Index 0", intValue: 0), CodingKeys(stringValue: "home", intValue: nil), CodingKeys(stringValue: "country", intValue: nil)], debugDescription: "No value associated with key CodingKeys(stringValue: \"population\", intValue: nil) (\"population\").", underlyingError: nil))</code></p>
+<h3 id="apr%C3%A8s-se-0489" tabindex="-1"><a href="#apr%C3%A8s-se-0489" class="header-anchor">Après SE-0489</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le même code de test que précédemment</span>
+<span class="token keyword">do</span> <span class="token punctuation">{</span>
+    <span class="token omit keyword">_</span> <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token class-name">JSONDecoder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">decode</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token class-name">Person</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">,</span> from<span class="token punctuation">:</span> jsonData<span class="token punctuation">)</span>
+<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">{</span>
+    <span class="token function">debugPrint</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'erreur est désormais affichée de manière concise et lisible (format théorique) :
+<code>keyNotFound(population) at [0].home.country</code></p>
+<p>La proposition résout le problème en extrayant les informations essentielles (clé manquante et chemin d'accès) de la structure complexe de l'erreur pour les présenter de façon humaine.</p>
+<hr>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

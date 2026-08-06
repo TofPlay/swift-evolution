@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0304 - Structured concurrency - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-5/se-0304-structured-concurrency/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0304 - Structured concurrency">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-5/se-0304-structured-concurrency/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-5/">
+                  Swift 5.5
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0304 - Structured concurrency</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0304 - Structured concurrency</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.5</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0304-structured-concurrency.md">SE-0304 - Structured concurrency</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit le modèle de <strong>concurrence structurée</strong> dans Swift, permettant l'exécution simultanée de code asynchrone tout en maintenant une hiérarchie de tâches prévisible. Contrairement à une exécution asynchrone simple, la concurrence structurée garantit que les tâches enfants sont liées au cycle de vie de la tâche parente.</p>
+<p>Les points clés incluent :</p>
+<ul>
+<li><strong>Tasks (Tâches) :</strong> L'unité de base de la concurrence remplaçant le concept de thread.</li>
+<li><strong>Task Groups :</strong> Mécanisme permettant de créer un nombre dynamique de tâches enfants qui héritent de la priorité et du contexte de la tâche parente, et dont la durée de vie est strictement limitée au scope du groupe.</li>
+<li><strong>Propagation de la priorité et de l'annulation :</strong> L'annulation d'une tâche parente annule automatiquement ses tâches enfants, et les priorités se propagent de manière hiérarchique.</li>
+<li><strong>Tâches non structurées :</strong> Introduction des initialisateurs <code>Task { ... }</code> (héritent du contexte) et <code>Task.detached { ... }</code> (indépendants) pour les cas où une durée de vie liée n'est pas requise.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0304" tabindex="-1"><a href="#avant-se-0304" class="header-anchor">Avant SE-0304</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// L'exécution asynchrone est séquentielle par défaut</span>
+<span class="token keyword">func</span> <span class="token function-definition function">makeDinner</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">Meal</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> veggies <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token keyword">await</span> <span class="token function">chopVegetables</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">let</span> meat <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">marinateMeat</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">let</span> oven <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token keyword">await</span> <span class="token function">preheatOven</span><span class="token punctuation">(</span>temperature<span class="token punctuation">:</span> <span class="token number">350</span><span class="token punctuation">)</span>
+    <span class="token keyword">let</span> dish <span class="token operator">=</span> <span class="token class-name">Dish</span><span class="token punctuation">(</span>ingredients<span class="token punctuation">:</span> <span class="token punctuation">[</span>veggies<span class="token punctuation">,</span> meat<span class="token punctuation">]</span><span class="token punctuation">)</span>
+    <span class="token keyword">return</span> <span class="token keyword">try</span> <span class="token keyword">await</span> oven<span class="token punctuation">.</span><span class="token function">cook</span><span class="token punctuation">(</span>dish<span class="token punctuation">,</span> duration<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token function">hours</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de <code>await</code> de manière séquentielle empêche l'exécution parallèle des tâches, rendant le processus plus long car chaque étape attend la fin de la précédente.</p>
+<h3 id="apr%C3%A8s-se-0304" tabindex="-1"><a href="#apr%C3%A8s-se-0304" class="header-anchor">Après SE-0304</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">makeDinner</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">Meal</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> veggies<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Vegetable</span><span class="token punctuation">]</span><span class="token operator">?</span>
+    <span class="token keyword">var</span> meat<span class="token punctuation">:</span> <span class="token class-name">Meat</span><span class="token operator">?</span>
+    <span class="token keyword">var</span> oven<span class="token punctuation">:</span> <span class="token class-name">Oven</span><span class="token operator">?</span>
+
+    <span class="token keyword">try</span> <span class="token keyword">await</span> <span class="token function">withThrowingTaskGroup</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> <span class="token class-name">CookingStep</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> group <span class="token keyword">in</span>
+        group<span class="token punctuation">.</span>addTask <span class="token punctuation">{</span> <span class="token keyword">try</span> <span class="token keyword">await</span> <span class="token punctuation">.</span><span class="token function">veggies</span><span class="token punctuation">(</span><span class="token function">chopVegetables</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+        group<span class="token punctuation">.</span>addTask <span class="token punctuation">{</span> <span class="token keyword">await</span> <span class="token punctuation">.</span><span class="token function">meat</span><span class="token punctuation">(</span><span class="token function">marinateMeat</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+        group<span class="token punctuation">.</span>addTask <span class="token punctuation">{</span> <span class="token keyword">try</span> <span class="token keyword">await</span> <span class="token punctuation">.</span><span class="token function">oven</span><span class="token punctuation">(</span><span class="token function">preheatOven</span><span class="token punctuation">(</span>temperature<span class="token punctuation">:</span> <span class="token number">350</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+
+        <span class="token keyword">for</span> <span class="token keyword">try</span> <span class="token keyword">await</span> finishedStep <span class="token keyword">in</span> group <span class="token punctuation">{</span>
+            <span class="token keyword">switch</span> finishedStep <span class="token punctuation">{</span>
+            <span class="token keyword">case</span> <span class="token punctuation">.</span><span class="token function">veggies</span><span class="token punctuation">(</span><span class="token keyword">let</span> v<span class="token punctuation">)</span><span class="token punctuation">:</span> veggies <span class="token operator">=</span> v
+            <span class="token keyword">case</span> <span class="token punctuation">.</span><span class="token function">meat</span><span class="token punctuation">(</span><span class="token keyword">let</span> m<span class="token punctuation">)</span><span class="token punctuation">:</span> meat <span class="token operator">=</span> m
+            <span class="token keyword">case</span> <span class="token punctuation">.</span><span class="token function">oven</span><span class="token punctuation">(</span><span class="token keyword">let</span> o<span class="token punctuation">)</span><span class="token punctuation">:</span> oven <span class="token operator">=</span> o
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token keyword">let</span> dish <span class="token operator">=</span> <span class="token class-name">Dish</span><span class="token punctuation">(</span>ingredients<span class="token punctuation">:</span> <span class="token punctuation">[</span>veggies<span class="token operator">!</span><span class="token punctuation">,</span> meat<span class="token operator">!</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+    <span class="token keyword">return</span> <span class="token keyword">try</span> <span class="token keyword">await</span> oven<span class="token operator">!</span><span class="token punctuation">.</span><span class="token function">cook</span><span class="token punctuation">(</span>dish<span class="token punctuation">,</span> duration<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token function">hours</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Grâce à <code>withThrowingTaskGroup</code>, les trois tâches (préparation des légumes, marinade de la viande et préchauffage du four) s'exécutent simultanément. Le programme attend que toutes les tâches du groupe soient terminées avant de poursuivre, garantissant une gestion sûre de la mémoire et des erreurs.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

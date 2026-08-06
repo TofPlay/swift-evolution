@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0491 - Module selectors for name disambiguation - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-3/se-0491-module-selectors-for-name-disambiguation/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0491 - Module selectors for name disambiguation">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-3/se-0491-module-selectors-for-name-disambiguation/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-3/">
+                  Swift 6.3
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0491 - Module selectors for name disambiguation</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0491 - Module selectors for name disambiguation</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.3</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0491-module-selectors.md">SE-0491 - Module selectors for name disambiguation</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit les <strong>sélecteurs de module</strong> via la syntaxe <code>ModuleName::</code> pour résoudre les ambiguïtés de nommage dans Swift. Actuellement, le système de recherche de noms (lookup) de Swift peut être rendu ambigu lorsque des types ou des membres partagent le même nom qu'un module importé (shadowing), ou lorsque des extensions créent des conflits de signatures de membres identiques dans différents modules.</p>
+<p>Les sélecteurs de module permettent de :</p>
+<ol>
+<li><strong>Désambiguer les recherches non qualifiées :</strong> En utilisant <code>Module::Identifier</code>, la recherche commence directement au niveau supérieur du module spécifié, contournant les échelles locales ou les types ombragés.</li>
+<li><strong>Désambiguer les recherches qualifiées :</strong> Permet de spécifier explicitement le module d'appartenance d'un membre (ex: <code>Module::Member</code>), ce qui est crucial pour le code généré mécaniquement et les interfaces de modules.</li>
+<li><strong>Résoudre le problème des macros :</strong> Offre une syntaxe compatible avec les macros qui ne permettaient pas la qualification par module.</li>
+</ol>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0491" tabindex="-1"><a href="#avant-se-0491" class="header-anchor">Avant SE-0491</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Un module possède un type du même nom que le module lui-même</span>
+<span class="token keyword">import</span> <span class="token class-name">RocketEngine</span> 
+
+<span class="token keyword">public</span> <span class="token keyword">struct</span> <span class="token class-name">RocketEngine</span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">struct</span> <span class="token class-name">Fuel</span> <span class="token punctuation">{</span>
+        <span class="token keyword">public</span> <span class="token keyword">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Erreur : Swift cherche Fuel dans le type RocketEngine du fichier actuel,</span>
+<span class="token comment">// et non dans le module RocketEngine importé.</span>
+<span class="token keyword">let</span> fuel <span class="token operator">=</span> <span class="token class-name">RocketEngine</span><span class="token punctuation">.</span><span class="token class-name">Fuel</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
+</code></pre>
+<p>La recherche de noms est sujette à l'ombrage (shadowing). Si un type possède le même nom qu'un module, il devient impossible de qualifier une déclaration en utilisant uniquement le nom du module.</p>
+<h3 id="apr%C3%A8s-se-0491" tabindex="-1"><a href="#apr%C3%A8s-se-0491" class="header-anchor">Après SE-0491</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Un module possède un type du même nom que le module lui-même</span>
+<span class="token keyword">import</span> <span class="token class-name">RocketEngine</span> 
+
+<span class="token keyword">public</span> <span class="token keyword">struct</span> <span class="token class-name">RocketEngine</span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">struct</span> <span class="token class-name">Fuel</span> <span class="token punctuation">{</span>
+        <span class="token keyword">public</span> <span class="token keyword">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Solution : Utilisation du sélecteur de module pour cibler le module d'origine</span>
+<span class="token keyword">let</span> fuel <span class="token operator">=</span> <span class="token class-name">RocketEngine</span><span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token class-name">Fuel</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Résolution des ambiguïtés dans les extensions</span>
+<span class="token keyword">import</span> <span class="token class-name">IonThruster</span>
+<span class="token keyword">import</span> <span class="token class-name">RocketEngine</span>
+
+<span class="token comment">// On peut spécifier exactement quel membre d'extension on souhaite utiliser</span>
+<span class="token keyword">let</span> engine <span class="token operator">=</span> <span class="token class-name">Spacecraft</span><span class="token punctuation">.</span><span class="token class-name">IonThruster</span><span class="token punctuation">:</span><span class="token punctuation">:</span><span class="token class-name">Engine</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+<p>L'utilisation de <code>::</code> permet de forcer la recherche dans le scope du module spécifié, ignorant les déclarations locales ou les types ayant le même nom dans le contexte actuel.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

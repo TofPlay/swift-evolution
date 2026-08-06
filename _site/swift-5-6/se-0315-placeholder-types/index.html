@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0315 - Type placeholders - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-6/se-0315-placeholder-types/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0315 - Type placeholders">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-6/se-0315-placeholder-types/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-6/">
+                  Swift 5.6
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0315 - Type placeholders</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0315 - Type placeholders</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.6</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0315-placeholder-types.md">SE-0315 - Type placeholders</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit les "type placeholders" (espaces réservés de type), représentés par le caractère underscore (<code>_</code>), pour faciliter l'inférence de type dans des situations où le compilateur nécessite une aide partielle.</p>
+<p>Actuellement, lorsqu'un type complexe est ambigu ou surchargé, le développeur doit écrire la signature complète du type. Avec les placeholders, il est possible de fournir uniquement la partie du type qui ne peut pas être déduite par le compilateur, laissant l'underscore agir comme une variable de type anonyme que le moteur d'inférence résoudra via le contexte environnant. Cette fonctionnalité est applicable aux types génériques, aux tuples, aux fonctions et aux types optionnels, mais elle est interdite au niveau supérieur (top-level) pour éviter l'ambiguïté sur le type de la variable elle-même.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0315" tabindex="-1"><a href="#avant-se-0315" class="header-anchor">Avant SE-0315</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">Combine</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">makeValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">String</span> <span class="token punctuation">{</span> <span class="token string-literal"><span class="token string">""</span></span> <span class="token punctuation">}</span>
+<span class="token keyword">func</span> <span class="token function-definition function">makeValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Int</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span>
+
+<span class="token comment">// Erreur : "ambiguous use of makeValue()" car le compilateur </span>
+<span class="token comment">// ne peut pas déterminer quel overload utiliser sans le type complet.</span>
+<span class="token keyword">let</span> publisher <span class="token operator">=</span> <span class="token class-name">Just</span><span class="token punctuation">(</span><span class="token function">makeValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">setFailureType</span><span class="token punctuation">(</span>to<span class="token punctuation">:</span> <span class="token class-name">Error</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">eraseToAnyPublisher</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Solution actuelle : Obligation d'écrire le type complet</span>
+<span class="token keyword">let</span> publisher<span class="token punctuation">:</span> <span class="token class-name">AnyPublisher</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token punctuation">,</span> <span class="token class-name">Error</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token class-name">Just</span><span class="token punctuation">(</span><span class="token function">makeValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">setFailureType</span><span class="token punctuation">(</span>to<span class="token punctuation">:</span> <span class="token class-name">Error</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">eraseToAnyPublisher</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+<p>L'obligation de spécifier l'intégralité du type (<code>AnyPublisher&lt;Int, Error&gt;</code>) est lourde et redondante lorsque le contexte (comme le type de retour de <code>setFailureType</code>) permet déjà de déduire une partie de la signature.</p>
+<h3 id="apr%C3%A8s-se-0315" tabindex="-1"><a href="#apr%C3%A8s-se-0315" class="header-anchor">Après SE-0315</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">Combine</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">makeValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">String</span> <span class="token punctuation">{</span> <span class="token string-literal"><span class="token string">""</span></span> <span class="token punctuation">}</span>
+<span class="token keyword">func</span> <span class="token function-definition function">makeValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Int</span> <span class="token punctuation">{</span> <span class="token number">0</span> <span class="token punctuation">}</span>
+
+<span class="token comment">// Le type placeholder "_" permet de ne spécifier que le type de sortie attendu.</span>
+<span class="token comment">// Le compilateur déduit que Int -&gt; Int -&gt; Int -&gt; Int, résolvant ainsi l'ambiguïté.</span>
+<span class="token keyword">let</span> publisher<span class="token punctuation">:</span> <span class="token class-name">AnyPublisher</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token punctuation">,</span> <span class="token omit keyword">_</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token class-name">Just</span><span class="token punctuation">(</span><span class="token function">makeValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">setFailureType</span><span class="token punctuation">(</span>to<span class="token punctuation">:</span> <span class="token class-name">Error</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">eraseToAnyPublisher</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Utilisation dans les types génériques et tuples</span>
+<span class="token keyword">let</span> dict<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Int</span><span class="token punctuation">:</span> <span class="token omit keyword">_</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"zero"</span></span><span class="token punctuation">]</span>
+<span class="token keyword">let</span> tuple<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token omit keyword">_</span><span class="token punctuation">,</span> <span class="token class-name">Double</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">,</span> <span class="token number">3.14</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> array<span class="token punctuation">:</span> <span class="token class-name">Array</span><span class="token operator">&lt;</span><span class="token omit keyword">_</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span>
+</code></pre>
+<p>L'utilisation de <code>_</code> permet de réduire la verbosité du code en ne fournissant au compilateur que l'information manquante, tout en laissant l'inférence de type faire le reste du travail.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

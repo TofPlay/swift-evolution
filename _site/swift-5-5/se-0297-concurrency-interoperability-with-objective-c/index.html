@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0297 - Concurrency Interoperability with Objective-C - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-5/se-0297-concurrency-interoperability-with-objective-c/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0297 - Concurrency Interoperability with Objective-C">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-5/se-0297-concurrency-interoperability-with-objective-c/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-5/">
+                  Swift 5.5
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0297 - Concurrency Interoperability with Objective-C</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0297 - Concurrency Interoperability with Objective-C</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.5</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0297-concurrency-objc.md">SE-0297 - Concurrency Interoperability with Objective-C</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit l'interopérabilité entre le modèle de concurrence de Swift (async/await) et les APIs Objective-C utilisant des blocs de completion (completion handlers).</p>
+<p>Les points clés incluent :</p>
+<ul>
+<li><strong>Traduction automatique</strong> : Les méthodes Objective-C avec des paramètres de type <code>completionHandler</code> sont traduites en fonctions <code>async</code> (et potentiellement <code>throws</code> si un <code>NSError *</code> est présent).</li>
+<li><strong>Inférence de nommage</strong> : Le compilateur utilise des heuristiques (suffixes comme <code>WithCompletion</code>, <code>WithReply</code>, etc.) pour nommer les nouvelles fonctions Swift.</li>
+<li><strong>Exportation vers Objective-C</strong> : Les fonctions Swift déclarées avec <code>@objc</code> peuvent être rendues asynchrones en Objective-C via la génération automatique de blocs de completion.</li>
+<li><strong>Attributs supplémentaires</strong> : Introduction d'attributs pour contrôler finement la traduction (ex: <code>_Nullable_result</code>, <code>swift_async_error</code>).</li>
+<li><strong>Support des Actors</strong> : Les classes <code>Actor</code> peuvent désormais être exposées à Objective-C si elles héritent de <code>NSObject</code>, tout en limitant l'exposition des membres isolés de manière synchrone.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0297" tabindex="-1"><a href="#avant-se-0297" class="header-anchor">Avant SE-0297</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// API Objective-C classique avec completion handler</span>
+<span class="token keyword">func</span> <span class="token function-definition function">fetchShareParticipant</span><span class="token punctuation">(</span>
+    withUserRecordID userRecordID<span class="token punctuation">:</span> <span class="token class-name">CKRecord</span><span class="token punctuation">.</span><span class="token constant">ID</span><span class="token punctuation">,</span> 
+    completionHandler<span class="token punctuation">:</span> <span class="token attribute atrule">@escaping</span> <span class="token punctuation">(</span><span class="token class-name">CKShare</span><span class="token punctuation">.</span><span class="token class-name">Participant</span><span class="token operator">?</span><span class="token punctuation">,</span> <span class="token class-name">Error</span><span class="token operator">?</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span>
+<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Implémentation manuelle avec callback</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Appelage verbeux</span>
+container<span class="token punctuation">.</span><span class="token function">fetchShareParticipant</span><span class="token punctuation">(</span>withUserRecordID<span class="token punctuation">:</span> userID<span class="token punctuation">)</span> <span class="token punctuation">{</span> participant<span class="token punctuation">,</span> error <span class="token keyword">in</span>
+    <span class="token keyword">guard</span> <span class="token keyword">let</span> participant <span class="token operator">=</span> participant <span class="token keyword">else</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token punctuation">}</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Participant trouvé : </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">participant</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de l'API nécessite une gestion manuelle des closures et des erreurs via des paramètres de callback, ce qui est moins ergonomique dans le nouveau modèle de Swift.</p>
+<h3 id="apr%C3%A8s-se-0297" tabindex="-1"><a href="#apr%C3%A8s-se-0297" class="header-anchor">Après SE-0297</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// L'API Objective-C est automatiquement vue comme async par Swift</span>
+<span class="token keyword">func</span> <span class="token function-definition function">fetchShareParticipant</span><span class="token punctuation">(</span>withUserRecordID userRecordID<span class="token punctuation">:</span> <span class="token class-name">CKRecord</span><span class="token punctuation">.</span><span class="token constant">ID</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">CKShare</span><span class="token punctuation">.</span><span class="token class-name">Participant</span>
+
+<span class="token comment">// Appel élégant avec async/await</span>
+<span class="token keyword">do</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> participant <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token keyword">await</span> container<span class="token punctuation">.</span><span class="token function">fetchShareParticipant</span><span class="token punctuation">(</span>withUserRecordID<span class="token punctuation">:</span> userID<span class="token punctuation">)</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Participant trouvé : </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">participant</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Erreur : </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">error</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition permet de transformer l'ancien pattern de callback en un flux de code linéaire et sécurisé utilisant <code>await</code> et <code>try</code>, facilitant grandement l'adoption de la concurrence moderne sur les APIs existantes.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

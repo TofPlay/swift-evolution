@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0396 - Conform Never to Codable - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-9/se-0396-conform-never-to-codable/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0396 - Conform Never to Codable">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-9/se-0396-conform-never-to-codable/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-9/">
+                  Swift 5.9
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0396 - Conform Never to Codable</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0396 - Conform Never to Codable</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.9</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0396-never-codable.md">SE-0396 - Conform Never to Codable</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition vise à étendre le type <code>Never</code> afin qu'il se conforme aux protocoles <code>Encodable</code> et <code>Decodable</code> (ensemble appelés <code>Codable</code>). Actuellement, la synthèse automatique de conformité <code>Codable</code> pour les types génériques échoue si l'un des paramètres génériques est de type <code>Never</code>, car <code>Never</code> ne respecte pas nativement <code>Codable</code>. La solution consiste à implémenter <code>Encodable</code> avec une méthode vide (puisqu'une instance de <code>Never</code> est impossible à obtenir) et <code>Decodable</code> en lançant une erreur de type <code>DecodingError.typeMismatch</code> si une tentative de décodage survient.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0396" tabindex="-1"><a href="#avant-se-0396" class="header-anchor">Avant SE-0396</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">enum</span> <span class="token class-name">Either</span><span class="token operator">&lt;</span><span class="token class-name">A</span><span class="token punctuation">,</span> <span class="token class-name">B</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span>
+    <span class="token keyword">case</span> <span class="token keyword">left</span><span class="token punctuation">(</span><span class="token class-name">A</span><span class="token punctuation">)</span>
+    <span class="token keyword">case</span> <span class="token keyword">right</span><span class="token punctuation">(</span><span class="token class-name">B</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">extension</span> <span class="token class-name">Either</span><span class="token punctuation">:</span> <span class="token class-name">Codable</span> <span class="token keyword">where</span> <span class="token class-name">A</span><span class="token punctuation">:</span> <span class="token class-name">Codable</span><span class="token punctuation">,</span> <span class="token class-name">B</span><span class="token punctuation">:</span> <span class="token class-name">Codable</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> result<span class="token punctuation">:</span> <span class="token class-name">Either</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token punctuation">,</span> <span class="token class-name">Never</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token keyword">left</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>
+<span class="token comment">// let data = try JSONEncoder().encode(result) // Erreur de compilation</span>
+</code></pre>
+<p>La synthèse de conformité <code>Codable</code> pour le type générique <code>Either</code> échoue dès que l'un des types paramétriques est <code>Never</code>, car <code>Never</code> ne respecte pas le protocole <code>Codable</code>. Cela empêche l'utilisation de types contenant <code>Never</code> dans des structures de données qui doivent être encodées ou décodées.</p>
+<h3 id="apr%C3%A8s-se-0396" tabindex="-1"><a href="#apr%C3%A8s-se-0396" class="header-anchor">Après SE-0396</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">enum</span> <span class="token class-name">Either</span><span class="token operator">&lt;</span><span class="token class-name">A</span><span class="token punctuation">,</span> <span class="token class-name">B</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span>
+    <span class="token keyword">case</span> <span class="token keyword">left</span><span class="token punctuation">(</span><span class="token class-name">A</span><span class="token punctuation">)</span>
+    <span class="token keyword">case</span> <span class="token keyword">right</span><span class="token punctuation">(</span><span class="token class-name">B</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">extension</span> <span class="token class-name">Either</span><span class="token punctuation">:</span> <span class="token class-name">Codable</span> <span class="token keyword">where</span> <span class="token class-name">A</span><span class="token punctuation">:</span> <span class="token class-name">Codable</span><span class="token punctuation">,</span> <span class="token class-name">B</span><span class="token punctuation">:</span> <span class="token class-name">Codable</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> result<span class="token punctuation">:</span> <span class="token class-name">Either</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token punctuation">,</span> <span class="token class-name">Never</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token keyword">left</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> data <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token class-name">JSONEncoder</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">encode</span><span class="token punctuation">(</span>result<span class="token punctuation">)</span> 
+<span class="token comment">// L'encodage réussit sans problème</span>
+</code></pre>
+<p>Grâce à la conformité de <code>Never</code> à <code>Codable</code>, le type générique <code>Either&lt;Int, Never&gt;</code> peut maintenant être traité par les encodeurs et décodeurs Swift, car les contraintes de protocoles sont satisfaites même avec le type <code>Never</code>.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

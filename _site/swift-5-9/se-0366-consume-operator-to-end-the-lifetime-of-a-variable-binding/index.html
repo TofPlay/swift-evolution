@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0366 - consume operator to end the lifetime of a variable binding - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-9/se-0366-consume-operator-to-end-the-lifetime-of-a-variable-binding/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0366 - consume operator to end the lifetime of a variable bin…">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-9/se-0366-consume-operator-to-end-the-lifetime-of-a-variable-binding/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-9/">
+                  Swift 5.9
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0366 - consume operator to end the lifetime of a variable binding</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0366 - consume operator to end the lifetime of a variable binding</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.9</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0366-move-function.md">SE-0366 - consume operator to end the lifetime of a variable binding</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit le mot-clé contextuel <code>consume</code> pour permettre aux développeurs de transférer explicitement la propriété (ownership) d'une valeur et de mettre fin à la durée de vie d'une liaison (binding) locale.</p>
+<p>Actuellement, Swift utilise le comptage de références et le <em>copy-on-write</em> (COW), ce qui peut entraîner des copies inutiles ou des appels de gestion de mémoire (retain/release) dans du code hautement optimisé. Avec <code>consume</code>, le développeur peut garantir au compilateur qu'une variable ne sera plus utilisée après l'opération, permettant ainsi des optimisations de performance (comme la mutation en place d'un buffer unique) tout en recevant un diagnostic si une utilisation après consommation est tentée.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0366" tabindex="-1"><a href="#avant-se-0366" class="header-anchor">Avant SE-0366</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">doStuffUniquely</span><span class="token punctuation">(</span>with value<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Int</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> newValue <span class="token operator">=</span> value
+    newValue<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">)</span>
+    <span class="token function">process</span><span class="token punctuation">(</span>newValue<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> x<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Int</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span>
+    x<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span>
+    <span class="token function">doStuffUniquely</span><span class="token punctuation">(</span>with<span class="token punctuation">:</span> x<span class="token punctuation">)</span>
+    <span class="token comment">// x est toujours techniquement accessible ici, ce qui peut empêcher </span>
+    <span class="token comment">// certaines optimisations de mutation en place dans doStuffUniquely.</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Dans ce code, le compilateur ne peut pas garantir que <code>x</code> ne sera pas réutilisé après l'appel à <code>doStuffUniquely</code>, ce qui oblige potentiellement <code>doStuffUniquely</code> à effectuer une copie pour garantir l'unicité du buffer avant la mutation.</p>
+<h3 id="apr%C3%A8s-se-0366" tabindex="-1"><a href="#apr%C3%A8s-se-0366" class="header-anchor">Après SE-0366</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">doStuffUniquely</span><span class="token punctuation">(</span>with value<span class="token punctuation">:</span> consuming <span class="token punctuation">[</span><span class="token class-name">Int</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> newValue <span class="token operator">=</span> consume value
+    newValue<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">)</span>
+    <span class="token function">process</span><span class="token punctuation">(</span>newValue<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> x<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Int</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span>
+    x<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span>
+    <span class="token function">doStuffUniquely</span><span class="token punctuation">(</span>with<span class="token punctuation">:</span> consume x<span class="token punctuation">)</span>
+    
+    <span class="token comment">// useX(x) // Erreur de compilation : utilisation de x après consommation</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de <code>consume x</code> transfère explicitement la propriété à la fonction. À l'intérieur de la fonction, <code>consume value</code> permet de récupérer la valeur sans copie supplémentaire. Le compilateur garantit également qu'aucune utilisation accidentelle de <code>x</code> n'aura lieu après ce point.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

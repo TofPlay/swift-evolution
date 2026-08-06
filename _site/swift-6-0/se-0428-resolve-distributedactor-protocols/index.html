@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0428 - Resolve DistributedActor protocols - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-0/se-0428-resolve-distributedactor-protocols/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0428 - Resolve DistributedActor protocols">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-0/se-0428-resolve-distributedactor-protocols/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-0/">
+                  Swift 6.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0428 - Resolve DistributedActor protocols</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0428 - Resolve DistributedActor protocols</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0428-resolve-distributed-actor-protocols.md">SE-0428 - Resolve DistributedActor protocols</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit la possibilité d'utiliser des protocoles <code>DistributedActor</code> comme interface de communication dans des architectures client/serveur, où le client ne possède pas la connaissance de l'implémentation concrète de l'acteur.</p>
+<p>La solution repose sur trois piliers :</p>
+<ol>
+<li><strong>La macro <code>@Resolvable</code></strong> : Elle permet de transformer un protocole en une interface utilisable par un client en générant un type "stub" (préfixé par <code>$</code>) capable de résoudre un acteur distant via son <code>ID</code>.</li>
+<li><strong>Généricité de l'ActorSystem</strong> : Permet aux acteurs distribués d'être génériques sur leur système d'acteurs, en introduisant un type associé principal pour la <code>SerializationRequirement</code>, garantissant la sécurité lors de la sérialisation des types.</li>
+<li><strong>Extension de la métadonnée distribuée</strong> : Permet de lier les méthodes de protocoles à leur implémentation concrète via l'identifiant <code>RemoteCallTarget</code>, facilitant le routage des appels distants vers les méthodes réelles sur le nœud destinataire.</li>
+</ol>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0428" tabindex="-1"><a href="#avant-se-0428" class="header-anchor">Avant SE-0428</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">Distributed</span>
+<span class="token keyword">import</span> <span class="token class-name">DistributedCluster</span> 
+
+<span class="token keyword">protocol</span> <span class="token class-name">Greeter</span><span class="token punctuation">:</span> <span class="token class-name">DistributedActor</span> <span class="token punctuation">{</span>
+    distributed <span class="token keyword">func</span> <span class="token function-definition function">greet</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">String</span>
+<span class="token punctuation">}</span>
+
+distributed <span class="token keyword">actor</span> <span class="token class-name">EnglishGreeter</span><span class="token punctuation">:</span> <span class="token class-name">Greeter</span> <span class="token punctuation">{</span>
+    <span class="token keyword">typealias</span> <span class="token class-name">ActorSystem</span> <span class="token operator">=</span> <span class="token class-name">ClusterSystem</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">greet</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">String</span> <span class="token punctuation">{</span> <span class="token string-literal"><span class="token string">"Hello, </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">name</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">!"</span></span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> system<span class="token punctuation">:</span> <span class="token class-name">ClusterSystem</span> <span class="token operator">=</span> <span class="token operator">...</span>
+<span class="token keyword">let</span> knownID<span class="token punctuation">:</span> <span class="token class-name">EnglishGreeter</span><span class="token punctuation">.</span><span class="token constant">ID</span> <span class="token operator">=</span> <span class="token comment">/* obtained ID */</span>
+<span class="token keyword">let</span> remote<span class="token punctuation">:</span> <span class="token class-name">EnglishGreeter</span> <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token class-name">EnglishGreeter</span><span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> knownID<span class="token punctuation">,</span> using<span class="token punctuation">:</span> system<span class="token punctuation">)</span>
+<span class="token keyword">let</span> greeting <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token keyword">await</span> remote<span class="token punctuation">.</span><span class="token function">greet</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Caplin"</span></span><span class="token punctuation">)</span>
+</code></pre>
+<p>L'implémentation actuelle oblige le client à connaître et à importer le type concret <code>EnglishGreeter</code>. Cela rend la séparation client/serveur difficile car les deux applications doivent partager les mêmes binaires ou modules contenant les implémentations concrètes.</p>
+<h3 id="apr%C3%A8s-se-0428" tabindex="-1"><a href="#apr%C3%A8s-se-0428" class="header-anchor">Après SE-0428</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">Distributed</span>
+
+<span class="token attribute atrule">@Resolvable</span> 
+<span class="token keyword">protocol</span> <span class="token class-name">Greeter</span><span class="token punctuation">:</span> <span class="token class-name">DistributedActor</span> <span class="token keyword">where</span> <span class="token class-name">ActorSystem</span><span class="token punctuation">:</span> <span class="token class-name">DistributedActorSystem</span><span class="token operator">&lt;</span>any <span class="token class-name">Codable</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span>
+    distributed <span class="token keyword">func</span> <span class="token function-definition function">greet</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">String</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Dans le module Client</span>
+<span class="token keyword">let</span> greeter <span class="token operator">=</span> <span class="token keyword">try</span> $<span class="token class-name">Greeter</span><span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> id<span class="token punctuation">,</span> using<span class="token punctuation">:</span> clusterSystem<span class="token punctuation">)</span>
+<span class="token keyword">let</span> greeting <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token keyword">await</span> greeter<span class="token punctuation">.</span><span class="token function">greet</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Caplin"</span></span><span class="token punctuation">)</span>
+</code></pre>
+<p>L'introduction de la macro <code>@Resolvable</code> permet de générer un type "stub" <code>$Greeter</code>. Le client peut ainsi utiliser ce stub pour résoudre un acteur distant via son protocole seul, sans avoir connaissance de l'implémentation concrète (le module serveur), permettant une véritable séparation des responsabilités.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

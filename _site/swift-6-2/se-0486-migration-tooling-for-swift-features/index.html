@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0486 - Migration tooling for Swift features - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-2/se-0486-migration-tooling-for-swift-features/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0486 - Migration tooling for Swift features">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-2/se-0486-migration-tooling-for-swift-features/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-2/">
+                  Swift 6.2
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0486 - Migration tooling for Swift features</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0486 - Migration tooling for Swift features</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.2</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0486-adoption-tooling-for-swift-features.md">SE-0486 - Migration tooling for Swift features</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit un mécanisme de "migration mode" pour faciliter l'adoption des fonctionnalités de langage Swift (upcoming ou expérimentales) qui impliquent des changements de syntaxe ou de comportement. L'objectif est de permettre une transition transparente en automatisant les modifications de code nécessaires pour préserver la compatibilité source et binaire.</p>
+<p>Le système repose sur deux piliers :</p>
+<ol>
+<li><strong>Mode Migration du compilateur</strong> : Permet d'activer une fonctionnalité via <code>-enable-*-feature &lt;feature&gt;:migrate</code>. Au lieu de générer des erreurs, le compilateur émet des avertissements accompagnés de "fix-its" permettant de corriger automatiquement le code.</li>
+<li><strong>Commande <code>swift package migrate</code></strong> : Une nouvelle commande du Swift Package Manager qui automatise l'application des correctifs sur un package entier ou des cibles spécifiques, et met à jour le fichier <code>Package.swift</code> pour activer la fonctionnalité.</li>
+</ol>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0486" tabindex="-1"><a href="#avant-se-0486" class="header-anchor">Avant SE-0486</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Imaginons une fonctionnalité "Upcoming" qui change la syntaxe</span>
+<span class="token comment">// par exemple, une transition vers l'utilisation de 'any' pour les existenciels.</span>
+<span class="token keyword">let</span> myValue<span class="token punctuation">:</span> <span class="token class-name">P</span> <span class="token operator">=</span> <span class="token operator">...</span> 
+<span class="token comment">// Le code actuel pourrait compiler, mais le comportement changera </span>
+<span class="token comment">// de manière subtile lors du passage au mode Swift 6 sans outil d'aide.</span>
+</code></pre>
+<p>L'absence d'outillage rend la migration manuelle pénible, risquée pour la compatibilité et difficile à auditer pour les mainteneurs de bibliothèques.</p>
+<h3 id="apr%C3%A8s-se-0486" tabindex="-1"><a href="#apr%C3%A8s-se-0486" class="header-anchor">Après SE-0486</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// 1. Utilisation du mode migration via la ligne de commande pour compiler</span>
+<span class="token comment">// swift build -enable-upcoming-feature ExistentialAny:migrate</span>
+
+<span class="token comment">// 2. Utilisation de la nouvelle commande SPM pour automatiser la migration</span>
+<span class="token comment">// swift package migrate --to-feature ExistentialAny</span>
+
+<span class="token comment">// Le compilateur suggère/applique un fix-it :</span>
+<span class="token keyword">let</span> myValue<span class="token punctuation">:</span> any <span class="token class-name">P</span> <span class="token operator">=</span> <span class="token operator">...</span> 
+</code></pre>
+<p>La commande <code>swift package migrate</code> analyse le code, applique les corrections automatiques (fix-its) fournies par le compilateur pour préserver le comportement original, et met à jour la configuration du package pour inclure la nouvelle fonctionnalité.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

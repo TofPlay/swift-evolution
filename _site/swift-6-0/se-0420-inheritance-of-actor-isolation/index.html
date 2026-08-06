@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0420 - Inheritance of actor isolation - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-0/se-0420-inheritance-of-actor-isolation/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0420 - Inheritance of actor isolation">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-0/se-0420-inheritance-of-actor-isolation/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-0/">
+                  Swift 6.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0420 - Inheritance of actor isolation</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0420 - Inheritance of actor isolation</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0420-inheritance-of-actor-isolation.md">SE-0420 - Inheritance of actor isolation</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit la possibilité pour une fonction asynchrone d'hériter de l'isolation de l'acteur de son appelant. Actuellement, les fonctions asynchronues non isolées réinitialisent l'isolation, ce qui oblige à traverser une barrière d'isolation, imposant des contraintes de conformité au protocole Sendable et provoquant des suspensions et des changements d'exécuteur inutiles.</p>
+<p>La solution repose sur deux évolutions :</p>
+<ol>
+<li>La possibilité pour un paramètre isolé d'accepter un type optionnel, permettant ainsi à une fonction d'être dynamiquement non isolée si le paramètre est nul.</li>
+<li>L'introduction de l'expression spéciale <code>#isolation</code> pour les arguments par défaut. Cette expression permet de propager automatiquement l'isolation du contexte appelant vers le paramètre isolé de la fonction appelée.</li>
+</ol>
+<p>Cette fonctionnalité améliore l'expressivité pour les fonctions d'ordre supérieur (comme <code>map</code>) et optimise les performances en évitant les "sauts" d'exécuteur inutiles lorsque le contexte de l'appelant et celui de la fonction partagent le même acteur.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0420" tabindex="-1"><a href="#avant-se-0420" class="header-anchor">Avant SE-0420</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@MainActor</span> 
+<span class="token keyword">func</span> <span class="token function-definition function">iterate</span><span class="token punctuation">(</span>over stream<span class="token punctuation">:</span> <span class="token class-name">AsyncStream</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span> 
+    <span class="token keyword">var</span> iterator <span class="token operator">=</span> stream<span class="token punctuation">.</span><span class="token function">makeAsyncIterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
+    <span class="token keyword">while</span> <span class="token keyword">let</span> element <span class="token operator">=</span> <span class="token keyword">await</span> iterator<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> 
+        <span class="token comment">// do something with 'element' </span>
+    <span class="token punctuation">}</span> 
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'appel de <code>iterator.next()</code> (qui est une fonction asynchrone non isolée) depuis un contexte isolé au <code>@MainActor</code> provoque un avertissement car l'itérateur n'est pas <code>Sendable</code> et l'isolation est réinitialisée, créant une barrière de sécurité et une suspension inutile.</p>
+<h3 id="apr%C3%A8s-se-0420" tabindex="-1"><a href="#apr%C3%A8s-se-0420" class="header-anchor">Après SE-0420</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">extension</span> <span class="token class-name">AsyncIteratorProtocol</span> <span class="token punctuation">{</span> 
+    <span class="token keyword">func</span> <span class="token function-definition function">next</span><span class="token punctuation">(</span>isolation<span class="token punctuation">:</span> <span class="token keyword">isolated</span> <span class="token punctuation">(</span>any <span class="token class-name">Actor</span><span class="token punctuation">)</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token other-directive property">#isolation</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token operator">-&gt;</span> <span class="token class-name">Element</span> <span class="token punctuation">{</span> 
+        <span class="token comment">// implémentation</span>
+    <span class="token punctuation">}</span> 
+<span class="token punctuation">}</span>
+
+<span class="token attribute atrule">@MainActor</span> 
+<span class="token keyword">func</span> <span class="token function-definition function">iterate</span><span class="token punctuation">(</span>over stream<span class="token punctuation">:</span> <span class="token class-name">AsyncStream</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span> 
+    <span class="token keyword">var</span> iterator <span class="token operator">=</span> stream<span class="token punctuation">.</span><span class="token function">makeAsyncIterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
+    <span class="token keyword">while</span> <span class="token keyword">let</span> element <span class="token operator">=</span> <span class="token keyword">await</span> iterator<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> 
+        <span class="token comment">// do something with 'element' </span>
+    <span class="token punctuation">}</span> 
+<span class="token punctuation">}</span>
+</code></pre>
+<p>En utilisant <code>#isolation</code> comme argument par défaut, la fonction <code>next</code> hérite dynamiquement de l'isolation du <code>@MainActor</code>. Cela permet de manipuler des types non-Sendable sans avertissement et d'éviter les changements d'exécuteur superflus.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

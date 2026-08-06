@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0349 - Unaligned Loads and Stores from Raw Memory - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-7/se-0349-unaligned-loads-and-stores-from-raw-memory/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0349 - Unaligned Loads and Stores from Raw Memory">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-7/se-0349-unaligned-loads-and-stores-from-raw-memory/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-7/">
+                  Swift 5.7
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0349 - Unaligned Loads and Stores from Raw Memory</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0349 - Unaligned Loads and Stores from Raw Memory</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.7</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0349-unaligned-loads-and-stores.md">SE-0349 - Unaligned Loads and Stores from Raw Memory</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit des APIs pour lire et écrire des données depuis des adresses mémoire non alignées, une situation courante lors de la lecture de flux binaires (fichiers, réseau). Jusqu'à présent, l'utilisation de <code>UnsafeRawPointer.load(as:)</code> sur une adresse non alignée provoquait un plantage (crash) au runtime.</p>
+<p>Les changements incluent :</p>
+<ul>
+<li>L'ajout de <code>loadUnaligned(fromByteOffset:as:)</code> pour <code>UnsafeRawPointer</code> et <code>UnsafeRawBufferPointer</code>.</li>
+<li>L'ajout de <code>loadUnaligned(fromByteOffset:as:)</code> pour <code>UnsafeMutableRawPointer</code> et <code>UnsafeMutableRawBufferPointer</code>.</li>
+<li>La modification de <code>storeBytes(of:toByteOffset:as:)</code> pour lever la restriction d'alignement au runtime, tout en restreignant l'usage aux types "triviaux" (POD - Plain Old Data).</li>
+</ul>
+<p>Ces APIs sont strictement réservées aux types triviaux (qui ne contiennent pas de propriétés gérées par le comptage de références) afin de garantir la sécurité de la mémoire.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0349" tabindex="-1"><a href="#avant-se-0349" class="header-anchor">Avant SE-0349</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> data <span class="token operator">=</span> <span class="token class-name">Data</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">0x0</span><span class="token punctuation">,</span> <span class="token number">0x0</span><span class="token punctuation">,</span> <span class="token number">0x0</span><span class="token punctuation">,</span> <span class="token number">0xff</span><span class="token punctuation">,</span> <span class="token number">0xff</span><span class="token punctuation">,</span> <span class="token number">0xff</span><span class="token punctuation">,</span> <span class="token number">0xff</span><span class="token punctuation">,</span> <span class="token number">0x0</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Tentative de lecture d'un UInt32 à l'offset 3 (non aligné pour un UInt32)</span>
+<span class="token comment">// Cela provoque un crash au runtime</span>
+<span class="token keyword">let</span> result <span class="token operator">=</span> data<span class="token punctuation">.</span><span class="token function">dropFirst</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">.</span>withUnsafeBytes <span class="token punctuation">{</span> <span class="token short-argument">$0</span><span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">UInt32</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de <code>load(as:)</code> nécessite que l'adresse soit parfaitement alignée pour le type cible. Pour éviter le crash, l'utilisateur devait copier manuellement les données dans un buffer temporaire aligné, ce qui est verbeux et moins performant (double copie).</p>
+<h3 id="apr%C3%A8s-se-0349" tabindex="-1"><a href="#apr%C3%A8s-se-0349" class="header-anchor">Après SE-0349</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> data <span class="token operator">=</span> <span class="token class-name">Data</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">0x0</span><span class="token punctuation">,</span> <span class="token number">0x0</span><span class="token punctuation">,</span> <span class="token number">0x0</span><span class="token punctuation">,</span> <span class="token number">0xff</span><span class="token punctuation">,</span> <span class="token number">0xff</span><span class="token punctuation">,</span> <span class="token number">0xff</span><span class="token punctuation">,</span> <span class="token number">0xff</span><span class="token punctuation">,</span> <span class="token number">0x0</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Utilisation de la nouvelle API pour une lecture non alignée</span>
+<span class="token keyword">let</span> result <span class="token operator">=</span> data<span class="token punctuation">.</span><span class="token function">dropFirst</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">.</span>withUnsafeBytes <span class="token punctuation">{</span> <span class="token short-argument">$0</span><span class="token punctuation">.</span><span class="token function">loadUnaligned</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">UInt32</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+</code></pre>
+<p>La méthode <code>loadUnaligned</code> permet de lire directement les octets à l'offset spécifié sans se soucier de l'alignement mémoire, simplifiant ainsi le traitement des flux de données binaires et évitant les plantages.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

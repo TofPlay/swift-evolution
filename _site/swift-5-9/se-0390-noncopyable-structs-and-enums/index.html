@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0390 - Noncopyable structs and enums - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-9/se-0390-noncopyable-structs-and-enums/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0390 - Noncopyable structs and enums">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-9/se-0390-noncopyable-structs-and-enums/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-9/">
+                  Swift 5.9
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0390 - Noncopyable structs and enums</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0390 - Noncopyable structs and enums</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.9</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0390-noncopyable-structs-and-enums.md">SE-0390 - Noncopyable structs and enums</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit les types <strong>noncopyable</strong> (ou types "move-only") dans Swift. Contrairement aux types standards qui sont tous copiables par défaut, un type noncopyable possède une propriété de propriété unique : il ne peut jamais être copié par le mécanisme implicite de Swift. Cela permet de représenter de manière sûre et efficace des ressources uniques (comme des descripteurs de fichiers ou des gestionnaires de mémoire) en utilisant des <code>struct</code> ou des <code>enum</code> au lieu de classes, tout en évitant le coût lié à l'allocation sur le tas (heap) et au comptage de références (ARC).</p>
+<p>La proposition introduit de nouvelles notions de transfert de propriété :</p>
+<ul>
+<li><strong>Consume</strong> : Invalide la valeur (transfert de propriété ou destruction).</li>
+<li><strong>Borrow</strong> : Accès partagé sans transfert de propriété.</li>
+<li><strong>~Copyable</strong> : Syntaxe pour supprimer la conformité implicite à <code>Copyable</code>.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0390" tabindex="-1"><a href="#avant-se-0390" class="header-anchor">Avant SE-0390</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">FileDescriptor</span> <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token keyword">var</span> fd<span class="token punctuation">:</span> <span class="token class-name">Int32</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>fd<span class="token punctuation">:</span> <span class="token class-name">Int32</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">self</span><span class="token punctuation">.</span>fd <span class="token operator">=</span> fd <span class="token punctuation">}</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">write</span><span class="token punctuation">(</span>buffer<span class="token punctuation">:</span> <span class="token class-name">Data</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">/* ... */</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> fd1 <span class="token operator">=</span> <span class="token class-name">FileDescriptor</span><span class="token punctuation">(</span>fd<span class="token punctuation">:</span> <span class="token number">3</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> fd2 <span class="token operator">=</span> fd1 <span class="token comment">// Copie implicite de la structure</span>
+<span class="token comment">// Problème : Si le destructeur ferme le descripteur, </span>
+<span class="token comment">// fd2 et fd1 tentent de fermer le même ressource.</span>
+</code></pre>
+<p>Les types valeurs classiques sont toujours copiables, ce qui est dangereux pour des ressources uniques car plusieurs instances peuvent posséder le même descripteur, rendant la gestion du cycle de vie complexe ou nécessitant l'utilisation de classes et de l'ARC.</p>
+<h3 id="apr%C3%A8s-se-0390" tabindex="-1"><a href="#apr%C3%A8s-se-0390" class="header-anchor">Après SE-0390</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">FileDescriptor</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token keyword">var</span> fd<span class="token punctuation">:</span> <span class="token class-name">Int32</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>fd<span class="token punctuation">:</span> <span class="token class-name">Int32</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">self</span><span class="token punctuation">.</span>fd <span class="token operator">=</span> fd <span class="token punctuation">}</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">write</span><span class="token punctuation">(</span>buffer<span class="token punctuation">:</span> <span class="token class-name">Data</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">/* ... */</span> <span class="token punctuation">}</span>
+    <span class="token keyword">deinit</span> <span class="token punctuation">{</span>
+        <span class="token function">close</span><span class="token punctuation">(</span>fd<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> fd1 <span class="token operator">=</span> <span class="token class-name">FileDescriptor</span><span class="token punctuation">(</span>fd<span class="token punctuation">:</span> <span class="token number">3</span><span class="token punctuation">)</span>
+<span class="token comment">// let fd2 = fd1 // ERREUR : Impossible de copier un type noncopyable</span>
+</code></pre>
+<p>En marquant le type avec <code>~Copyable</code>, le compilateur interdit toute copie. La propriété <code>deinit</code> est appelée automatiquement lorsque l'unique instance sort du scope, garantissant que la ressource (le descripteur) est fermée une seule fois et de manière sûre, sans l'overhead d'une classe.</p>
+<h3 id="avant-se-0390-1" tabindex="-1"><a href="#avant-se-0390-1" class="header-anchor">Avant SE-0390</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">process</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> x <span class="token operator">=</span> <span class="token number">10</span>
+<span class="token function">process</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> x<span class="token punctuation">)</span>
+<span class="token function">process</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> x<span class="token punctuation">)</span> <span class="token comment">// OK : x est copié</span>
+</code></pre>
+<p>Pour les types standards, le passage en paramètre effectue une copie implicite, ce qui est acceptable pour des types simples mais problématique pour des ressources uniques.</p>
+<h3 id="apr%C3%A8s-se-0390-1" tabindex="-1"><a href="#apr%C3%A8s-se-0390-1" class="header-anchor">Après SE-0390</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">consumeResource</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> resource<span class="token punctuation">:</span> consuming <span class="token class-name">FileDescriptor</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// La ressource est consommée ici</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">borrowResource</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> resource<span class="token punctuation">:</span> borrowing <span class="token class-name">FileDescriptor</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// La ressource est empruntée ici</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> fd <span class="token operator">=</span> <span class="token class-name">FileDescriptor</span><span class="token punctuation">(</span>fd<span class="token punctuation">:</span> <span class="token number">3</span><span class="token punctuation">)</span>
+<span class="token function">borrowResource</span><span class="token punctuation">(</span>fd<span class="token punctuation">)</span> <span class="token comment">// OK : fd est toujours valide</span>
+<span class="token function">consumeResource</span><span class="token punctuation">(</span>fd<span class="token punctuation">)</span> <span class="token comment">// OK : fd est invalidé après l'appel</span>
+<span class="token comment">// borrowResource(fd) // ERREUR : fd a été consommé</span>
+</code></pre>
+<p>Swift impose désormais de spécifier explicitement si une fonction <strong>consume</strong> (prend la propriété), <strong>borrow</strong> (emprunte) ou utilise un accès exclusif (<strong>inout</strong>). Cela permet de définir un contrat d'API précis sur la durée de vie des ressources uniques.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

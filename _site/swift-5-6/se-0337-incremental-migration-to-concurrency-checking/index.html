@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0337 - Incremental migration to concurrency checking - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-6/se-0337-incremental-migration-to-concurrency-checking/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0337 - Incremental migration to concurrency checking">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-6/se-0337-incremental-migration-to-concurrency-checking/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-6/">
+                  Swift 5.6
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0337 - Incremental migration to concurrency checking</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0337 - Incremental migration to concurrency checking</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.6</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0337-support-incremental-migration-to-concurrency-checking.md">SE-0337 - Incremental migration to concurrency checking</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit des mécanismes pour faciliter la migration progressive vers le mode de vérification de la concurrence (concurrency checking) de Swift. L'objectif est de permettre l'interopérabilité entre le code utilisant les nouvelles fonctionnalités de concurrence (async/await, actors, Sendable) et les modules existants qui ne sont pas encore mis à jour, évitant ainsi des ruptures de compatibilité (source et ABI) ou des vagues d'erreurs massives lors de l'adoption de Swift 6.</p>
+<p>Les éléments clés introduits sont :</p>
+<ul>
+<li><strong>Deux modes de vérification</strong> : Un mode "Strict" (Swift 6) qui transforme les violations de Sendable en erreurs, et un mode "Minimal" (Swift 5) qui les traite comme des avertissements.</li>
+<li><strong>L'attribut <code>@preconcurrency</code> sur les déclarations</strong> : Permet aux mainteneurs de marquer les APIs qui ont été mises à jour pour la concurrence, évitant que les changements de signature (comme l'ajout de <code>@MainActor</code> ou <code>@Sendable</code>) ne cassent le code client existant ou ne brisent l'ABI.</li>
+<li><strong>L'attribut <code>@preconcurrency</code> sur les imports</strong> : Permet aux utilisateurs de silencer ou de transformer en avertissement les diagnostics liés à des types provenant de modules non encore adaptés à la concurrence.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0337" tabindex="-1"><a href="#avant-se-0337" class="header-anchor">Avant SE-0337</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Imaginons une API existante sans annotations de concurrence</span>
+<span class="token keyword">func</span> <span class="token function-definition function">doSomething</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> body<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Exécution sur le thread principal</span>
+    <span class="token function">body</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">class</span> <span class="token class-name">MyButton</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> clickedCount <span class="token operator">=</span> <span class="token number">0</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">onClicked</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Si on tente d'utiliser cela dans un contexte async/Sendable,</span>
+        <span class="token comment">// cela pourrait poser des problèmes de data race non détectés</span>
+        <span class="token comment">// ou causer des erreurs massives si l'API est mise à jour.</span>
+        doSomething <span class="token punctuation">{</span>
+            <span class="token keyword">self</span><span class="token punctuation">.</span>clickedCount <span class="token operator">+=</span> <span class="token number">1</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'absence d'annotations empêche le compilateur de vérifier si l'exécution de <code>body()</code> est sûre pour le thread ou si la capture de <code>self</code> est sécurisée dans un contexte concurrent. Si l'API est soudainement mise à jour avec <code>@MainActor</code>, le code client ci-dessus échouera immédiatement.</p>
+<h3 id="apr%C3%A8s-se-0337" tabindex="-1"><a href="#apr%C3%A8s-se-0337" class="header-anchor">Après SE-0337</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le mainteneur met à jour la librairie</span>
+<span class="token attribute atrule">@preconcurrency</span> <span class="token keyword">func</span> <span class="token function-definition function">doSomething</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> body<span class="token punctuation">:</span> <span class="token attribute atrule">@Sendable</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Implémentation mise à jour pour la concurrence</span>
+    <span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// L'utilisateur peut utiliser @preconcurrency pour une migration douce</span>
+<span class="token attribute atrule">@preconcurrency</span> <span class="token keyword">import</span> <span class="token class-name">ExternalModule</span>
+
+<span class="token keyword">class</span> <span class="token class-name">MyButton</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> clickedCount <span class="token operator">=</span> <span class="token number">0</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">onClicked</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Le compilateur traite les violations de l'import </span>
+        <span class="token comment">// comme des warnings et non des erreurs.</span>
+        doSomething <span class="token punctuation">{</span>
+            <span class="token keyword">self</span><span class="token punctuation">.</span>clickedCount <span class="token operator">+=</span> <span class="token number">1</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Le développeur peut adopter la syntaxe <code>async/await</code> dans son propre code tout en utilisant <code>@preconcurrency import</code> pour éviter que les types non-<code>Sendable</code> du module externe ne bloquent la compilation, tout en étant alerté via des avertissements si une violation réelle est détectée.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

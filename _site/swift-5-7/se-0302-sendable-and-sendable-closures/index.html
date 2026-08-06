@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0302 - Sendable and @Sendable closures - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-7/se-0302-sendable-and-sendable-closures/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0302 - Sendable and @Sendable closures">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-7/se-0302-sendable-and-sendable-closures/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-7/">
+                  Swift 5.7
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0302 - Sendable and @Sendable closures</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0302 - Sendable and @Sendable closures</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.7</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0302-concurrent-value-and-concurrent-closures.md">SE-0302 - Sendable and @Sendable closures</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit les mécanismes nécessaires pour garantir la sécurité mémoire lors du passage de données entre différents domaines de concurrence (comme les Actors ou les tâches structurées). Elle repose sur deux piliers :</p>
+<ol>
+<li><strong>Le protocole marqueur <code>Sendable</code></strong> : Un protocole qui n'a pas de exigences au runtime mais qui indique au compilateur qu'un type est sûr à transférer (en étant copié ou étant immuable).</li>
+<li><strong>L'attribut <code>@Sendable</code></strong> : Appliqué aux fonctions et fermetures, il garantit que la fermeture ne capture pas de variables mutables de manière non sécurisée et que toutes les valeurs capturées sont elles-mêmes <code>Sendable</code>.</li>
+</ol>
+<p>Le mécanisme permet également une conformité implicite pour les types de la bibliothèque standard (Int, String, etc.) et fournit une option <code>@unchecked</code> pour les cas où le développeur garantit lui-même la sécurité (ex: via un verrou/mutex).</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0302" tabindex="-1"><a href="#avant-se-0302" class="header-anchor">Avant SE-0302</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Un objet mutuable qui ne peut pas être transféré en toute sécurité</span>
+<span class="token keyword">class</span> <span class="token class-name">UnsafeClass</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token operator">=</span> <span class="token number">0</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">class</span> <span class="token class-name">DataManager</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> storage <span class="token operator">=</span> <span class="token class-name">UnsafeClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">processData</span><span class="token punctuation">(</span>manager<span class="token punctuation">:</span> <span class="token class-name">DataManager</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Impossible de savoir si le partage de 'manager' entre deux tâches </span>
+    <span class="token comment">// est sûr ou si une course de données (data race) va survenir.</span>
+    <span class="token keyword">let</span> myData <span class="token operator">=</span> manager<span class="token punctuation">.</span>storage
+    <span class="token keyword">await</span> <span class="token class-name">Task</span> <span class="token punctuation">{</span>
+        <span class="token function">print</span><span class="token punctuation">(</span>myData<span class="token punctuation">.</span>value<span class="token punctuation">)</span> <span class="token comment">// Risque de data race</span>
+    <span class="token punctuation">}</span><span class="token punctuation">.</span>value
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Le compilateur ne peut pas vérifier si le transfert de l'instance <code>UnsafeClass</code> entre deux domaines de concurrence est sûr, ce qui expose le programme à des interruptions ou des corruptions de mémoire.</p>
+<h3 id="apr%C3%A8s-se-0302" tabindex="-1"><a href="#apr%C3%A8s-se-0302" class="header-anchor">Après SE-0302</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// 1. Utilisation d'un type sûr (Value Semantic)</span>
+<span class="token keyword">struct</span> <span class="token class-name">SafeData</span><span class="token punctuation">:</span> <span class="token class-name">Sendable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">actor</span> <span class="token class-name">DataManager</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> storage <span class="token operator">=</span> <span class="token class-name">SafeData</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">)</span>
+    
+    <span class="token comment">// On précise que la closure passée doit être @Sendable</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">performAction</span><span class="token punctuation">(</span>action<span class="token punctuation">:</span> <span class="token attribute atrule">@Sendable</span> <span class="token punctuation">(</span><span class="token class-name">SafeData</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">action</span><span class="token punctuation">(</span>storage<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// 2. Utilisation de @Sendable pour les fermetures</span>
+<span class="token keyword">let</span> myTask <span class="token operator">=</span> <span class="token class-name">Task</span> <span class="token punctuation">{</span> <span class="token attribute atrule">@Sendable</span> <span class="token keyword">in</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Exécution sécurisée"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// 3. Cas des classes avec @unchecked pour les types synchronisés</span>
+<span class="token keyword">class</span> <span class="token class-name">SynchronizedClass</span><span class="token punctuation">:</span> <span class="token attribute atrule">@unchecked</span> <span class="token class-name">Sendable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token keyword">var</span> value <span class="token operator">=</span> <span class="token number">0</span>
+    <span class="token keyword">private</span> <span class="token keyword">let</span> lock <span class="token operator">=</span> <span class="token class-name">NSLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    
+    <span class="token keyword">func</span> <span class="token function-definition function">increment</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        lock<span class="token punctuation">.</span><span class="token function">lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        value <span class="token operator">+=</span> <span class="token number">1</span>
+        lock<span class="token punctuation">.</span><span class="token function">unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Le protocole <code>Sendable</code> permet de marquer les types sûrs. L'attribut <code>@Sendable</code> sur une fonction force le compilateur à vérifier que la fermeture ne capture pas d'état mutable local de manière dangereuse, assurant ainsi que le transfert entre domaines de concurrence est totalement sécurisé par le système de types.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

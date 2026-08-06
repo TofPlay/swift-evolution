@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0323 - Asynchronous Main Semantics - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-5/se-0323-asynchronous-main-semantics/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0323 - Asynchronous Main Semantics">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-5/se-0323-asynchronous-main-semantics/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-5/">
+                  Swift 5.5
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0323 - Asynchronous Main Semantics</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0323 - Asynchronous Main Semantics</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.5.2</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0323-async-main-semantics.md">SE-0323 - Asynchronous Main Semantics</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition modifie le comportement de la fonction <code>main</code> asynchrone (marquée avec <code>@main</code>) pour résoudre des problèmes d'ordre d'exécution lors de l'initialisation globale.</p>
+<p>Auparavant, le <code>main</code> asynchrone était immédiatement enveloppé dans une tâche et mis en file d'attente sur la file principale. Cela créait un risque de race condition : des initialisateurs d'objets globaux (notamment en C++ ou Objective-C) pouvaient enfiler une tâche sur la file principale qui s'exécutait <em>avant</em> le code de configuration situé dans le <code>main</code>.</p>
+<p>Les changements apportés sont :</p>
+<ol>
+<li><strong>Exécution synchrone initiale</strong> : La fonction <code>main</code> est désormais exécutée de manière synchrone jusqu'au premier point de suspension (<code>await</code>). Cela garantit que tout code de configuration avant le premier <code>await</code> s'exécute avant que les tâches enfileées par des initialisateurs ne soient traitées.</li>
+<li><strong>Protection MainActor</strong> : La fonction <code>main</code> est implicitement protégée par le <code>@MainActor</code> pour éviter les changements de thread inutiles et assurer la cohérence avec l'accès aux ressources de la file principale.</li>
+</ol>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0323" tabindex="-1"><a href="#avant-se-0323" class="header-anchor">Avant SE-0323</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">MyAudioManager</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> deviceHandle<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token operator">=</span> <span class="token number">0</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// L'initialiseur enfile une tâche sur la file principale</span>
+        <span class="token class-name">DispatchQueue</span><span class="token punctuation">.</span>main<span class="token punctuation">.</span><span class="token keyword">async</span> <span class="token punctuation">{</span>
+            <span class="token comment">// L'assertion échoue car le main n'a pas encore pu exécuter sa configuration</span>
+            <span class="token function">assert</span><span class="token punctuation">(</span><span class="token keyword">self</span><span class="token punctuation">.</span>deviceHandle <span class="token operator">!=</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> <span class="token string-literal"><span class="token string">"Device handle not initialized!"</span></span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Initialisation globale (exécute l'init ci-dessus)</span>
+<span class="token keyword">let</span> <span class="token class-name">AudioManager</span> <span class="token operator">=</span> <span class="token class-name">MyAudioManager</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token attribute atrule">@main</span>
+<span class="token keyword">struct</span> <span class="token class-name">Main</span> <span class="token punctuation">{</span>
+    <span class="token keyword">static</span> <span class="token keyword">func</span> <span class="token function-definition function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Ce code est mis en file d'attente APRÈS la tâche de l'init</span>
+        <span class="token comment">// donc la configuration est trop tardive.</span>
+        <span class="token function">setupAudioDevice</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Dans l'ancienne version, le <code>main</code> était asynchrone dès le départ, ce qui permettait aux tâches enfileées par les initialisateurs de s'exécuter avant que le code de configuration du <code>main</code> ne puisse s'exécuter.</p>
+<h3 id="apr%C3%A8s-se-0323" tabindex="-1"><a href="#apr%C3%A8s-se-0323" class="header-anchor">Après SE-0323</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@main</span>
+<span class="token keyword">struct</span> <span class="token class-name">Main</span> <span class="token punctuation">{</span>
+    <span class="token keyword">static</span> <span class="token keyword">func</span> <span class="token function-definition function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 1. Exécuté SYNCHRONEMENT avant toute tâche de la file principale</span>
+        <span class="token class-name">AudioManager</span><span class="token punctuation">.</span><span class="token function">setup</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
+        
+        <span class="token comment">// 2. Au premier 'await', la fonction suspend et laisse les tâches </span>
+        <span class="token comment">// enfileées par les initialisateurs s'exécuter.</span>
+        <span class="token keyword">await</span> <span class="token function">doSomethingCool</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Avec la nouvelle sémantique, le code avant le premier <code>await</code> s'exécute immédiatement et de manière synchrone, garantissant que la configuration est terminée avant que les tâches provenant des initialisateurs ne soient traitées.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

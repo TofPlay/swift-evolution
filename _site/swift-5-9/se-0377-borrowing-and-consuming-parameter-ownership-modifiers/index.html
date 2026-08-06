@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0377 - borrowing and consuming parameter ownership modifiers - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-9/se-0377-borrowing-and-consuming-parameter-ownership-modifiers/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0377 - borrowing and consuming parameter ownership modifiers">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-9/se-0377-borrowing-and-consuming-parameter-ownership-modifiers/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-9/">
+                  Swift 5.9
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0377 - borrowing and consuming parameter ownership modifiers</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0377 - borrowing and consuming parameter ownership modifiers</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.9</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0377-parameter-ownership-modifiers.md">SE-0377 - borrowing and consuming parameter ownership modifiers</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit les modificateurs de propriété <code>borrowing</code> et <code>consuming</code> pour les paramètres de fonctions. L'objectif est de donner aux développeurs un contrôle explicite sur la convention de gestion de la mémoire (ARC pour les types de référence ou copies pour les types de valeur) lors du passage d'arguments.</p>
+<p>Par défaut, Swift décide de manière implicite si une fonction doit "emprunter" (borrow) ou "consommer" (consume) un paramètre. Cette précision devient cruciale avec l'introduction des types non-copiables (SE-0390), où il est indispensable de savoir si une fonction laisse le paramètre intact ou si elle en prend la propriété définitive. L'ajout de ces modificateurs empêche la copie implicite des paramètres au sein de la fonction, optimisant ainsi les performances en réduisant les appels ARC inutiles ou les copies de structures coûteuses. Pour permettre une copie explicite là où le modificateur l'interdit, la proposition introduit l'opérateur <code>copy x</code>.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0377" tabindex="-1"><a href="#avant-se-0377" class="header-anchor">Avant SE-0377</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">process</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> value<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Le compilateur décide implicitement de la stratégie.</span>
+    <span class="token comment">// Si 'process' est appelé, une copie de 'value' peut être créée </span>
+    <span class="token comment">// pour garantir la sécurité, même si ce n'est pas optimal.</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> myString <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"Hello"</span></span>
+<span class="token function">process</span><span class="token punctuation">(</span>myString<span class="token punctuation">)</span>
+</code></pre>
+<p>Le comportement est géré de manière opaque par le compilateur via des règles de décision implicites, ce qui peut entraîner des copies ou des appels ARC (Reference Counting) supplémentaires non souhaités pour des raisons de performance.</p>
+<h3 id="apr%C3%A8s-se-0377" tabindex="-1"><a href="#apr%C3%A8s-se-0377" class="header-anchor">Après SE-0377</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">process</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> value<span class="token punctuation">:</span> borrowing <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Le paramètre est emprunté : pas de copie implicite possible.</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span>
+    <span class="token comment">// let duplicate = value // ERREUR : tente de copier un paramètre 'borrowing'</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">consumeValue</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> value<span class="token punctuation">:</span> consuming <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Le paramètre est consommé : la fonction prend la propriété.</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> myString <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"Hello"</span></span>
+<span class="token function">process</span><span class="token punctuation">(</span>myString<span class="token punctuation">)</span> <span class="token comment">// Utilisation efficace sans copie inutile</span>
+</code></pre>
+<p>Avec <code>borrowing</code>, on garantit que le paramètre est utilisé sans être copié, optimisant ainsi l'accès. Avec <code>consuming</code>, on indique explicitement que la fonction prend la propriété du paramètre, ce qui est essentiel pour définir un contrat clair, notamment avec les types non-copiables.</p>
+<h3 id="avant-se-0377-1" tabindex="-1"><a href="#avant-se-0377-1" class="header-anchor">Avant SE-0377</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">extension</span> <span class="token class-name">String</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">appendExtra</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> other<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">String</span> <span class="token punctuation">{</span>
+        <span class="token keyword">var</span> result <span class="token operator">=</span> <span class="token keyword">self</span>
+        result <span class="token operator">+=</span> other
+        <span class="token keyword">return</span> result
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La modification du paramètre implique souvent des copies de l'objet original ou une gestion automatique qui ne permet pas de tirer pleinement parti de l'unicité de la valeur.</p>
+<h3 id="apr%C3%A8s-se-0377-1" tabindex="-1"><a href="#apr%C3%A8s-se-0377-1" class="header-anchor">Après SE-0377</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">extension</span> <span class="token class-name">String</span> <span class="token punctuation">{</span>
+    consuming <span class="token keyword">func</span> <span class="token function-definition function">plus</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> other<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">String</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 'self' est consommé, on peut donc le modifier en place </span>
+        <span class="token comment">// si l'instance est unique, optimisant les performances.</span>
+        <span class="token keyword">self</span> <span class="token operator">+=</span> other
+        <span class="token keyword">return</span> <span class="token keyword">self</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> helloWorld <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"hello "</span></span><span class="token punctuation">.</span><span class="token function">plus</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"world"</span></span><span class="token punctuation">)</span>
+</code></pre>
+<p>En utilisant <code>consuming</code>, si la valeur possède une propriété d'unicité, la fonction peut modifier la valeur directement en mémoire (in-place), évitant ainsi une allocation et une copie coûteuse.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

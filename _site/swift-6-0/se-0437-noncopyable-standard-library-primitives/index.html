@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0437 - Noncopyable Standard Library Primitives - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-0/se-0437-noncopyable-standard-library-primitives/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0437 - Noncopyable Standard Library Primitives">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-0/se-0437-noncopyable-standard-library-primitives/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-0/">
+                  Swift 6.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0437 - Noncopyable Standard Library Primitives</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0437 - Noncopyable Standard Library Primitives</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0437-noncopyable-stdlib-primitives.md">SE-0437 - Noncopyable Standard Library Primitives</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit les primitives essentielles de la bibliothèque standard pour supporter les types non-copiables (<code>~Copyable</code>). Elle vise à lever l'hypothèse omniprésente que tout objet dans Swift est copiable, afin de permettre l'utilisation des types non-copiables dans des structures génériques fondamentales.</p>
+<p>Les changements majeurs incluent :</p>
+<ul>
+<li><strong>Gestion de la mémoire de bas niveau :</strong> Généralisation de <code>MemoryLayout</code>, <code>UnsafePointer</code>, <code>UnsafeMutablePointer</code>, et des buffers (<code>UnsafeBufferPointer</code>, <code>UnsafeMutableBufferPointer</code>) pour supporter des éléments non-copiables.</li>
+<li><strong>Types optionnels et résultats :</strong> <code>Optional</code> et <code>Result</code> deviennent des énumérations conditionnellement copiables (ils sont non-copiables si leur contenu l'est).</li>
+<li><strong>Sémantique de propriété :</strong> Introduction de la distinction explicite entre <code>consuming</code> et <code>borrowing</code> pour les opérations de la bibliothèque standard (ex: <code>initialize(to:)</code> doit désormais consommer la valeur).</li>
+<li><strong>Nouveaux outils :</strong> Ajout de <code>extracting(_:)</code> pour les buffers afin de pallier l'impossibilité de la syntaxe de slicing (<code>[i..&lt;j]</code>) pour les types non-copiables, et de la méthode <code>take()</code> pour <code>Optional</code>.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0437" tabindex="-1"><a href="#avant-se-0437" class="header-anchor">Avant SE-0437</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">Foo</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+    <span class="token keyword">mutating</span> <span class="token keyword">func</span> <span class="token function-definition function">increment</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> value <span class="token operator">+=</span> <span class="token number">1</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> p <span class="token operator">=</span> <span class="token class-name">UnsafeMutablePointer</span><span class="token operator">&lt;</span><span class="token class-name">Foo</span><span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token function">allocate</span><span class="token punctuation">(</span>capacity<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span>
+p<span class="token punctuation">.</span><span class="token function">initialize</span><span class="token punctuation">(</span>to<span class="token punctuation">:</span> <span class="token class-name">Foo</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> <span class="token number">42</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+p<span class="token punctuation">.</span>pointee<span class="token punctuation">.</span><span class="token function">increment</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+p<span class="token punctuation">.</span><span class="token function">deinitialize</span><span class="token punctuation">(</span>count<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span>
+p<span class="token punctuation">.</span><span class="token function">deallocate</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+<p>L'utilisation des pointeurs et de la mémoire avec des types non-copiables est impossible car les API de la bibliothèque standard (comme <code>initialize(to:)</code>) supposent par défaut que l'argument est copiable.</p>
+<h3 id="apr%C3%A8s-se-0437" tabindex="-1"><a href="#apr%C3%A8s-se-0437" class="header-anchor">Après SE-0437</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro (non applicable ici, sujet standard)</span>
+
+<span class="token comment">// Utilisation du macro (exemple d'application de la logique de la proposition)</span>
+<span class="token keyword">struct</span> <span class="token class-name">Foo</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+    <span class="token keyword">mutating</span> <span class="token keyword">func</span> <span class="token function-definition function">increment</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> value <span class="token operator">+=</span> <span class="token number">1</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> p <span class="token operator">=</span> <span class="token class-name">UnsafeMutablePointer</span><span class="token operator">&lt;</span><span class="token class-name">Foo</span><span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token function">allocate</span><span class="token punctuation">(</span>capacity<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span>
+p<span class="token punctuation">.</span><span class="token function">initialize</span><span class="token punctuation">(</span>to<span class="token punctuation">:</span> <span class="token class-name">Foo</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> <span class="token number">42</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// L'API a été modifiée pour consommer la valeur</span>
+p<span class="token punctuation">.</span>pointee<span class="token punctuation">.</span><span class="token function">increment</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+p<span class="token punctuation">.</span><span class="token function">deinitialize</span><span class="token punctuation">(</span>count<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span>
+p<span class="token punctuation">.</span><span class="token function">deallocate</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Gestion des optionnels non-copiables</span>
+<span class="token keyword">let</span> foo<span class="token punctuation">:</span> <span class="token class-name">Foo</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token nil constant">nil</span> <span class="token comment">// Fonctionne grâce à l'extension de ExpressibleByNilLiteral</span>
+<span class="token keyword">let</span> value <span class="token operator">=</span> foo<span class="token punctuation">.</span>map <span class="token punctuation">{</span> consuming f <span class="token keyword">in</span> f <span class="token punctuation">}</span> <span class="token comment">// La transformation consomme le contenu</span>
+</code></pre>
+<p>La proposition résout le problème en rendant les conteneurs génériques (comme <code>Optional</code>) conditionnellement copiables et en ajoutant des mots-clés de transfert de propriété (<code>consuming</code>) aux fonctions de bas niveau pour gérer explicitement le cycle de vie des entités non-copiables.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

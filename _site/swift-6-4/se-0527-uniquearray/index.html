@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0527 - UniqueArray - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-4/se-0527-uniquearray/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0527 - UniqueArray">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-4/se-0527-uniquearray/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-4/">
+                  Swift 6.4
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0527 - UniqueArray</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0527 - UniqueArray</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.4</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0527-rigidarray-uniquearray.md">SE-0527 - UniqueArray</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit deux nouveaux types de tableaux dans la bibliothèque standard pour supporter les éléments non-copiables (<code>~Copyable</code>) avec des performances prévisibles, en dissociant la gestion de la mémoire des sémantiques de valeur classiques.</p>
+<ol>
+<li><strong>UniqueArray</strong> : Un tableau dynamiquement redimensionnable où le stockage est détenu de manière unique. Étant lui-même non-copiable, il garantit qu'une seule variable possède l'instance à la fois, évitant ainsi les coûts imprévisibles du <em>Copy-on-Write</em> (CoW) pour les types non-copiables.</li>
+<li><strong>RigidArray</strong> : Un tableau à capacité fixe, optimisé pour les environnements à ressources limitées (systèmes embarqués, temps réel). Il ne redimensionne pas automatiquement sa mémoire, évitant ainsi les pics de latence liés aux allocations de stockage.</li>
+</ol>
+<p>Ces types sont introduits dans un nouveau module nommé <code>Containers</code> pour ne pas remplacer le type <code>Array</code> existant, qui reste le choix par défaut pour les types copiables.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0527" tabindex="-1"><a href="#avant-se-0527" class="header-anchor">Avant SE-0527</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// L'Array classique ne supporte pas les types non-copiables (~Copyable)</span>
+<span class="token keyword">struct</span> <span class="token class-name">FileHandle</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> fd<span class="token punctuation">:</span> <span class="token class-name">UInt32</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>path<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">self</span><span class="token punctuation">.</span>fd <span class="token operator">=</span> <span class="token number">42</span> <span class="token punctuation">}</span> <span class="token comment">// Simulation</span>
+    <span class="token keyword">deinit</span> <span class="token punctuation">{</span> <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Closed"</span></span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> foo <span class="token operator">=</span> <span class="token class-name">FileHandle</span><span class="token punctuation">(</span>path<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"test.txt"</span></span><span class="token punctuation">)</span>
+<span class="token comment">// var array = [foo] // Erreur de compilation : l'élément est non-copiable</span>
+</code></pre>
+<p>L'utilisation de <code>Array</code> est incompatible avec les types non-copiables car <code>Array</code> repose sur des sémantiques de valeur avec <em>Copy-on-Write</em>, ce qui nécessite que les éléments puissent être copiés en cas de mutation partagée.</p>
+<h3 id="apr%C3%A8s-se-0527" tabindex="-1"><a href="#apr%C3%A8s-se-0527" class="header-anchor">Après SE-0527</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">Containers</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">FileHandle</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> fd<span class="token punctuation">:</span> <span class="token class-name">UInt32</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>path<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">self</span><span class="token punctuation">.</span>fd <span class="token operator">=</span> <span class="token number">42</span> <span class="token punctuation">}</span>
+    <span class="token keyword">deinit</span> <span class="token punctuation">{</span> <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Closed"</span></span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> foo <span class="token operator">=</span> <span class="token class-name">FileHandle</span><span class="token punctuation">(</span>path<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"test.txt"</span></span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> bar <span class="token operator">=</span> <span class="token class-name">FileHandle</span><span class="token punctuation">(</span>path<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"bar.txt"</span></span><span class="token punctuation">)</span>
+
+<span class="token comment">// Utilisation de UniqueArray pour des éléments non-copiables</span>
+<span class="token keyword">var</span> a <span class="token operator">=</span> <span class="token class-name">UniqueArray</span><span class="token operator">&lt;</span><span class="token class-name">FileHandle</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+a<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>foo<span class="token punctuation">)</span>  <span class="token comment">// Consomme foo</span>
+a<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>bar<span class="token punctuation">)</span>  <span class="token comment">// Consomme bar</span>
+
+<span class="token keyword">var</span> b <span class="token operator">=</span> a      <span class="token comment">// Consomme 'a', move vers 'b'</span>
+b<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token class-name">FileHandle</span><span class="token punctuation">(</span>path<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"baz.txt"</span></span><span class="token punctuation">)</span><span class="token punctuation">)</span> 
+
+<span class="token comment">// a.append(FileHandle(path: "err.txt")) // Erreur : 'a' a été consommé par le move</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de RigidArray pour une capacité fixe et prévisible</span>
+<span class="token keyword">var</span> rigid <span class="token operator">=</span> <span class="token class-name">RigidArray</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>capacity<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span>
+rigid<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>
+rigid<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">20</span><span class="token punctuation">)</span>
+<span class="token comment">// rigid.append(30) // Runtime error: RigidArray capacity overflow</span>
+</code></pre>
+<p><code>UniqueArray</code> permet de manipuler des ressources uniques (comme des descripteurs de fichiers) sans risque de copie accidentelle, tandis que <code>RigidArray</code> garantit qu'aucune allocation supplémentaire n'aura lieu, assurant une performance déterministe.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

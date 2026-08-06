@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0476 - Controlling the ABI of a function, initializer, property, or subscript - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-2/se-0476-controlling-the-abi-of-a-function-initializer-property-or-subscript/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0476 - Controlling the ABI of a function, initializer, proper…">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-2/se-0476-controlling-the-abi-of-a-function-initializer-property-or-subscript/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-2/">
+                  Swift 6.2
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0476 - Controlling the ABI of a function, initializer, property, or subscript</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0476 - Controlling the ABI of a function, initializer, property, or subscript</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.2</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0476-abi-attr.md">SE-0476 - Controlling the ABI of a function, initializer, property, or subscript</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit l'attribut <code>@abi</code> pour permettre aux développeurs de bibliothèques stables au niveau ABI (Application Binary Interface) de modifier la syntaxe ou les caractéristiques d'une déclaration (nom, étiquettes, contraintes de protocoles comme <code>Sendable</code>, ou types de lancers d'erreurs) sans casser la compatibilité binaire avec les clients existants.</p>
+<p>L'attribut fonctionne en séparant la déclaration en deux rôles :</p>
+<ol>
+<li><strong>Rôle API (API-providing) :</strong> La déclaration telle qu'elle est écrite dans le code source (utilisée pour la vérification du type et la syntaxe).</li>
+<li><strong>Rôle ABI (ABI-providing) :</strong> La déclaration telle qu'elle doit être "mangled" (nommée) pour le compilateur afin de maintenir la compatibilité avec les binaires compilés précédemment.</li>
+</ol>
+<p>Cela remplace l'utilisation risquée et complexe de l'attribut interne <code>@_silgen_name</code>, qui nécessitait une connaissance approfondie du nommage interne du compilateur et ne fonctionnait que pour les fonctions.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0476" tabindex="-1"><a href="#avant-se-0476" class="header-anchor">Avant SE-0476</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">extension</span> <span class="token class-name">Collection</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Wrapper avec le même ABI que l'ancien map(_:) qui utilisait rethrows</span>
+    <span class="token comment">// Nécessite un hack interne complexe et dangereux</span>
+    <span class="token attribute atrule">@_silgen_name</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"$sSlsE3mapySayqd__Gqd__7ElementQzKXEKlF"</span></span><span class="token punctuation">)</span>
+    <span class="token attribute atrule">@usableFromInline</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">__rethrows_map</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>
+        <span class="token omit keyword">_</span> transform<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token class-name">Element</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">T</span>
+    <span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">T</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
+        <span class="token keyword">try</span> <span class="token function">map</span><span class="token punctuation">(</span>transform<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de <code>@_silgen_name</code> est dangereuse car elle ne possède aucune vérification de sécurité à la compilation et oblige à manipuler manuellement les noms "mangled" du compilateur.</p>
+<h3 id="apr%C3%A8s-se-0476" tabindex="-1"><a href="#apr%C3%A8s-se-0476" class="header-anchor">Après SE-0476</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">extension</span> <span class="token class-name">Collection</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Wrapper avec le même ABI que l'ancien map(_:) qui utilisait rethrows</span>
+    <span class="token attribute atrule">@abi</span><span class="token punctuation">(</span>
+        <span class="token keyword">func</span> <span class="token function-definition function">map</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>
+            <span class="token omit keyword">_</span> transform<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token class-name">Element</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">T</span>
+        <span class="token punctuation">)</span> <span class="token keyword">rethrows</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">T</span><span class="token punctuation">]</span>
+    <span class="token punctuation">)</span>
+    <span class="token attribute atrule">@usableFromInline</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">__rethrows_map</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>
+        <span class="token omit keyword">_</span> transform<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token class-name">Element</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">T</span>
+    <span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">T</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
+        <span class="token keyword">try</span> <span class="token function">map</span><span class="token punctuation">(</span>transform<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'attribut <code>@abi</code> encapsule la déclaration originale. Le compilateur utilise la signature à l'intérieur de l'attribut pour générer le nom de symbole (mangling) tout en permettant à l'implémentation réelle d'utiliser la nouvelle syntaxe (ici, passage de <code>rethrows</code> à <code>throws</code>). Le compilateur vérifie également que la déclaration dans <code>@abi</code> est compatible avec la déclaration réelle.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

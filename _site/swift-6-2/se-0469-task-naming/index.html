@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0469 - Task Naming Proposal - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-2/se-0469-task-naming/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0469 - Task Naming Proposal">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-2/se-0469-task-naming/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-2/">
+                  Swift 6.2
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0469 - Task Naming Proposal</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0469 - Task Naming Proposal</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.2</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0469-task-names.md">SE-0469 - Task Naming Proposal</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit de nouvelles API permettant d'attribuer un nom lisible par l'humain aux <code>Task</code> de Swift. L'objectif est de faciliter le débogage et le profilage en permettant aux outils (débogueurs, <code>swift-inspect</code>) d'identifier précisément quelle tâche effectue quel travail, remplaçant ainsi le manque de contexte actuel dans Swift Concurrency.</p>
+<p>Les changements incluent :</p>
+<ul>
+<li>L'ajout d'un paramètre <code>name: String?</code> aux initialisateurs de <code>Task</code> et <code>Task.detached</code>.</li>
+<li>L'ajout du paramètre <code>name: String?</code> aux méthodes d'ajout de tâches dans les groupes de tâches (<code>addTask</code>, <code>addTaskUnlessCancelled</code>).</li>
+<li>L'introduction d'une propriété <code>name</code> sur <code>Task</code> et <code>UnsafeCurrentTask</code> pour permettre la lecture du nom de la tâche en cours d'exécution.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0469" tabindex="-1"><a href="#avant-se-0469" class="header-anchor">Avant SE-0469</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code illustrant l'état AVANT la proposition</span>
+<span class="token keyword">let</span> task <span class="token operator">=</span> <span class="token class-name">Task</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Travail asynchrone</span>
+    <span class="token keyword">await</span> <span class="token function">performWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Actuellement, il est impossible de nommer une tâche lors de sa création. En cas de crash ou de ralentissement, les outils de débogage ne peuvent pas afficher un nom explicite pour identifier cette tâche spécifique parmi toutes les autres tâches asynchrones en cours.</p>
+<h3 id="apr%C3%A8s-se-0469" tabindex="-1"><a href="#apr%C3%A8s-se-0469" class="header-anchor">Après SE-0469</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code illustrant l'état APRÈS la proposition</span>
+<span class="token keyword">let</span> task <span class="token operator">=</span> <span class="token class-name">Task</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Get Users for </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">accountID</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> <span class="token function">performWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'introduction du paramètre <code>name</code> lors de l'initialisation de la tâche permet de fournir un contexte immédiat (comme un identifiant d'utilisateur ou une action spécifique) qui peut être lu par le programme ou par des outils d'inspection externes.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

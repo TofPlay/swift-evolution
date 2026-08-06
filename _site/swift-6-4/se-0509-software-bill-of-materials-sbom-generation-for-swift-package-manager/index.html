@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0509 - Software Bill of Materials (SBOM) Generation for Swift Package Manager - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-4/se-0509-software-bill-of-materials-sbom-generation-for-swift-package-manager/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0509 - Software Bill of Materials (SBOM) Generation for Swift…">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-4/se-0509-software-bill-of-materials-sbom-generation-for-swift-package-manager/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-4/">
+                  Swift 6.4
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0509 - Software Bill of Materials (SBOM) Generation for Swift Package Manager</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0509 - Software Bill of Materials (SBOM) Generation for Swift Package Manager</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.4</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0509-swift-sboms-via-swiftpm.md">SE-0509 - Software Bill of Materials (SBOM) Generation for Swift Package Manager</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit la génération de <strong>Software Bill of Materials (SBOM)</strong> directement via Swift Package Manager (SwiftPM) pour améliorer la sécurité de la chaîne d'approvisionnement logicielle.</p>
+<p>La fonctionnalité supporte deux formats standards : <strong>CycloneDX</strong> et <strong>SPDX</strong>. Elle peut être utilisée de deux manières :</p>
+<ol>
+<li><strong>Via la commande <code>swift build</code></strong> : en utilisant le flag <code>--sbom-spec</code> (cyclonedx ou spdx) pour générer les fichiers lors de la compilation. Si le système <code>SwiftBuild</code> est utilisé, le SBOM reflétera le graphe de dépendances réellement compilé (incluant les dépendances conditionnelles selon l'OS).</li>
+<li><strong>Via une nouvelle commande <code>swift package generate-sbom</code></strong> : pour générer un SBOM de manière indépendante du processus de compilation, en se basant uniquement sur le graphe des modules résolus.</li>
+</ol>
+<p>L'implémentation utilise une architecture en trois couches : un extracteur (lecture du graphe de dépendances), un convertisseur (formatage CycloneDX ou SPDX) et un validateur (vérification via schémas JSON).</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0509" tabindex="-1"><a href="#avant-se-0509" class="header-anchor">Avant SE-0509</a></h3>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># SwiftPM ne possède pas de commande native pour générer des SBOM
+# Les développeurs doivent utiliser des outils tiers qui analysent 
+# souvent uniquement Package.resolved, manquant ainsi les dépendances 
+# liées à la compilation (ex: dépendances spécifiques à un OS).
+</code></pre>
+<p>L'absence de support natif oblige à dépendre d'outils externes qui ne voient pas forcément le graphe de dépendances calculé par le système de build lors de la compilation.</p>
+<h3 id="apr%C3%A8s-se-0509" tabindex="-1"><a href="#apr%C3%A8s-se-0509" class="header-anchor">Après SE-0509</a></h3>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Générer un SBOM CycloneDX pendant le build
+$ swift build --sbom-spec cyclonedx
+
+# Générer un SBOM SPDX spécifique pour un produit donné
+$ swift build --product MyProduct --sbom-spec spdx
+
+# Générer un SBOM via la commande dédiée (basé sur le graphe des modules)
+$ swift package generate-sbom --sbom-spec spdx
+</code></pre>
+<p>L'intégration native permet de générer des inventaires précis (CycloneDX ou SPDX) qui peuvent refléter fidèlement les dépendances utilisées réellement lors de la compilation, facilitant ainsi l'audit et la conformité réglementaire.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

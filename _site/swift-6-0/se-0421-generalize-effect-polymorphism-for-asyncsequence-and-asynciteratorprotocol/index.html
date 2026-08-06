@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0421 - Generalize effect polymorphism for AsyncSequence and AsyncIteratorProtocol - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-0/se-0421-generalize-effect-polymorphism-for-asyncsequence-and-asynciteratorprotocol/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0421 - Generalize effect polymorphism for AsyncSequence and A…">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-0/se-0421-generalize-effect-polymorphism-for-asyncsequence-and-asynciteratorprotocol/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-0/">
+                  Swift 6.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0421 - Generalize effect polymorphism for AsyncSequence and AsyncIteratorProtocol</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0421 - Generalize effect polymorphism for AsyncSequence and AsyncIteratorProtocol</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-a-partir-de-%3A" tabindex="-1"><a href="#disponible-a-partir-de-%3A" class="header-anchor">Disponible a partir de :</a></h2>
+<p>Swift 6.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0421-generalize-async-sequence.md">SE-0421 - Generalize effect polymorphism for AsyncSequence and AsyncIteratorProtocol</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition vise à améliorer l'expressivité et les performances de l'asynchronisme en généralisant <code>AsyncSequence</code> et <code>AsyncIteratorProtocol</code>.</p>
+<p>Les changements majeurs incluent :</p>
+<ul>
+<li>L'adoption des "typed throws" via un nouvel associé <code>Failure</code>, permettant de spécifier précisément le type d'erreur thrown, ce qui améliore l'inférence de type dans les boucles <code>for try await</code>.</li>
+<li>L'introduction de paramètres isolés dans la méthode <code>next(isolation:)</code>. Cela permet d'abstraire l'isolation des acteurs, évitant ainsi des sauts inutiles (hops) vers l'exécuteur générique lorsqu'on itère depuis un acteur.</li>
+<li>L'adoption de types associés primaires pour l'élément et l'erreur, permettant d'utiliser des types opaques ou existentiels contraints comme <code>some AsyncSequence&lt;Element, Failure&gt;</code>.</li>
+</ul>
+<p>Ces modifications permettent de résoudre des problèmes de vérification de conformité <code>Sendable</code> lors de l'itération dans des contextes isolés par un acteur.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0421" tabindex="-1"><a href="#avant-se-0421" class="header-anchor">Avant SE-0421</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Actuellement, l'erreur est toujours considérée comme 'any Error'</span>
+<span class="token comment">// et l'isolation est fixée sur l'exécuteur générique.</span>
+<span class="token keyword">protocol</span> <span class="token class-name">AsyncIteratorProtocol</span> <span class="token punctuation">{</span>
+    <span class="token keyword">associatedtype</span> <span class="token class-name">Element</span>
+    <span class="token keyword">mutating</span> <span class="token keyword">func</span> <span class="token function-definition function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">Element</span><span class="token operator">?</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// L'utilisation dans un acteur provoque des warnings de Sendable</span>
+<span class="token comment">// car l'itérateur est passé à travers une frontière d'isolation.</span>
+<span class="token attribute atrule">@MainActor</span>
+<span class="token keyword">func</span> <span class="token function-definition function">iterate</span><span class="token punctuation">(</span>over stream<span class="token punctuation">:</span> <span class="token class-name">AsyncStream</span><span class="token operator">&lt;</span><span class="token class-name">NotSendable</span><span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">for</span> <span class="token keyword">await</span> element <span class="token keyword">in</span> stream <span class="token punctuation">{</span>
+        <span class="token comment">// Warning: non-sendable type returned from nonisolated function</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'absence de précision sur le type d'erreur limite l'inférence, et la nature non-isolée de <code>next()</code> force des transitions de contexte coûteuses et risquées pour la sécurité mémoire.</p>
+<h3 id="apr%C3%A8s-se-0421" tabindex="-1"><a href="#apr%C3%A8s-se-0421" class="header-anchor">Après SE-0421</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le type d'erreur est maintenant explicite et l'isolation est paramétrée</span>
+<span class="token keyword">protocol</span> <span class="token class-name">AsyncIteratorProtocol</span><span class="token operator">&lt;</span><span class="token class-name">Element</span><span class="token punctuation">,</span> <span class="token class-name">Failure</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span>
+    <span class="token keyword">associatedtype</span> <span class="token class-name">Element</span>
+    <span class="token keyword">associatedtype</span> <span class="token class-name">Failure</span><span class="token punctuation">:</span> <span class="token class-name">Error</span>
+    
+    <span class="token keyword">mutating</span> <span class="token keyword">func</span> <span class="token function-definition function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">Element</span><span class="token operator">?</span>
+    <span class="token keyword">mutating</span> <span class="token keyword">func</span> <span class="token function-definition function">next</span><span class="token punctuation">(</span>isolation <span class="token keyword">actor</span><span class="token punctuation">:</span> <span class="token keyword">isolated</span> <span class="token punctuation">(</span>any <span class="token class-name">Actor</span><span class="token punctuation">)</span><span class="token operator">?</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token keyword">throws</span><span class="token punctuation">(</span><span class="token class-name">Failure</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Element</span><span class="token operator">?</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// L'utilisation permet de respecter l'isolation de l'acteur</span>
+<span class="token attribute atrule">@MainActor</span>
+<span class="token keyword">func</span> <span class="token function-definition function">iterate</span><span class="token punctuation">(</span>over stream<span class="token punctuation">:</span> <span class="token class-name">AsyncStream</span><span class="token operator">&lt;</span><span class="token class-name">NotSendable</span><span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">for</span> <span class="token keyword">try</span> <span class="token keyword">await</span> element <span class="token keyword">in</span> stream <span class="token punctuation">{</span>
+        <span class="token comment">// L'itération est consciente de l'isolation de l'acteur</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La solution introduit un type associé <code>Failure</code> qui permet de savoir exactement quelle erreur est susceptible d'être lancée, et la méthode <code>next(isolation:)</code> permet de maintenir l'exécution dans le domaine d'isolation de l'appelant.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

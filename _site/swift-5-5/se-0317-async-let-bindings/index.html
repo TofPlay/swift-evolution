@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0317 - async let bindings - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-5/se-0317-async-let-bindings/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0317 - async let bindings">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-5/se-0317-async-let-bindings/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-5/">
+                  Swift 5.5
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0317 - async let bindings</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0317 - async let bindings</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.5</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0317-async-let.md">SE-0317 - async let bindings</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit la syntaxe <code>async let</code> pour permettre la création simplifiée de tâches enfants dans un contexte de concurrence structurée. Elle permet de lancer une tâche de manière asynchrone et d'en récupérer le résultat via une assignation légère, similaire à un <code>let</code> classique, tout en garantissant que la tâche enfant ne survit pas à la tâche parente.</p>
+<p>Les points clés incluent :</p>
+<ul>
+<li><strong>Concurrence structurée</strong> : Les tâches créées par <code>async let</code> héritent de la priorité et des valeurs locales à la tâche parente.</li>
+<li><strong>Suspension implicite</strong> : L'accès à une variable déclarée avec <code>async let</code> est un point de suspension (nécessite <code>await</code>).</li>
+<li><strong>Gestion automatique</strong> : La propagation de la annulation (cancellation) et des erreurs est gérée automatiquement par le runtime.</li>
+<li><strong>Limitation</strong> : Contrairement aux <code>TaskGroup</code>, <code>async let</code> est conçu pour des résultats hétérogènes et un nombre fixe de tâches défini à la compilation.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0317" tabindex="-1"><a href="#avant-se-0317" class="header-anchor">Avant SE-0317</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">makeDinner</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">Meal</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">try</span> <span class="token keyword">await</span> <span class="token function">withThrowingTaskGroup</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> <span class="token class-name">CookingTask</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> group <span class="token keyword">in</span>
+        group<span class="token punctuation">.</span>addTask <span class="token punctuation">{</span> <span class="token class-name">CookingTask</span><span class="token punctuation">.</span><span class="token function">veggies</span><span class="token punctuation">(</span><span class="token keyword">try</span> <span class="token keyword">await</span> <span class="token function">chopVegetables</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+        group<span class="token punctuation">.</span>addTask <span class="token punctuation">{</span> <span class="token class-name">CookingTask</span><span class="token punctuation">.</span><span class="token function">meat</span><span class="token punctuation">(</span><span class="token keyword">await</span> <span class="token function">marinateMeat</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+        group<span class="token punctuation">.</span>addTask <span class="token punctuation">{</span> <span class="token class-name">CookingTask</span><span class="token punctuation">.</span><span class="token function">oven</span><span class="token punctuation">(</span><span class="token keyword">await</span> <span class="token function">preheatOven</span><span class="token punctuation">(</span>temperature<span class="token punctuation">:</span> <span class="token number">350</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+
+        <span class="token keyword">var</span> veggies<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Vegetable</span><span class="token punctuation">]</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token nil constant">nil</span>
+        <span class="token keyword">var</span> meat<span class="token punctuation">:</span> <span class="token class-name">Meat</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token nil constant">nil</span>
+        <span class="token keyword">var</span> oven<span class="token punctuation">:</span> <span class="token class-name">Oven</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token nil constant">nil</span>
+
+        <span class="token keyword">for</span> <span class="token keyword">try</span> <span class="token keyword">await</span> task <span class="token keyword">in</span> group <span class="token punctuation">{</span>
+            <span class="token keyword">switch</span> task <span class="token punctuation">{</span>
+            <span class="token keyword">case</span> <span class="token punctuation">.</span><span class="token function">veggies</span><span class="token punctuation">(</span><span class="token keyword">let</span> v<span class="token punctuation">)</span><span class="token punctuation">:</span> veggies <span class="token operator">=</span> v
+            <span class="token keyword">case</span> <span class="token punctuation">.</span><span class="token function">meat</span><span class="token punctuation">(</span><span class="token keyword">let</span> m<span class="token punctuation">)</span><span class="token punctuation">:</span> meat <span class="token operator">=</span> m
+            <span class="token keyword">case</span> <span class="token punctuation">.</span><span class="token function">oven</span><span class="token punctuation">(</span><span class="token keyword">let</span> o<span class="token punctuation">)</span><span class="token punctuation">:</span> oven <span class="token operator">=</span> o
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        
+        <span class="token keyword">let</span> ingredients <span class="token operator">=</span> veggies<span class="token operator">!</span><span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>meat<span class="token operator">!</span><span class="token punctuation">)</span>
+        <span class="token keyword">let</span> dish <span class="token operator">=</span> <span class="token class-name">Dish</span><span class="token punctuation">(</span>ingredients<span class="token punctuation">:</span> ingredients<span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token keyword">try</span> <span class="token keyword">await</span> oven<span class="token operator">!</span><span class="token punctuation">.</span><span class="token function">cook</span><span class="token punctuation">(</span>dish<span class="token punctuation">,</span> duration<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token function">hours</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de <code>TaskGroup</code> pour des types de retours différents (hétérogènes) impose un boilerplate important (utilisation d'énums, variables optionnelles, boucles de collecte) et augmente le risque d'erreurs via le déballage forcé (<code>!</code>).</p>
+<h3 id="apr%C3%A8s-se-0317" tabindex="-1"><a href="#apr%C3%A8s-se-0317" class="header-anchor">Après SE-0317</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">makeDinner</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">Meal</span> <span class="token punctuation">{</span>
+    <span class="token keyword">async</span> <span class="token keyword">let</span> veggies <span class="token operator">=</span> <span class="token function">chopVegetables</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">async</span> <span class="token keyword">let</span> meat <span class="token operator">=</span> <span class="token function">marinateMeat</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">async</span> <span class="token keyword">let</span> oven <span class="token operator">=</span> <span class="token function">preheatOven</span><span class="token punctuation">(</span>temperature<span class="token punctuation">:</span> <span class="token number">350</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">let</span> ingredients <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token keyword">try</span> <span class="token keyword">await</span> veggies<span class="token punctuation">,</span> <span class="token keyword">await</span> meat<span class="token punctuation">]</span>
+    <span class="token keyword">let</span> dish <span class="token operator">=</span> <span class="token class-name">Dish</span><span class="token punctuation">(</span>ingredients<span class="token punctuation">:</span> ingredients<span class="token punctuation">)</span>
+    <span class="token keyword">return</span> <span class="token keyword">try</span> <span class="token keyword">await</span> oven<span class="token punctuation">.</span><span class="token function">cook</span><span class="token punctuation">(</span>dish<span class="token punctuation">,</span> duration<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token function">hours</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La syntaxe <code>async let</code> permet de déclarer des tâches concurrentes de manière concise. Le compilateur gère la création des tâches enfants et l'utilisateur utilise simplement <code>await</code> (et <code>try</code> si nécessaire) pour récupérer les valeurs, rendant le code plus lisible et sûr.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

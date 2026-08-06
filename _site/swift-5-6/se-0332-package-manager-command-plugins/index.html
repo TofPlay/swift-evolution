@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0332 - Package Manager Command Plugins - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-6/se-0332-package-manager-command-plugins/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0332 - Package Manager Command Plugins">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-6/se-0332-package-manager-command-plugins/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-6/">
+                  Swift 5.6
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0332 - Package Manager Command Plugins</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0332 - Package Manager Command Plugins</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.6</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0332-swiftpm-command-plugins.md">SE-0332 - Package Manager Command Plugins</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit une nouvelle capacité pour Swift Package Manager (SwiftPM) : les <strong>Command Plugins</strong>. Contrairement aux <em>build tool plugins</em> qui s'exécutent automatiquement pendant la compilation, les command plugins sont invoqués manuellement par l'utilisateur via la CLI (<code>swift package &lt;verb&gt;</code>) ou via une IDE.</p>
+<p>Les points clés incluent :</p>
+<ul>
+<li><strong>Intention et Verbes :</strong> Les plugins définissent une intention (ex: génération de documentation, formatage de code) ou un verbe personnalisé.</li>
+<li><strong>Permissions :</strong> Les plugins sont sandboxed par défaut. Ils peuvent demander des permissions spécifiques, comme l'accès en écriture au répertoire du package (<code>writeToPackageDirectory</code>), ce qui nécessite l'approbation de l'utilisateur.</li>
+<li><strong>Interaction avec SwiftPM :</strong> Les plugins peuvent utiliser une interface <code>PackageManager</code> pour demander des actions comme des builds (<code>build()</code>) ou des tests (<code>test()</code>), ou obtenir des informations comme les symbol graphs.</li>
+<li><strong>Exécution :</strong> Ils s'exécutent sous forme de scripts Swift avec un point d'entrée <code>performCommand</code>.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0332" tabindex="-1"><a href="#avant-se-0332" class="header-anchor">Avant SE-0332</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Les plugins existants (Build Tool Plugins) s'exécutent </span>
+<span class="token comment">// uniquement de manière automatique lors du build.</span>
+<span class="token comment">// Ils sont fortement restreints et ne peuvent pas </span>
+<span class="token comment">// modifier les fichiers du répertoire du package.</span>
+</code></pre>
+<p>Les build tool plugins sont conçus pour la génération de code (ex: .proto vers .swift) et sont intégrés au graphe de build, ce qui limite leur flexibilité pour des tâches comme le formatage de code ou la documentation.</p>
+<h3 id="apr%C3%A8s-se-0332" tabindex="-1"><a href="#apr%C3%A8s-se-0332" class="header-anchor">Après SE-0332</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans le Package.swift</span>
+<span class="token punctuation">.</span><span class="token function">plugin</span><span class="token punctuation">(</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyFormatterPlugin"</span></span><span class="token punctuation">,</span>
+    capability<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token function">command</span><span class="token punctuation">(</span>
+        intent<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token function">sourceCodeFormatting</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        permissions<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token function">writeToPackageDirectory</span><span class="token punctuation">(</span>reason<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Reformat source files"</span></span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+    <span class="token punctuation">)</span><span class="token punctuation">,</span>
+    dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">product</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"swift-format"</span></span><span class="token punctuation">,</span> package<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"swift-format"</span></span><span class="token punctuation">)</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">)</span>
+
+<span class="token comment">// Implémentation du plugin</span>
+<span class="token keyword">import</span> <span class="token class-name">PackagePlugin</span>
+<span class="token keyword">import</span> <span class="token class-name">Foundation</span>
+
+<span class="token attribute atrule">@main</span>
+<span class="token keyword">struct</span> <span class="token class-name">MyFormatterPlugin</span><span class="token punctuation">:</span> <span class="token class-name">CommandPlugin</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">performCommand</span><span class="token punctuation">(</span>context<span class="token punctuation">:</span> <span class="token class-name">PluginContext</span><span class="token punctuation">,</span> arguments<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">String</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token keyword">throws</span> <span class="token punctuation">{</span>
+        <span class="token keyword">let</span> swiftFormatTool <span class="token operator">=</span> <span class="token keyword">try</span> context<span class="token punctuation">.</span><span class="token function">tool</span><span class="token punctuation">(</span>named<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"swift-format"</span></span><span class="token punctuation">)</span>
+        <span class="token comment">// Logique pour invoquer l'outil et modifier les fichiers</span>
+        <span class="token keyword">let</span> process <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token class-name">Process</span><span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span>executableURL<span class="token punctuation">,</span> arguments<span class="token punctuation">:</span> args<span class="token punctuation">)</span>
+        process<span class="token punctuation">.</span><span class="token function">waitUntilExit</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation du plugin via la CLI</span>
+❯ swift package format<span class="token operator">-</span>source<span class="token operator">-</span>code
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code généré par la macro (Expansion)</span>
+<span class="token comment">// Le plugin exécute l'outil externe qui modifie directement </span>
+<span class="token comment">// les fichiers sources du package après approbation.</span>
+</code></pre>
+<p>La proposition permet d'étendre les fonctionnalités de SwiftPM via des outils personnalisés capables d'interagir avec le code source (formatage, documentation) de manière interactive et sécurisée.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0404 - Allow Protocols to be Nested in Non-Generic Contexts - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-10/se-0404-allow-protocols-to-be-nested-in-non-generic-contexts/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0404 - Allow Protocols to be Nested in Non-Generic Contexts">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-10/se-0404-allow-protocols-to-be-nested-in-non-generic-contexts/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-10/">
+                  Swift 5.10
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0404 - Allow Protocols to be Nested in Non-Generic Contexts</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0404 - Allow Protocols to be Nested in Non-Generic Contexts</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.10</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0404-nested-protocols.md">SE-0404 - Allow Protocols to be Nested in Non-Generic Contexts</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit la possibilité d'imbriquer des protocoles à l'intérieur de types nommés non génériques (structures, classes, énumérations, acteurs) ainsi qu'à l'intérieur de fonctions ne faisant pas partie d'un contexte générique. Jusqu'à présent, les protocoles devaient obligatoirement être définis au niveau supérieur du module, ce qui forçait les développeurs à utiliser des noms composés (ex: <code>TableViewDelegate</code>) pour exprimer un lien logique avec un type parent. L'imbrication permet une meilleure encapsulation et une syntaxe plus concise via le nom complet du type parent (ex: <code>TableView.Delegate</code>). Il est important de noter que l'imbrication dans des contextes génériques (types ou fonctions génériques) reste interdite dans cette proposition pour des raisons de complexité technique.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0404" tabindex="-1"><a href="#avant-se-0404" class="header-anchor">Avant SE-0404</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">class</span> <span class="token class-name">TableView</span> <span class="token punctuation">{</span>
+    <span class="token comment">// La logique de délégation doit être définie au niveau supérieur</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Utilisation d'un nom composé pour exprimer la relation de dépendance</span>
+<span class="token keyword">protocol</span> <span class="token class-name">TableViewDelegate</span><span class="token punctuation">:</span> <span class="token class-name">AnyObject</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">tableView</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> tableView<span class="token punctuation">:</span> <span class="token class-name">TableView</span><span class="token punctuation">,</span> didSelectRowAtIndex index<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">extension</span> <span class="token class-name">TableView</span> <span class="token punctuation">{</span>
+    <span class="token keyword">weak</span> <span class="token keyword">var</span> delegate<span class="token punctuation">:</span> <span class="token class-name">TableViewDelegate</span><span class="token operator">?</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'absence de support pour l'imbrication oblige à utiliser des noms longs et explicites pour indiquer qu'un protocole est lié à une classe spécifique.</p>
+<h3 id="apr%C3%A8s-se-0404" tabindex="-1"><a href="#apr%C3%A8s-se-0404" class="header-anchor">Après SE-0404</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">class</span> <span class="token class-name">TableView</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Le protocole est directement imbriqué dans la classe</span>
+    <span class="token keyword">protocol</span> <span class="token class-name">Delegate</span><span class="token punctuation">:</span> <span class="token class-name">AnyObject</span> <span class="token punctuation">{</span>
+        <span class="token keyword">func</span> <span class="token function-definition function">tableView</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> tableView<span class="token punctuation">:</span> <span class="token class-name">TableView</span><span class="token punctuation">,</span> didSelectRowAtIndex index<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">weak</span> <span class="token keyword">var</span> delegate<span class="token punctuation">:</span> <span class="token class-name">Delegate</span><span class="token operator">?</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// La conformité se fait via le chemin de type complet</span>
+<span class="token keyword">class</span> <span class="token class-name">DelegateConformer</span><span class="token punctuation">:</span> <span class="token class-name">TableView</span><span class="token punctuation">.</span><span class="token class-name">Delegate</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">tableView</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> tableView<span class="token punctuation">:</span> <span class="token class-name">TableView</span><span class="token punctuation">,</span> didSelectRowAtIndex index<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Implémentation</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'imbrication permet de définir le protocole <code>Delegate</code> à l'intérieur de <code>TableView</code>, créant un espace de nommage naturel et une syntaxe beaucoup plus propre.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

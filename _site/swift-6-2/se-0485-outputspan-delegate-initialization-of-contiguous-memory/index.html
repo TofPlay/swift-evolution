@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0485 - OutputSpan: delegate initialization of contiguous memory - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-2/se-0485-outputspan-delegate-initialization-of-contiguous-memory/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0485 - OutputSpan: delegate initialization of contiguous memo…">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-2/se-0485-outputspan-delegate-initialization-of-contiguous-memory/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-2/">
+                  Swift 6.2
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0485 - OutputSpan: delegate initialization of contiguous memory</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0485 - OutputSpan: delegate initialization of contiguous memory</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.2</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0485-outputspan.md">SE-0485 - OutputSpan: delegate initialization of contiguous memory</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit <code>OutputSpan</code> et <code>OutputRawSpan</code>, deux nouveaux types non-copiables et non-échappables conçus pour déléguer l'initialisation de la mémoire d'un conteneur à un code utilisateur de manière sûre.</p>
+<p>Actuellement, l'initialisation personnalisée de la mémoire (comme pour <code>Array.init(unsafeUninitializedCapacity:...)</code>) repose sur des fonctions <code>unsafe</code>, ce qui est risqué et peu adapté aux environnements soucieux de la sécurité.</p>
+<p>Les points clés incluent :</p>
+<ul>
+<li><strong>OutputSpan<element></element></strong> : Gère une région de mémoire contiguë composée d'un préfixe d'éléments déjà initialisés et d'un suffixe de mémoire non initialisée. Sa taille peut varier au fur et à mesure que des éléments sont ajoutés.</li>
+<li><strong>OutputRawSpan</strong> : Version équivalente pour la mémoire non typée (bytes), utile pour les encodeurs.</li>
+<li><strong>Sécurité</strong> : Utilise les garanties d'accès exclusif et de durée de vie pour prévenir les fuites de mémoire et les accès non sécurisés.</li>
+<li><strong>Extensions de la bibliothèque standard</strong> : Introduction de nouveaux initialisateurs pour <code>Array</code>, <code>String</code>, <code>ContiguousArray</code>, etc., prenant un <code>OutputSpan</code> en paramètre via une closure.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0485" tabindex="-1"><a href="#avant-se-0485" class="header-anchor">Avant SE-0485</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de fonctions unsafe, sujettes aux erreurs de gestion de capacité et de durée de vie</span>
+<span class="token keyword">var</span> array <span class="token operator">=</span> <span class="token class-name">Array</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>unsafeUninitializedCapacity<span class="token punctuation">:</span> <span class="token number">5</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> buffer<span class="token punctuation">,</span> initializedCount <span class="token keyword">in</span>
+    buffer<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">10</span>
+    buffer<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">20</span>
+    <span class="token keyword">return</span> <span class="token number">2</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de fonctions <code>unsafe</code> oblige le développeur à gérer manuellement le nombre d'éléments initialisés et la gestion de la mémoire, ce qui peut conduire à des comportements indéfinis si le <code>initializedCount</code> est incorrect.</p>
+<h3 id="apr%C3%A8s-se-0485" tabindex="-1"><a href="#apr%C3%A8s-se-0485" class="header-anchor">Après SE-0485</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation sécurisée avec OutputSpan</span>
+<span class="token keyword">let</span> array <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token class-name">Array</span><span class="token punctuation">(</span>capacity<span class="token punctuation">:</span> <span class="token number">5</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">(</span>span<span class="token punctuation">:</span> <span class="token keyword">inout</span> <span class="token class-name">OutputSpan</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token keyword">in</span>
+    span<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>
+    span<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">20</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// span.count est maintenant 2, et la mémoire est gérée de manière sûre.</span>
+</code></pre>
+<p>La proposition permet de passer un <code>OutputSpan</code> à une closure. Le développeur utilise simplement <code>append(_:)</code> pour ajouter des éléments. Le type <code>OutputSpan</code> gère l'état de l'initialisation de la mémoire et garantit que le conteneur final est correctement configuré.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

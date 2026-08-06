@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0309 - Unlock existentials for all protocols - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-7/se-0309-unlock-existential-types-for-all-protocols/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0309 - Unlock existentials for all protocols">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-7/se-0309-unlock-existential-types-for-all-protocols/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-7/">
+                  Swift 5.7
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0309 - Unlock existentials for all protocols</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0309 - Unlock existentials for all protocols</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.7</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0309-unlock-existential-types-for-all-protocols.md">SE-0309 - Unlock existentials for all protocols</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition lève la restriction empêchant l'utilisation de protocoles ayant des exigences de type associé (<code>associatedtype</code>) ou des références à <code>Self</code> comme types existentiels.</p>
+<p>Auparavant, un protocole possédant un type associé ne pouvait être utilisé qu'en tant que contrainte générique, rendant l'accès à ses membres impossible via une valeur de type protocolaire. La proposition introduit une approche plus granulaire : tout protocole peut désormais être utilisé comme type, mais l'accès aux membres est restreint dynamiquement. L'accès échoue uniquement si le membre invoqué contient une référence à <code>Self</code> ou à un type associé racine dans une position non-covariante. Cette modification permet également de lever des limitations sur les protocoles dont les types associés sont liés à des types concrets via des contraintes (ex: <code>where Self.Element == Int</code>).</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0309" tabindex="-1"><a href="#avant-se-0309" class="header-anchor">Avant SE-0309</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">protocol</span> <span class="token class-name">Identifiable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">associatedtype</span> <span class="token constant">ID</span><span class="token punctuation">:</span> <span class="token class-name">Hashable</span>
+    <span class="token keyword">var</span> id<span class="token punctuation">:</span> <span class="token constant">ID</span> <span class="token punctuation">{</span> <span class="token keyword">get</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">process</span><span class="token punctuation">(</span>item<span class="token punctuation">:</span> <span class="token class-name">Identifiable</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// error: Protocol can only be used as a generic constraint because it has 'Self' or associated type requirements</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>item<span class="token punctuation">.</span>id<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de protocoles avec types associés était limitée aux contraintes génériques, empêchant l'utilisation de ces protocoles comme types pour des variables ou paramètres de fonctions.</p>
+<h3 id="apr%C3%A8s-se-0309" tabindex="-1"><a href="#apr%C3%A8s-se-0309" class="header-anchor">Après SE-0309</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">protocol</span> <span class="token class-name">Identifiable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">associatedtype</span> <span class="token constant">ID</span><span class="token punctuation">:</span> <span class="token class-name">Hashable</span>
+    <span class="token keyword">var</span> id<span class="token punctuation">:</span> <span class="token constant">ID</span> <span class="token punctuation">{</span> <span class="token keyword">get</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">process</span><span class="token punctuation">(</span>item<span class="token punctuation">:</span> <span class="token class-name">Identifiable</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// OK, si le type associé est connu ou via type-erasure (à l'avenir)</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>item<span class="token punctuation">.</span>id<span class="token punctuation">)</span> 
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Cas des contraintes de type connues</span>
+<span class="token keyword">protocol</span> <span class="token class-name">Animal</span><span class="token punctuation">:</span> <span class="token class-name">Identifiable</span> <span class="token keyword">where</span> <span class="token constant">ID</span> <span class="token operator">==</span> <span class="token class-name">String</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token keyword">extension</span> <span class="token class-name">Animal</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> name<span class="token punctuation">:</span> <span class="token class-name">String</span> <span class="token punctuation">{</span> id <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">var</span> animal<span class="token punctuation">:</span> any <span class="token class-name">Animal</span> <span class="token operator">=</span> someConcreteAnimal
+<span class="token function">print</span><span class="token punctuation">(</span>animal<span class="token punctuation">.</span>name<span class="token punctuation">)</span> <span class="token comment">// OK, car ID est connu comme String</span>
+</code></pre>
+<p>La proposition permet d'utiliser n'importe quel protocole en tant que type. L'accès aux membres est autorisé si le type associé est résolu par une contrainte ou si le membre est dans une position covariante, offrant une abstraction de valeur beaucoup plus flexible.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

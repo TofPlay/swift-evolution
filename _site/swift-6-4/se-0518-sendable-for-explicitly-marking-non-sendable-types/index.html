@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0518 - ~Sendable for explicitly marking non-Sendable types - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-4/se-0518-sendable-for-explicitly-marking-non-sendable-types/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0518 - ~Sendable for explicitly marking non-Sendable types">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-4/se-0518-sendable-for-explicitly-marking-non-sendable-types/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-4/">
+                  Swift 6.4
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0518 - ~Sendable for explicitly marking non-Sendable types</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0518 - ~Sendable for explicitly marking non-Sendable types</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.4</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0518-tilde-sendable.md">SE-0518 - ~Sendable for explicitly marking non-Sendable types</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit la syntaxe de conformité <code>~Sendable</code> pour permettre de marquer explicitement un type comme non-<code>Sendable</code>. Cela permet de supprimer l'inférence automatique de <code>Sendable</code> pour les types publics, facilitant ainsi l'audit de sécurité des API. Contrairement aux extensions marquées comme <code>unavailable</code>, le marquage <code>~Sendable</code> ne s'applique pas par héritage aux sous-classes, permettant ainsi à une classe parente d'être non-<code>Sendable</code> tout en autorisant ses sous-classes à devenir <code>Sendable</code> si elles sont sécurisées.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0518" tabindex="-1"><a href="#avant-se-0518" class="header-anchor">Avant SE-0518</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
+    <span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+
+<span class="token attribute atrule">@available</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">,</span> unavailable<span class="token punctuation">)</span>
+<span class="token keyword">extension</span> <span class="token class-name">Base</span><span class="token punctuation">:</span> <span class="token class-name">Sendable</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
+
+<span class="token comment">// Erreur : La conformité de 'ThreadSafe' à 'Sendable' est déjà indisponible</span>
+<span class="token comment">// car la conformité indisponible à 'Sendable' est héritée par les sous-classes.</span>
+<span class="token keyword">final</span> <span class="token keyword">class</span> <span class="token class-name">ThreadSafe</span><span class="token punctuation">:</span> <span class="token class-name">Base</span><span class="token punctuation">,</span> <span class="token attribute atrule">@unchecked</span> <span class="token class-name">Sendable</span> <span class="token punctuation">{</span>
+    <span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Actuellement, il est difficile de déterminer si l'absence de conformité <code>Sendable</code> est intentionnelle ou simplement une omission. De plus, utiliser une extension <code>unavailable</code> pour bloquer <code>Sendable</code> empêche toute sous-classe d'être déclarée <code>Sendable</code>, même si elle est sécurisée.</p>
+<h3 id="apr%C3%A8s-se-0518" tabindex="-1"><a href="#apr%C3%A8s-se-0518" class="header-anchor">Après SE-0518</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le type est explicitement marqué comme non-Sendable</span>
+<span class="token keyword">public</span> <span class="token keyword">enum</span> <span class="token class-name">ExecutionResult</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Sendable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">case</span> success
+    <span class="token keyword">case</span> <span class="token function">failure</span><span class="token punctuation">(</span><span class="token class-name">NonSendable</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// La classe de base est non-Sendable</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Base</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Sendable</span> <span class="token punctuation">{</span>
+    <span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// La sous-classe peut maintenant être explicitement Sendable</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ThreadSafeImpl</span><span class="token punctuation">:</span> <span class="token class-name">Base</span><span class="token punctuation">,</span> <span class="token attribute atrule">@unchecked</span> <span class="token class-name">Sendable</span> <span class="token punctuation">{</span>
+    <span class="token comment">// protège 'value' via un verrou pour garantir la sécurité</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Une sous-classe peut rester non-Sendable par défaut</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">UnsafeImpl</span><span class="token punctuation">:</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> x<span class="token punctuation">:</span> <span class="token class-name">NonSendable</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La syntaxe <code>~Sendable</code> permet d'exprimer une intention claire pour les types publics et offre la flexibilité nécessaire pour que des sous-classes puissent implémenter leur propre conformité <code>Sendable</code> (via <code>@unchecked</code> par exemple) sans être bloquées par la déclaration de la classe parente.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0341 - Opaque Parameter Declarations - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-5-7/se-0341-opaque-parameter-declarations/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0341 - Opaque Parameter Declarations">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-5-7/se-0341-opaque-parameter-declarations/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-5-7/">
+                  Swift 5.7
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0341 - Opaque Parameter Declarations</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0341 - Opaque Parameter Declarations</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.7</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0341-opaque-parameters.md">SE-0341 - Opaque Parameter Declarations</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit l'utilisation du mot-clé <code>some</code> pour les paramètres de fonctions, initialiseurs et sous-scripts. Jusqu'à présent, l'utilisation de types génériques pour des paramètres nécessitant peu de contraintes impliquait une syntaxe lourde (déclaration de paramètres génériques explicites).</p>
+<p>L'utilisation de <code>some P</code> dans un paramètre permet de :</p>
+<ul>
+<li>Simplifier la syntaxe en supprimant la liste des paramètres génériques inutiles.</li>
+<li>Réduire la complexité visuelle des fonctions (ex: SwiftUI).</li>
+<li>Déterminer le type via l'inférence de type par l'appelant, contrairement aux types opaques de retour.</li>
+</ul>
+<p>Chaque occurrence de <code>some</code> dans une déclaration représente un paramètre générique distinct et non nommé. La proposition ne modifie pas le comportement binaire (ABI) car il s'agit d'un simple sucre syntaxique pour les paramètres génériques.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0341" tabindex="-1"><a href="#avant-se-0341" class="header-anchor">Avant SE-0341</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">horizontal</span><span class="token operator">&lt;</span>V1<span class="token punctuation">:</span> <span class="token class-name">View</span><span class="token punctuation">,</span> V2<span class="token punctuation">:</span> <span class="token class-name">View</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> v1<span class="token punctuation">:</span> V1<span class="token punctuation">,</span> <span class="token omit keyword">_</span> v2<span class="token punctuation">:</span> V2<span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token keyword">some</span> <span class="token class-name">View</span> <span class="token punctuation">{</span>
+    <span class="token class-name">HStack</span> <span class="token punctuation">{</span>
+        v1
+        v2
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La syntaxe nécessite de déclarer explicitement les types génériques <code>V1</code> et <code>V2</code> même s'ils ne sont utilisés qu'une seule fois, ce qui alourdit la signature de la fonction.</p>
+<h3 id="apr%C3%A8s-se-0341" tabindex="-1"><a href="#apr%C3%A8s-se-0341" class="header-anchor">Après SE-0341</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">horizontal</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> v1<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">View</span><span class="token punctuation">,</span> <span class="token omit keyword">_</span> v2<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">View</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token keyword">some</span> <span class="token class-name">View</span> <span class="token punctuation">{</span>
+    <span class="token class-name">HStack</span> <span class="token punctuation">{</span>
+        v1
+        v2
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La syntaxe est plus concise et lisible. Le compilateur traite <code>some View</code> comme un paramètre générique implicite, où l'appelant fournit un type concret qui respecte le protocole <code>View</code>.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

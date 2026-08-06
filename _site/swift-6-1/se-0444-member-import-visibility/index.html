@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0444 - Member import visibility - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-1/se-0444-member-import-visibility/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0444 - Member import visibility">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-1/se-0444-member-import-visibility/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-1/">
+                  Swift 6.1
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0444 - Member import visibility</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0444 - Member import visibility</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.1</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0444-member-import-visibility.md">SE-0444 - Member import visibility</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Actuellement, Swift applique des règles de visibilité différentes pour les déclarations de haut niveau (top-level) et pour les membres (méthodes, propriétés) de structures ou d'extensions. Les membres d'un module importé de manière transitive sont considérés comme étant "dans la portée" (in scope), ce qui peut provoquer des erreurs d'ambiguïté si un autre module importé directement possède également un membre portant le même nom.</p>
+<p>La proposition SE-0444 unifie ces règles pour assurer une cohérence dans la recherche de noms (name lookup). Désormais, un membre n'est considéré comme étant dans la portée que si le module qui le déclare est explicitement importé (ou re-exporté) dans le fichier source. Cela empêche l'apparition soudaine d'ambiguïtés lors de l'ajout de nouvelles dépendances et améliore la prévisibilité du code. Une exception est maintenue pour les implémentations par défaut des protocoles afin de préserver la compatibilité ABI lors de l'évolution des bibliothèques.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0444" tabindex="-1"><a href="#avant-se-0444" class="header-anchor">Avant SE-0444</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// main.swift</span>
+<span class="token keyword">import</span> <span class="token class-name">RecipeKit</span>
+
+<span class="token keyword">let</span> recipe <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"2 slices of bread, 1.5 tbs peanut butter"</span></span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+<p>L'appel à <code>parse()</code> est ambigu car un nouveau module ajouté (ex: <code>GroceryKit</code>) peut contenir une extension sur <code>String</code> avec une méthode <code>parse()</code>, même si <code>GroceryKit</code> n'est pas importé dans <code>main.swift</code>, car son membre est visible par transitivité.</p>
+<h3 id="apr%C3%A8s-se-0444" tabindex="-1"><a href="#apr%C3%A8s-se-0444" class="header-anchor">Après SE-0444</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// main.swift</span>
+<span class="token keyword">import</span> <span class="token class-name">RecipeKit</span>
+
+<span class="token keyword">let</span> recipe <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"2 slices of bread, 1.5 tbs peanut butter"</span></span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+<p>L'erreur d'ambiguïté est évitée car le compilateur ne cherchera les membres de <code>GroceryKit</code> que si <code>import GroceryKit</code> est explicitement présent. Si une ambiguïté persiste avec un autre module, le développeur devra importer explicitement le module souhaité ou typer la variable pour lever l'ambiguïté.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0471 - Improved Custom SerialExecutor isolation checking for Concurrency Runtime - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-2/se-0471-improved-custom-serialexecutor-isolation-checking-for-concurrency-runtime/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0471 - Improved Custom SerialExecutor isolation checking for…">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-2/se-0471-improved-custom-serialexecutor-isolation-checking-for-concurrency-runtime/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-2/">
+                  Swift 6.2
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0471 - Improved Custom SerialExecutor isolation checking for Concurrency Runtime</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0471 - Improved Custom SerialExecutor isolation checking for Concurrency Runtime</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.2</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0471-SerialExecutor-isIsolated.md">SE-0471 - Improved Custom SerialExecutor isolation checking for Concurrency Runtime</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit une amélioration du système de vérification de l'isolation pour les exécuteurs personnalisés (<code>SerialExecutor</code>).</p>
+<p>Jusqu'à présent, les API de vérification (comme <code>assumeIsolated</code>) reposaient sur <code>checkIsolated()</code>, qui suit un modèle "passer ou planter" (<em>pass or crash</em>). Si l'exécution ne se trouvait pas sur le bon contexte, l'application plantait immédiatement, ce qui rendait difficile l'émission de simples avertissements et produisait des messages d'erreur peu informatifs.</p>
+<p>La proposition introduit la méthode <code>isIsolatingCurrentContext() -&gt; Bool?</code> dans le protocole <code>SerialExecutor</code>. Cette méthode permet au runtime de :</p>
+<ol>
+<li><strong>Émettre des avertissements :</strong> Si l'exécution est incorrecte mais que le runtime est en mode "avertissement", il peut prévenir le développeur sans faire planter l'application.</li>
+<li><strong>Améliorer le débogage :</strong> En utilisant cette méthode, le runtime peut fournir des messages d'erreur beaucoup plus détaillés sur l'environnement d'exécution actuel lors d'un échec.</li>
+<li><strong>Accès sécurisé depuis un Actor :</strong> L'ajout de l'extension <code>Actor.withSerialExecutor</code> permet d'accéder de manière sécurisée à l'exécuteur d'un acteur pour effectuer des vérifications d'isolation manuelles.</li>
+</ol>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0471" tabindex="-1"><a href="#avant-se-0471" class="header-anchor">Avant SE-0471</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">final</span> <span class="token keyword">class</span> <span class="token class-name">ExampleExecutor</span><span class="token punctuation">:</span> <span class="token class-name">SerialExecutor</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">checkIsolated</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Si l'isolation est incorrecte, l'application plante ici.</span>
+        <span class="token comment">// Le message d'erreur est souvent générique et peu informatif.</span>
+        <span class="token function">dispatchPrecondition</span><span class="token punctuation">(</span>condition<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token function">onQueue</span><span class="token punctuation">(</span><span class="token keyword">self</span><span class="token punctuation">.</span>queue<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'approche actuelle oblige à provoquer un crash immédiat via <code>checkIsolated()</code> pour empêcher un accès concurrent non sécurisé, empêchant toute transition douce vers un mode de vérification strict via des avertissements.</p>
+<h3 id="apr%C3%A8s-se-0471" tabindex="-1"><a href="#apr%C3%A8s-se-0471" class="header-anchor">Après SE-0471</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">final</span> <span class="token keyword">class</span> <span class="token class-name">ExampleExecutor</span><span class="token punctuation">:</span> <span class="token class-name">SerialExecutor</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Nouvelle méthode permettant de vérifier sans faire planter</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">isIsolatingCurrentContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Bool</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token keyword">self</span><span class="token punctuation">.</span>queue<span class="token punctuation">.</span><span class="token function">containsCurrentTask</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Exemple logique</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">func</span> <span class="token function-definition function">checkIsolated</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">dispatchPrecondition</span><span class="token punctuation">(</span>condition<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token function">onQueue</span><span class="token punctuation">(</span><span class="token keyword">self</span><span class="token punctuation">.</span>queue<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Utilisation pour émettre des avertissements au lieu de crashs</span>
+<span class="token keyword">func</span> <span class="token function-definition function">performSafeOperation</span><span class="token punctuation">(</span>on <span class="token keyword">actor</span><span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">Actor</span><span class="token punctuation">,</span> operation<span class="token punctuation">:</span> <span class="token attribute atrule">@isolated</span><span class="token punctuation">(</span>any<span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">actor</span><span class="token punctuation">.</span>withSerialExecutor <span class="token punctuation">{</span> executor <span class="token keyword">in</span>
+        <span class="token keyword">if</span> <span class="token operator">!</span>executor<span class="token punctuation">.</span><span class="token function">isIsolatingCurrentContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Warning: Operation is not running on the expected isolation!"</span></span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+            <span class="token function">operation</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La nouvelle approche permet de distinguer la vérification "silencieuse" (pour les avertissements) du crash obligatoire, offrant une flexibilité accrue pour les bibliothèques souhaitant aider les développeurs à migrer vers un mode de concurrence strict sans interrompre l'exécution.</p>
+<hr>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>

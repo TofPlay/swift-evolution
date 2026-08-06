@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SE-0459 - Add Collection conformances for enumerated() - TofPlay</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="alternate" href="/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="canonical" href="http://localhost:3000/swift-6-2/se-0459-add-collection-conformances-for-enumerated/">
+    <script src="/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="SE-0459 - Add Collection conformances for enumerated()">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="http://localhost:3000/swift-6-2/se-0459-add-collection-conformances-for-enumerated/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-6-2/">
+                  Swift 6.2
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0459 - Add Collection conformances for enumerated()</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0459 - Add Collection conformances for enumerated()</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.2</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0459-enumerated-collection.md">SE-0459 - Add Collection conformances for enumerated()</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit la conformité de <code>EnumeratedSequence</code> aux protocoles <code>Collection</code>, <code>BidirectionalCollection</code> et <code>RandomAccessCollection</code>. Jusqu'à présent, le type retourné par la méthode <code>.enumerated()</code> ne se conformait qu'à <code>Sequence</code>, ce qui limitait son utilisation dans des contextes exigeant une collection (par exemple, pour utiliser des méthodes comme <code>.reversed()</code> de manière efficace ou pour être utilisé directement dans des vues SwiftUI comme <code>List</code> ou <code>ForEach</code>).</p>
+<p>La proposition a choisi de rendre la conformité conditionnelle à la nature de la collection de base (<code>Base</code>), permettant ainsi des opérations comme <code>.reversed()</code> de bénéficier de <code>ReversedCollection</code> au lieu de provoquer une allocation de tableau coûteuse.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0459" tabindex="-1"><a href="#avant-se-0459" class="header-anchor">Avant SE-0459</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> items <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"a"</span></span><span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"b"</span></span><span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"c"</span></span><span class="token punctuation">]</span>
+<span class="token keyword">let</span> enumerated <span class="token operator">=</span> items<span class="token punctuation">.</span><span class="token function">enumerated</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Erreur : 'EnumeratedSequence&lt;[String]&gt;' ne se conforme pas à 'Collection'</span>
+<span class="token comment">// On est obligé de convertir en Array pour utiliser des fonctionnalités de Collection</span>
+<span class="token keyword">let</span> reversedItems <span class="token operator">=</span> <span class="token class-name">Array</span><span class="token punctuation">(</span>enumerated<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">reversed</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+<p>L'impossibilité d'accéder directement aux fonctionnalités de <code>Collection</code> oblige l'utilisateur à créer une copie sous forme de tableau, ce qui entraîne des allocations mémoire inutiles et des performances réduites.</p>
+<h3 id="apr%C3%A8s-se-0459" tabindex="-1"><a href="#apr%C3%A8s-se-0459" class="header-anchor">Après SE-0459</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> items <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"a"</span></span><span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"b"</span></span><span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"c"</span></span><span class="token punctuation">]</span>
+<span class="token keyword">let</span> enumerated <span class="token operator">=</span> items<span class="token punctuation">.</span><span class="token function">enumerated</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Fonctionne directement grâce à la nouvelle conformité Collection</span>
+<span class="token keyword">let</span> reversedItems <span class="token operator">=</span> enumerated<span class="token punctuation">.</span><span class="token function">reversed</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+<p>La conformité directe permet d'utiliser des algorithmes de collection de manière efficace (par exemple, <code>.reversed()</code> retourne une <code>ReversedCollection</code> sans allocation supplémentaire) et simplifie l'utilisation avec les frameworks de l'écosystème Swift.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations.
+    </footer>    
+  
+</body></html>
