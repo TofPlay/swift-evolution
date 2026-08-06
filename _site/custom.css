@@ -1,0 +1,124 @@
+main {
+  padding-top: 0.5rem; /* ou 0 si tu veux coller complètement */
+}
+
+.navbar {
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+}
+
+.navbar .breadcrumb {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+.navbar .breadcrumb li:not(:last-child)::after {
+  content: "›";
+  margin-left: 0.35rem;
+  opacity: 0.5;
+}
+
+.navbar .breadcrumb li:last-child::after {
+  content: none;
+}
+
+.navbar .breadcrumb a {
+  text-decoration: none;
+}
+
+.navbar .breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.navbar .breadcrumb [aria-current="page"] {
+  opacity: 0.7;
+}
+
+.site-welcome {
+  max-width: min(100% - 15vw, 45em);
+  margin: 0 auto;
+  padding: 0.5rem 0 0;
+}
+
+.site-welcome .page-title {
+  margin: 0;
+}
+
+.page-header {
+  margin-bottom: 0.5rem; /* ou 0 si tu veux encore plus serré */
+}
+
+.breadcrumb {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.breadcrumb ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.breadcrumb li:not(:last-child)::after {
+  content: "›";
+  margin-left: 0.35rem;
+  opacity: 0.5;
+}
+
+.breadcrumb a {
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb [aria-current="page"] {
+  opacity: 0.7;
+}
+
+/* --- Base du Footer (Positionnement & Structure) --- */
+.ai-disclaimer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-top: 1px solid;
+  z-index: 1000;
+  box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.05);
+  -webkit-backdrop-filter: blur(5px);
+          backdrop-filter: blur(5px);
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+/* --- Thème Clair (Par défaut) --- */
+.ai-disclaimer {
+  color: #666;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-top-color: #eee;
+  box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Thème Sombre (Géré par le bouton de changement de thème) --- */
+/* Le JavaScript dans base.vto définit data-theme="dark" sur <html> */
+[data-theme="dark"] .ai-disclaimer {
+  color: #e0e0e0;
+  background-color: rgba(20, 20, 20, 0.95);
+  border-top-color: #333;
+  box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.3);
+}
