@@ -1,2 +1,2 @@
 
-Sitemap: http://localhost:3000/sitemap.xml
+Sitemap: https://tofplay.github.io/swift-evolution/sitemap.xml

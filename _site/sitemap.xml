@@ -1,911 +1,937 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:3000/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/</loc>
     <lastmod>2026-08-06T15:25:35.830Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/intro/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/intro/</loc>
     <lastmod>2026-08-05T22:23:35.532Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/subtile/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/subtile/</loc>
     <lastmod>2026-08-06T13:53:44.754Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-10/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-10/</loc>
     <lastmod>2026-08-06T13:53:44.696Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-10/se-0327-on-actors-and-initialization/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-10/se-0327-on-actors-and-initialization/</loc>
     <lastmod>2026-08-06T13:53:44.698Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-10/se-0383-deprecate-uiapplicationmain-and-nsapplicationmain/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-10/se-0383-deprecate-uiapplicationmain-and-nsapplicationmain/</loc>
     <lastmod>2026-08-06T13:53:44.698Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-10/se-0404-allow-protocols-to-be-nested-in-non-generic-contexts/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-10/se-0404-allow-protocols-to-be-nested-in-non-generic-contexts/</loc>
     <lastmod>2026-08-06T13:53:44.698Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-10/se-0411-isolated-default-value-expressions/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-10/se-0411-isolated-default-value-expressions/</loc>
     <lastmod>2026-08-06T13:53:44.699Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-10/se-0412-strict-concurrency-for-global-variables/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-10/se-0412-strict-concurrency-for-global-variables/</loc>
     <lastmod>2026-08-06T13:53:44.699Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/</loc>
     <lastmod>2026-08-06T13:53:44.699Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0291-package-collections/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0291-package-collections/</loc>
     <lastmod>2026-08-06T13:53:44.699Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0293-extend-property-wrappers-to-function-and-closure-parameters/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0293-extend-property-wrappers-to-function-and-closure-parameters/</loc>
     <lastmod>2026-08-06T13:53:44.700Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0295-codable-synthesis-for-enums-with-associated-values/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0295-codable-synthesis-for-enums-with-associated-values/</loc>
     <lastmod>2026-08-06T13:53:44.700Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0296-async-await/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0296-async-await/</loc>
     <lastmod>2026-08-06T13:53:44.700Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0297-concurrency-interoperability-with-objective-c/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0297-concurrency-interoperability-with-objective-c/</loc>
     <lastmod>2026-08-06T13:53:44.701Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0298-async-await-sequences/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0298-async-await-sequences/</loc>
     <lastmod>2026-08-06T13:53:44.701Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0299-extending-static-member-lookup-in-generic-contexts/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0299-extending-static-member-lookup-in-generic-contexts/</loc>
     <lastmod>2026-08-06T13:53:44.701Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0300-continuations-for-interfacing-async-tasks-with-synchronous-code/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0300-continuations-for-interfacing-async-tasks-with-synchronous-code/</loc>
     <lastmod>2026-08-06T13:53:44.702Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0304-structured-concurrency/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0304-structured-concurrency/</loc>
     <lastmod>2026-08-06T13:53:44.702Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0306-actors/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0306-actors/</loc>
     <lastmod>2026-08-06T13:53:44.702Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0307-allow-interchangeable-use-of-cgfloat-and-double-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0307-allow-interchangeable-use-of-cgfloat-and-double-types/</loc>
     <lastmod>2026-08-06T13:53:44.702Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0308-if-for-postfix-member-expressions/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0308-if-for-postfix-member-expressions/</loc>
     <lastmod>2026-08-06T13:53:44.703Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0310-effectful-read-only-properties/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0310-effectful-read-only-properties/</loc>
     <lastmod>2026-08-06T13:53:44.703Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0311-task-local-values/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0311-task-local-values/</loc>
     <lastmod>2026-08-06T13:53:44.703Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0313-improved-control-over-actor-isolation/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0313-improved-control-over-actor-isolation/</loc>
     <lastmod>2026-08-06T13:53:44.704Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0314-asyncstream-and-asyncthrowingstream/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0314-asyncstream-and-asyncthrowingstream/</loc>
     <lastmod>2026-08-06T13:53:44.704Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0316-global-actors/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0316-global-actors/</loc>
     <lastmod>2026-08-06T13:53:44.704Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0317-async-let-bindings/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0317-async-let-bindings/</loc>
     <lastmod>2026-08-06T13:53:44.705Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0319-conform-never-to-identifiable/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0319-conform-never-to-identifiable/</loc>
     <lastmod>2026-08-06T13:53:44.705Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-5/se-0323-asynchronous-main-semantics/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-5/se-0323-asynchronous-main-semantics/</loc>
     <lastmod>2026-08-06T13:53:44.705Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-6/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-6/</loc>
     <lastmod>2026-08-06T13:53:44.706Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-6/se-0290-unavailability-condition/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-6/se-0290-unavailability-condition/</loc>
     <lastmod>2026-08-06T13:53:44.706Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-6/se-0303-package-manager-extensible-build-tools/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-6/se-0303-package-manager-extensible-build-tools/</loc>
     <lastmod>2026-08-06T13:53:44.706Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-6/se-0305-package-manager-binary-target-improvements/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-6/se-0305-package-manager-binary-target-improvements/</loc>
     <lastmod>2026-08-06T13:53:44.706Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-6/se-0315-placeholder-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-6/se-0315-placeholder-types/</loc>
     <lastmod>2026-08-06T13:53:44.707Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-6/se-0320-allow-coding-of-non-string-int-keyed-dictionary-into-a-keyedcontainer/</loc>
+    <loc>
+      https://tofplay.github.io/swift-evolution/swift-5-6/se-0320-allow-coding-of-non-string-int-keyed-dictionary-into-a-keyedcontainer/
+    </loc>
     <lastmod>2026-08-06T13:53:44.707Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-6/se-0322-temporary-uninitialized-buffers/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-6/se-0322-temporary-uninitialized-buffers/</loc>
     <lastmod>2026-08-06T13:53:44.707Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-6/se-0324-relax-diagnostics-for-pointer-arguments-to-c-functions/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-6/se-0324-relax-diagnostics-for-pointer-arguments-to-c-functions/</loc>
     <lastmod>2026-08-06T13:53:44.708Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-6/se-0325-additional-package-plugin-apis/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-6/se-0325-additional-package-plugin-apis/</loc>
     <lastmod>2026-08-06T13:53:44.708Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-6/se-0331-remove-sendable-conformance-from-unsafe-pointer-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-6/se-0331-remove-sendable-conformance-from-unsafe-pointer-types/</loc>
     <lastmod>2026-08-06T13:53:44.708Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-6/se-0332-package-manager-command-plugins/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-6/se-0332-package-manager-command-plugins/</loc>
     <lastmod>2026-08-06T13:53:44.709Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-6/se-0335-introduce-existential-any/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-6/se-0335-introduce-existential-any/</loc>
     <lastmod>2026-08-06T13:53:44.709Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-6/se-0337-incremental-migration-to-concurrency-checking/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-6/se-0337-incremental-migration-to-concurrency-checking/</loc>
     <lastmod>2026-08-06T13:53:44.709Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/</loc>
     <lastmod>2026-08-06T13:53:44.709Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0292-package-registry-service/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0292-package-registry-service/</loc>
     <lastmod>2026-08-06T13:53:44.710Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0302-sendable-and-sendable-closures/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0302-sendable-and-sendable-closures/</loc>
     <lastmod>2026-08-06T13:53:44.710Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0309-unlock-existential-types-for-all-protocols/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0309-unlock-existential-types-for-all-protocols/</loc>
     <lastmod>2026-08-06T13:53:44.710Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0326-enable-multi-statement-closure-parameter-result-type-inference/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0326-enable-multi-statement-closure-parameter-result-type-inference/</loc>
     <lastmod>2026-08-06T13:53:44.710Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0328-structural-opaque-result-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0328-structural-opaque-result-types/</loc>
     <lastmod>2026-08-06T13:53:44.711Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0329-clock-instant-and-duration/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0329-clock-instant-and-duration/</loc>
     <lastmod>2026-08-06T13:53:44.711Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0333-expand-usability-of-withmemoryrebound/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0333-expand-usability-of-withmemoryrebound/</loc>
     <lastmod>2026-08-06T13:53:44.711Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0334-pointer-api-usability-improvements/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0334-pointer-api-usability-improvements/</loc>
     <lastmod>2026-08-06T13:53:44.711Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0336-distributed-actor-isolation/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0336-distributed-actor-isolation/</loc>
     <lastmod>2026-08-06T13:53:44.712Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0338-clarify-the-execution-of-non-actor-isolated-async-functions/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0338-clarify-the-execution-of-non-actor-isolated-async-functions/</loc>
     <lastmod>2026-08-06T13:53:44.712Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0339-module-aliasing-for-disambiguation/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0339-module-aliasing-for-disambiguation/</loc>
     <lastmod>2026-08-06T13:53:44.712Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0340-unavailable-from-async-attribute/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0340-unavailable-from-async-attribute/</loc>
     <lastmod>2026-08-06T13:53:44.712Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0341-opaque-parameter-declarations/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0341-opaque-parameter-declarations/</loc>
     <lastmod>2026-08-06T13:53:44.712Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0343-concurrency-in-top-level-code/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0343-concurrency-in-top-level-code/</loc>
     <lastmod>2026-08-06T13:53:44.713Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0344-distributed-actor-runtime/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0344-distributed-actor-runtime/</loc>
     <lastmod>2026-08-06T13:53:44.713Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0345-if-let-shorthand-for-shadowing-an-existing-optional-variable/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0345-if-let-shorthand-for-shadowing-an-existing-optional-variable/</loc>
     <lastmod>2026-08-06T13:53:44.713Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0346-lightweight-same-type-requirements-for-primary-associated-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0346-lightweight-same-type-requirements-for-primary-associated-types/</loc>
     <lastmod>2026-08-06T13:53:44.714Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0347-type-inference-from-default-expressions/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0347-type-inference-from-default-expressions/</loc>
     <lastmod>2026-08-06T13:53:44.714Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0348-buildpartialblock-for-result-builders/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0348-buildpartialblock-for-result-builders/</loc>
     <lastmod>2026-08-06T13:53:44.714Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0349-unaligned-loads-and-stores-from-raw-memory/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0349-unaligned-loads-and-stores-from-raw-memory/</loc>
     <lastmod>2026-08-06T13:53:44.715Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0350-regex-type-and-overview/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0350-regex-type-and-overview/</loc>
     <lastmod>2026-08-06T13:53:44.715Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0351-regex-builder-dsl/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0351-regex-builder-dsl/</loc>
     <lastmod>2026-08-06T13:53:44.715Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0352-implicitly-opened-existentials/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0352-implicitly-opened-existentials/</loc>
     <lastmod>2026-08-06T13:53:44.715Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0353-constrained-existential-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0353-constrained-existential-types/</loc>
     <lastmod>2026-08-06T13:53:44.716Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0354-regex-literals/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0354-regex-literals/</loc>
     <lastmod>2026-08-06T13:53:44.716Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0355-regex-syntax-and-runtime-construction/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0355-regex-syntax-and-runtime-construction/</loc>
     <lastmod>2026-08-06T13:53:44.716Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0356-swift-snippets/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0356-swift-snippets/</loc>
     <lastmod>2026-08-06T13:53:44.716Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0357-regex-powered-string-processing-algorithms/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0357-regex-powered-string-processing-algorithms/</loc>
     <lastmod>2026-08-06T13:53:44.717Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0358-primary-associated-types-in-the-standard-library/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0358-primary-associated-types-in-the-standard-library/</loc>
     <lastmod>2026-08-06T13:53:44.717Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0360-opaque-result-types-with-limited-availability/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0360-opaque-result-types-with-limited-availability/</loc>
     <lastmod>2026-08-06T13:53:44.717Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0361-extensions-on-bound-generic-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0361-extensions-on-bound-generic-types/</loc>
     <lastmod>2026-08-06T13:53:44.717Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-7/se-0363-unicode-for-string-processing/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-7/se-0363-unicode-for-string-processing/</loc>
     <lastmod>2026-08-06T13:53:44.718Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-8/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-8/</loc>
     <lastmod>2026-08-06T13:53:44.718Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-8/se-0274-concise-magic-file-names/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-8/se-0274-concise-magic-file-names/</loc>
     <lastmod>2026-08-06T13:53:44.718Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-8/se-0362-piecemeal-adoption-of-upcoming-language-improvements/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-8/se-0362-piecemeal-adoption-of-upcoming-language-improvements/</loc>
     <lastmod>2026-08-06T13:53:44.718Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-8/se-0365-allow-implicit-self-for-weak-self-captures-after-self-is-unwrapped/</loc>
+    <loc>
+      https://tofplay.github.io/swift-evolution/swift-5-8/se-0365-allow-implicit-self-for-weak-self-captures-after-self-is-unwrapped/
+    </loc>
     <lastmod>2026-08-06T13:53:44.719Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-8/se-0367-conditional-compilation-for-attributes/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-8/se-0367-conditional-compilation-for-attributes/</loc>
     <lastmod>2026-08-06T13:53:44.719Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-8/se-0368-staticbigint/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-8/se-0368-staticbigint/</loc>
     <lastmod>2026-08-06T13:53:44.719Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-8/se-0369-add-customdebugstringconvertible-conformance-to-anykeypath/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-8/se-0369-add-customdebugstringconvertible-conformance-to-anykeypath/</loc>
     <lastmod>2026-08-06T13:53:44.719Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-8/se-0370-pointer-family-initialization-improvements-and-better-buffer-slices/</loc>
+    <loc>
+      https://tofplay.github.io/swift-evolution/swift-5-8/se-0370-pointer-family-initialization-improvements-and-better-buffer-slices/
+    </loc>
     <lastmod>2026-08-06T13:53:44.720Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-8/se-0372-document-sorting-as-stable/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-8/se-0372-document-sorting-as-stable/</loc>
     <lastmod>2026-08-06T13:53:44.720Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-8/se-0373-lift-all-limitations-on-variables-in-result-builders/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-8/se-0373-lift-all-limitations-on-variables-in-result-builders/</loc>
     <lastmod>2026-08-06T13:53:44.720Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-8/se-0375-opening-existential-arguments-to-optional-parameters/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-8/se-0375-opening-existential-arguments-to-optional-parameters/</loc>
     <lastmod>2026-08-06T13:53:44.720Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-8/se-0376-function-back-deployment/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-8/se-0376-function-back-deployment/</loc>
     <lastmod>2026-08-06T13:53:44.721Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-8/se-0378-package-registry-authentication/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-8/se-0378-package-registry-authentication/</loc>
     <lastmod>2026-08-06T13:53:44.721Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/</loc>
     <lastmod>2026-08-06T13:53:44.721Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0366-consume-operator-to-end-the-lifetime-of-a-variable-binding/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0366-consume-operator-to-end-the-lifetime-of-a-variable-binding/</loc>
     <lastmod>2026-08-06T13:53:44.722Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0374-add-sleep-for-to-clock/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0374-add-sleep-for-to-clock/</loc>
     <lastmod>2026-08-06T13:53:44.722Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0377-borrowing-and-consuming-parameter-ownership-modifiers/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0377-borrowing-and-consuming-parameter-ownership-modifiers/</loc>
     <lastmod>2026-08-06T13:53:44.722Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0380-if-and-switch-expressions/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0380-if-and-switch-expressions/</loc>
     <lastmod>2026-08-06T13:53:44.722Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0381-discardingtaskgroups/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0381-discardingtaskgroups/</loc>
     <lastmod>2026-08-06T13:53:44.723Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0382-expression-macros/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0382-expression-macros/</loc>
     <lastmod>2026-08-06T13:53:44.723Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0384-importing-forward-declared-objective-c-interfaces-and-protocols/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0384-importing-forward-declared-objective-c-interfaces-and-protocols/</loc>
     <lastmod>2026-08-06T13:53:44.723Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0386-package-access-modifier/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0386-package-access-modifier/</loc>
     <lastmod>2026-08-06T13:53:44.723Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0388-convenience-async-throwing-stream-makestream-methods/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0388-convenience-async-throwing-stream-makestream-methods/</loc>
     <lastmod>2026-08-06T13:53:44.724Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0389-attached-macros/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0389-attached-macros/</loc>
     <lastmod>2026-08-06T13:53:44.724Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0390-noncopyable-structs-and-enums/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0390-noncopyable-structs-and-enums/</loc>
     <lastmod>2026-08-06T13:53:44.724Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0391-package-registry-publish/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0391-package-registry-publish/</loc>
     <lastmod>2026-08-06T13:53:44.725Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0392-custom-actor-executors/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0392-custom-actor-executors/</loc>
     <lastmod>2026-08-06T13:53:44.725Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0393-value-and-type-parameter-packs/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0393-value-and-type-parameter-packs/</loc>
     <lastmod>2026-08-06T13:53:44.725Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0394-package-manager-support-for-custom-macros/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0394-package-manager-support-for-custom-macros/</loc>
     <lastmod>2026-08-06T13:53:44.725Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0395-observability/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0395-observability/</loc>
     <lastmod>2026-08-06T13:53:44.726Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0396-conform-never-to-codable/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0396-conform-never-to-codable/</loc>
     <lastmod>2026-08-06T13:53:44.726Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0397-freestanding-declaration-macros/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0397-freestanding-declaration-macros/</loc>
     <lastmod>2026-08-06T13:53:44.726Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0398-allow-generic-types-to-abstract-over-packs/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0398-allow-generic-types-to-abstract-over-packs/</loc>
     <lastmod>2026-08-06T13:53:44.726Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0399-tuple-of-value-pack-expansion/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0399-tuple-of-value-pack-expansion/</loc>
     <lastmod>2026-08-06T13:53:44.727Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0400-init-accessors/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0400-init-accessors/</loc>
     <lastmod>2026-08-06T13:53:44.727Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0401-remove-actor-isolation-inference-caused-by-property-wrappers/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0401-remove-actor-isolation-inference-caused-by-property-wrappers/</loc>
     <lastmod>2026-08-06T13:53:44.727Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0402-generalize-conformance-macros-as-extension-macros/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0402-generalize-conformance-macros-as-extension-macros/</loc>
     <lastmod>2026-08-06T13:53:44.727Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-5-9/se-0407-member-macro-conformances/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-9/se-0407-member-macro-conformances/</loc>
     <lastmod>2026-08-06T13:53:44.727Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/</loc>
     <lastmod>2026-08-06T13:53:44.728Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0220-count-where/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0220-count-where/</loc>
     <lastmod>2026-08-06T13:53:44.728Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0270-add-collection-operations-on-noncontiguous-elements/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0270-add-collection-operations-on-noncontiguous-elements/</loc>
     <lastmod>2026-08-06T13:53:44.728Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0301-package-editor-commands/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0301-package-editor-commands/</loc>
     <lastmod>2026-08-06T13:53:44.728Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0364-warning-for-retroactive-conformances-of-external-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0364-warning-for-retroactive-conformances-of-external-types/</loc>
     <lastmod>2026-08-06T13:53:44.729Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0405-string-initializers-with-encoding-validation/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0405-string-initializers-with-encoding-validation/</loc>
     <lastmod>2026-08-06T13:53:44.729Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0408-pack-iteration/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0408-pack-iteration/</loc>
     <lastmod>2026-08-06T13:53:44.729Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0409-access-level-modifiers-on-import-declarations/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0409-access-level-modifiers-on-import-declarations/</loc>
     <lastmod>2026-08-06T13:53:44.729Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0410-low-level-atomic-operations/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0410-low-level-atomic-operations/</loc>
     <lastmod>2026-08-06T13:53:44.730Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0413-typed-throws/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0413-typed-throws/</loc>
     <lastmod>2026-08-06T13:53:44.730Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0414-region-based-isolation/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0414-region-based-isolation/</loc>
     <lastmod>2026-08-06T13:53:44.730Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0415-function-body-macros/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0415-function-body-macros/</loc>
     <lastmod>2026-08-06T13:53:44.730Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0416-subtyping-for-keypath-literals-as-functions/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0416-subtyping-for-keypath-literals-as-functions/</loc>
     <lastmod>2026-08-06T13:53:44.731Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0417-task-executor-preference/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0417-task-executor-preference/</loc>
     <lastmod>2026-08-06T13:53:44.731Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0418-inferring-sendable-for-methods-and-key-path-literals/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0418-inferring-sendable-for-methods-and-key-path-literals/</loc>
     <lastmod>2026-08-06T13:53:44.731Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0420-inheritance-of-actor-isolation/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0420-inheritance-of-actor-isolation/</loc>
     <lastmod>2026-08-06T13:53:44.731Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0421-generalize-effect-polymorphism-for-asyncsequence-and-asynciteratorprotocol/</loc>
+    <loc>
+      https://tofplay.github.io/swift-evolution/swift-6-0/se-0421-generalize-effect-polymorphism-for-asyncsequence-and-asynciteratorprotocol/
+    </loc>
     <lastmod>2026-08-06T13:53:44.732Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0422-expression-macro-as-caller-side-default-argument/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0422-expression-macro-as-caller-side-default-argument/</loc>
     <lastmod>2026-08-06T13:53:44.732Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0423-dynamic-actor-isolation-enforcement-from-non-strict-concurrency-contexts/</loc>
+    <loc>
+      https://tofplay.github.io/swift-evolution/swift-6-0/se-0423-dynamic-actor-isolation-enforcement-from-non-strict-concurrency-contexts/
+    </loc>
     <lastmod>2026-08-06T13:53:44.732Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0424-custom-isolation-checking-for-serialexecutor/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0424-custom-isolation-checking-for-serialexecutor/</loc>
     <lastmod>2026-08-06T13:53:44.732Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0425-128-bit-integer-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0425-128-bit-integer-types/</loc>
     <lastmod>2026-08-06T13:53:44.733Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0426-bitwisecopyable/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0426-bitwisecopyable/</loc>
     <lastmod>2026-08-06T13:53:44.733Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0427-noncopyable-generics/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0427-noncopyable-generics/</loc>
     <lastmod>2026-08-06T13:53:44.733Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0428-resolve-distributedactor-protocols/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0428-resolve-distributedactor-protocols/</loc>
     <lastmod>2026-08-06T13:53:44.733Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0429-partial-consumption-of-noncopyable-values/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0429-partial-consumption-of-noncopyable-values/</loc>
     <lastmod>2026-08-06T13:53:44.733Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0430-sending-parameter-and-result-values/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0430-sending-parameter-and-result-values/</loc>
     <lastmod>2026-08-06T13:53:44.734Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0431-isolated-any-function-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0431-isolated-any-function-types/</loc>
     <lastmod>2026-08-06T13:53:44.734Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0432-borrowing-and-consuming-pattern-matching-for-noncopyable-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0432-borrowing-and-consuming-pattern-matching-for-noncopyable-types/</loc>
     <lastmod>2026-08-06T13:53:44.734Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0433-synchronous-mutual-exclusion-lock/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0433-synchronous-mutual-exclusion-lock/</loc>
     <lastmod>2026-08-06T13:53:44.734Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0434-usability-of-global-actor-isolated-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0434-usability-of-global-actor-isolated-types/</loc>
     <lastmod>2026-08-06T13:53:44.734Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0435-swift-language-version-per-target/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0435-swift-language-version-per-target/</loc>
     <lastmod>2026-08-06T13:53:44.735Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0437-noncopyable-standard-library-primitives/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0437-noncopyable-standard-library-primitives/</loc>
     <lastmod>2026-08-06T13:53:44.735Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0440-debugdescription-macro/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0440-debugdescription-macro/</loc>
     <lastmod>2026-08-06T13:53:44.735Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-0/se-0512-mutex-withlockifavailable-cannot-spuriously-fail/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-0/se-0512-mutex-withlockifavailable-cannot-spuriously-fail/</loc>
     <lastmod>2026-08-06T13:53:44.735Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-1/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-1/</loc>
     <lastmod>2026-08-06T13:53:44.735Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-1/se-0387-swift-sdks-for-cross-compilation/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-1/se-0387-swift-sdks-for-cross-compilation/</loc>
     <lastmod>2026-08-06T13:53:44.736Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-1/se-0436-objective-c-implementations-in-swift/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-1/se-0436-objective-c-implementations-in-swift/</loc>
     <lastmod>2026-08-06T13:53:44.736Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-1/se-0438-metatype-keypaths/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-1/se-0438-metatype-keypaths/</loc>
     <lastmod>2026-08-06T13:53:44.736Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-1/se-0439-allow-trailing-comma-in-comma-separated-lists/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-1/se-0439-allow-trailing-comma-in-comma-separated-lists/</loc>
     <lastmod>2026-08-06T13:53:44.736Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-1/se-0441-formalize-language-mode-terminology/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-1/se-0441-formalize-language-mode-terminology/</loc>
     <lastmod>2026-08-06T13:53:44.736Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-1/se-0442-allow-taskgroup-s-childtaskresult-type-to-be-inferred/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-1/se-0442-allow-taskgroup-s-childtaskresult-type-to-be-inferred/</loc>
     <lastmod>2026-08-06T13:53:44.737Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-1/se-0443-precise-control-flags-over-compiler-warnings/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-1/se-0443-precise-control-flags-over-compiler-warnings/</loc>
     <lastmod>2026-08-06T13:53:44.737Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-1/se-0444-member-import-visibility/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-1/se-0444-member-import-visibility/</loc>
     <lastmod>2026-08-06T13:53:44.737Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-1/se-0445-improving-string-index-s-printed-descriptions/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-1/se-0445-improving-string-index-s-printed-descriptions/</loc>
     <lastmod>2026-08-06T13:53:44.737Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-1/se-0449-allow-nonisolated-to-prevent-global-actor-inference/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-1/se-0449-allow-nonisolated-to-prevent-global-actor-inference/</loc>
     <lastmod>2026-08-06T13:53:44.737Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-1/se-0450-package-traits/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-1/se-0450-package-traits/</loc>
     <lastmod>2026-08-06T13:53:44.738Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/</loc>
     <lastmod>2026-08-06T13:53:44.738Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0371-isolated-synchronous-deinit/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0371-isolated-synchronous-deinit/</loc>
     <lastmod>2026-08-06T13:53:44.738Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0419-swift-backtrace-api/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0419-swift-backtrace-api/</loc>
     <lastmod>2026-08-06T13:53:44.739Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0446-nonescapable-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0446-nonescapable-types/</loc>
     <lastmod>2026-08-06T13:53:44.739Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0447-span-safe-access-to-contiguous-storage/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0447-span-safe-access-to-contiguous-storage/</loc>
     <lastmod>2026-08-06T13:53:44.739Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0451-raw-identifiers/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0451-raw-identifiers/</loc>
     <lastmod>2026-08-06T13:53:44.739Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0452-integer-generic-parameters/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0452-integer-generic-parameters/</loc>
     <lastmod>2026-08-06T13:53:44.739Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0453-inlinearray-a-fixed-size-array/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0453-inlinearray-a-fixed-size-array/</loc>
     <lastmod>2026-08-06T13:53:44.739Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0456-add-span-providing-properties-to-standard-library-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0456-add-span-providing-properties-to-standard-library-types/</loc>
     <lastmod>2026-08-06T13:53:44.740Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0457-expose-attosecond-representation-of-duration/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0457-expose-attosecond-representation-of-duration/</loc>
     <lastmod>2026-08-06T13:53:44.740Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0458-opt-in-strict-memory-safety-checking/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0458-opt-in-strict-memory-safety-checking/</loc>
     <lastmod>2026-08-06T13:53:44.740Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0459-add-collection-conformances-for-enumerated/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0459-add-collection-conformances-for-enumerated/</loc>
     <lastmod>2026-08-06T13:53:44.740Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0461-run-nonisolated-async-functions-on-the-caller-s-actor-by-default/</loc>
+    <loc>
+      https://tofplay.github.io/swift-evolution/swift-6-2/se-0461-run-nonisolated-async-functions-on-the-caller-s-actor-by-default/
+    </loc>
     <lastmod>2026-08-06T13:53:44.741Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0462-task-priority-escalation-apis/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0462-task-priority-escalation-apis/</loc>
     <lastmod>2026-08-06T13:53:44.741Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0463-import-objective-c-completion-handler-parameters-as-sendable/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0463-import-objective-c-completion-handler-parameters-as-sendable/</loc>
     <lastmod>2026-08-06T13:53:44.741Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0464-utf8span-safe-utf-8-processing-over-contiguous-bytes/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0464-utf8span-safe-utf-8-processing-over-contiguous-bytes/</loc>
     <lastmod>2026-08-06T13:53:44.741Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0465-standard-library-primitives-for-nonescapable-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0465-standard-library-primitives-for-nonescapable-types/</loc>
     <lastmod>2026-08-06T13:53:44.741Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0466-control-default-actor-isolation-inference/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0466-control-default-actor-isolation-inference/</loc>
     <lastmod>2026-08-06T13:53:44.742Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0467-mutablespan-and-mutablerawspan-delegate-mutations-of-contiguous-memory/</loc>
+    <loc>
+      https://tofplay.github.io/swift-evolution/swift-6-2/se-0467-mutablespan-and-mutablerawspan-delegate-mutations-of-contiguous-memory/
+    </loc>
     <lastmod>2026-08-06T13:53:44.742Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0468-hashable-conformance-for-async-throwing-stream-continuation/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0468-hashable-conformance-for-async-throwing-stream-continuation/</loc>
     <lastmod>2026-08-06T13:53:44.742Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0469-task-naming/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0469-task-naming/</loc>
     <lastmod>2026-08-06T13:53:44.742Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0470-global-actor-isolated-conformances/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0470-global-actor-isolated-conformances/</loc>
     <lastmod>2026-08-06T13:53:44.743Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0471-improved-custom-serialexecutor-isolation-checking-for-concurrency-runtime/</loc>
+    <loc>
+      https://tofplay.github.io/swift-evolution/swift-6-2/se-0471-improved-custom-serialexecutor-isolation-checking-for-concurrency-runtime/
+    </loc>
     <lastmod>2026-08-06T13:53:44.743Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0472-starting-tasks-synchronously-from-caller-context/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0472-starting-tasks-synchronously-from-caller-context/</loc>
     <lastmod>2026-08-06T13:53:44.743Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0475-transactional-observation-of-values/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0475-transactional-observation-of-values/</loc>
     <lastmod>2026-08-06T13:53:44.743Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0476-controlling-the-abi-of-a-function-initializer-property-or-subscript/</loc>
+    <loc>
+      https://tofplay.github.io/swift-evolution/swift-6-2/se-0476-controlling-the-abi-of-a-function-initializer-property-or-subscript/
+    </loc>
     <lastmod>2026-08-06T13:53:44.743Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0477-default-value-in-string-interpolations/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0477-default-value-in-string-interpolations/</loc>
     <lastmod>2026-08-06T13:53:44.744Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0480-warning-control-settings-for-swiftpm/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0480-warning-control-settings-for-swiftpm/</loc>
     <lastmod>2026-08-06T13:53:44.744Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0482-binary-static-library-dependencies-for-non-apple-platforms/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0482-binary-static-library-dependencies-for-non-apple-platforms/</loc>
     <lastmod>2026-08-06T13:53:44.744Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0483-inlinearray-type-sugar/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0483-inlinearray-type-sugar/</loc>
     <lastmod>2026-08-06T13:53:44.744Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0485-outputspan-delegate-initialization-of-contiguous-memory/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0485-outputspan-delegate-initialization-of-contiguous-memory/</loc>
     <lastmod>2026-08-06T13:53:44.744Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0486-migration-tooling-for-swift-features/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0486-migration-tooling-for-swift-features/</loc>
     <lastmod>2026-08-06T13:53:44.745Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0487-nonexhaustive-enums/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0487-nonexhaustive-enums/</loc>
     <lastmod>2026-08-06T13:53:44.745Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-2/se-0488-apply-the-extracting-slicing-pattern-more-widely/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0488-apply-the-extracting-slicing-pattern-more-widely/</loc>
     <lastmod>2026-08-06T13:53:44.745Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-3/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-3/</loc>
     <lastmod>2026-08-06T13:53:44.745Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-3/se-0460-explicit-specialization/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-3/se-0460-explicit-specialization/</loc>
     <lastmod>2026-08-06T13:53:44.746Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-3/se-0473-clock-epochs/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-3/se-0473-clock-epochs/</loc>
     <lastmod>2026-08-06T13:53:44.746Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-3/se-0481-weak-let/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-3/se-0481-weak-let/</loc>
     <lastmod>2026-08-06T13:53:44.746Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-3/se-0489-improve-encodingerror-and-decodingerror-s-printed-descriptions/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-3/se-0489-improve-encodingerror-and-decodingerror-s-printed-descriptions/</loc>
     <lastmod>2026-08-06T13:53:44.746Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-3/se-0491-module-selectors-for-name-disambiguation/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-3/se-0491-module-selectors-for-name-disambiguation/</loc>
     <lastmod>2026-08-06T13:53:44.746Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-3/se-0492-section-placement-control/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-3/se-0492-section-placement-control/</loc>
     <lastmod>2026-08-06T13:53:44.747Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-3/se-0495-c-compatible-functions-and-enums/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-3/se-0495-c-compatible-functions-and-enums/</loc>
     <lastmod>2026-08-06T13:53:44.747Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-3/se-0496-inline-always-attribute/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-3/se-0496-inline-always-attribute/</loc>
     <lastmod>2026-08-06T13:53:44.747Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-3/se-0497-controlling-function-definition-visibility-in-clients/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-3/se-0497-controlling-function-definition-visibility-in-clients/</loc>
     <lastmod>2026-08-06T13:53:44.747Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/</loc>
     <lastmod>2026-08-06T13:53:44.748Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0493-support-async-calls-in-defer-bodies/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0493-support-async-calls-in-defer-bodies/</loc>
     <lastmod>2026-08-06T13:53:44.748Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0494-add-istriviallyidentical-to-methods-for-quick-comparisons-to-concrete-types/</loc>
+    <loc>
+      https://tofplay.github.io/swift-evolution/swift-6-4/se-0494-add-istriviallyidentical-to-methods-for-quick-comparisons-to-concrete-types/
+    </loc>
     <lastmod>2026-08-06T13:53:44.748Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0498-expose-demangle-function-in-runtime-module/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0498-expose-demangle-function-in-runtime-module/</loc>
     <lastmod>2026-08-06T13:53:44.749Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0499-support-copyable-escapable-in-simple-standard-library-protocols/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0499-support-copyable-escapable-in-simple-standard-library-protocols/</loc>
     <lastmod>2026-08-06T13:53:44.749Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0502-exclude-private-initialized-properties-from-memberwise-initializer/</loc>
+    <loc>
+      https://tofplay.github.io/swift-evolution/swift-6-4/se-0502-exclude-private-initialized-properties-from-memberwise-initializer/
+    </loc>
     <lastmod>2026-08-06T13:53:44.749Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0504-task-cancellation-shields/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0504-task-cancellation-shields/</loc>
     <lastmod>2026-08-06T13:53:44.749Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0506-advanced-observation-tracking/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0506-advanced-observation-tracking/</loc>
     <lastmod>2026-08-06T13:53:44.749Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0507-borrow-and-mutate-accessors/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0507-borrow-and-mutate-accessors/</loc>
     <lastmod>2026-08-06T13:53:44.750Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0508-array-expression-trailing-closures/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0508-array-expression-trailing-closures/</loc>
     <lastmod>2026-08-06T13:53:44.750Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0509-software-bill-of-materials-sbom-generation-for-swift-package-manager/</loc>
+    <loc>
+      https://tofplay.github.io/swift-evolution/swift-6-4/se-0509-software-bill-of-materials-sbom-generation-for-swift-package-manager/
+    </loc>
     <lastmod>2026-08-06T13:53:44.750Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0514-hashable-conformance-for-dictionary-keys-collectionofone-and-emptycollection/</loc>
+    <loc>
+      https://tofplay.github.io/swift-evolution/swift-6-4/se-0514-hashable-conformance-for-dictionary-keys-collectionofone-and-emptycollection/
+    </loc>
     <lastmod>2026-08-06T13:53:44.750Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0518-sendable-for-explicitly-marking-non-sendable-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0518-sendable-for-explicitly-marking-non-sendable-types/</loc>
     <lastmod>2026-08-06T13:53:44.750Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0519-ref-and-mutableref-types-for-safe-first-class-references/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0519-ref-and-mutableref-types-for-safe-first-class-references/</loc>
     <lastmod>2026-08-06T13:53:44.751Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0520-discardable-result-use-in-task-initializers/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0520-discardable-result-use-in-task-initializers/</loc>
     <lastmod>2026-08-06T13:53:44.751Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0521-improved-syntax-for-optionals-of-opaque-and-existential-types/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0521-improved-syntax-for-optionals-of-opaque-and-existential-types/</loc>
     <lastmod>2026-08-06T13:53:44.751Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0522-source-level-control-over-compiler-warnings/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0522-source-level-control-over-compiler-warnings/</loc>
     <lastmod>2026-08-06T13:53:44.751Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0523-hashable-conformance-for-unownedtaskexecutor/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0523-hashable-conformance-for-unownedtaskexecutor/</loc>
     <lastmod>2026-08-06T13:53:44.752Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0524-add-withtemporaryallocation-using-output-raw-span/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0524-add-withtemporaryallocation-using-output-raw-span/</loc>
     <lastmod>2026-08-06T13:53:44.752Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0525-safe-loading-api-for-rawspan/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0525-safe-loading-api-for-rawspan/</loc>
     <lastmod>2026-08-06T13:53:44.752Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0527-uniquearray/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0527-uniquearray/</loc>
     <lastmod>2026-08-06T13:53:44.752Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0528-continuation-safe-and-performant-async-continuations/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0528-continuation-safe-and-performant-async-continuations/</loc>
     <lastmod>2026-08-06T13:53:44.752Z</lastmod>
   </url>
   <url>
-    <loc>http://localhost:3000/swift-6-4/se-0530-async-result-support/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-4/se-0530-async-result-support/</loc>
     <lastmod>2026-08-06T13:53:44.753Z</lastmod>
   </url>
 </urlset>
