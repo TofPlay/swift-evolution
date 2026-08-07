@@ -1,24 +1,26 @@
 // translate.js - Google Translate API pour site statique (traduction en place, sans barre)
-// Fallback vers l'URL Google Translate si l'API échoue (ex: localhost)
-// Sauvegarde la langue sélectionnée dans le localStorage
+// Sauvegarde la langue dans le localStorage pour qu'elle persiste sur toutes les pages.
 
 (function () {
   "use strict";
 
-  const STORAGE_KEY = "selected_language";
+  const STORAGE_KEY = "site_selected_language";
   const DEFAULT_LANGUAGE = "fr";
 
   const languageSelect = document.getElementById("language-select");
   if (!languageSelect) return;
 
-  // URL de base du site (sans le trailing slash)
+  // URL de base du site
   const siteUrl = window.location.origin + (window.location.pathname === "/" ? "" : window.location.pathname);
 
-  // Stocke le contenu original de la page
+  // Contenu original de la page (stocké au premier chargement)
   let originalContent = null;
   let isTranslating = false;
+  let apiChecked = false;
+  let apiAvailable = false;
 
-  // Sauvegarde la langue sélectionnée
+  // --- Gestion du localStorage ---
+
   function saveLanguage(lang) {
     try {
       localStorage.setItem(STORAGE_KEY, lang);
@@ -27,7 +29,6 @@
     }
   }
 
-  // Récupère la langue sauvegardée
   function loadLanguage() {
     try {
       return localStorage.getItem(STORAGE_KEY);
@@ -36,7 +37,8 @@
     }
   }
 
-  // Cache Google Translate (barre en haut)
+  // --- Cache Google Translate ---
+
   function hideGoogleBar() {
     const googleBar = document.querySelector(".goog-te-banner-frame");
     if (googleBar) {
@@ -47,33 +49,40 @@
     }
   }
 
-  // Vérifie si l'API Google Translate est accessible
-  async function isApiAvailable() {
+  // --- Vérification de l'API (une seule fois) ---
+
+  async function checkApiAvailability() {
+    if (apiChecked) return apiAvailable;
+    
     try {
       const response = await fetch(
         "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=test",
         { method: "GET", mode: "cors" }
       );
-      return response.ok;
+      apiAvailable = response.ok;
     } catch (error) {
-      return false;
+      apiAvailable = false;
     }
+    apiChecked = true;
+    return apiAvailable;
   }
 
-  // Traduit le contenu de la page avec l'API Google Translate
+  // --- Traduction via l'API ---
+
   async function translatePageWithApi(targetLang) {
-    // Charger le contenu original si ce n'est pas déjà fait
+    // Stocker le contenu original au premier chargement
     if (!originalContent) {
       originalContent = document.body.innerHTML;
     }
 
-    // Récupérer tous les éléments textuels
+    // Sélectionner les éléments à traduire
     const elementsToTranslate = document.body.querySelectorAll(
       "h1, h2, h3, h4, h5, h6, p, span, div, a, li, td, th, label, button, small, strong, em, blockquote, cite, abbr, address, b, i, u, sub, sup"
     );
 
     const textNodes = [];
     elementsToTranslate.forEach((el) => {
+      // Ignorer les scripts, styles et éléments déjà traduits
       if (el.tagName === "SCRIPT" || el.tagName === "STYLE" || el.hasAttribute("data-translated")) {
         return;
       }
@@ -116,13 +125,15 @@
     return true;
   }
 
-  // Fallback : utilise l'URL Google Translate (ouvre dans un nouvel onglet)
+  // --- Fallback : URL Google Translate ---
+
   function translateWithFallback(targetLang) {
     const translateUrl = `https://translate.google.com/translate?sl=auto&tl=${targetLang}&u=${encodeURIComponent(siteUrl)}`;
     window.open(translateUrl, "_blank");
   }
 
-  // Réinitialiser la page au contenu original
+  // --- Réinitialisation ---
+
   function resetPage() {
     if (originalContent) {
       document.body.innerHTML = originalContent;
@@ -133,52 +144,48 @@
     isTranslating = false;
   }
 
-  // Applique la langue sauvegardée au chargement de la page
+  // --- Fonction principale de traduction (réutilisable) ---
+
+  async function translatePage(targetLang) {
+    if (isTranslating) return;
+    isTranslating = true;
+
+    resetPage();
+
+    try {
+      if (!apiChecked) {
+        await checkApiAvailability();
+      }
+
+      if (apiAvailable) {
+        await translatePageWithApi(targetLang);
+        saveLanguage(targetLang);
+      } else {
+        translateWithFallback(targetLang);
+      }
+    } catch (error) {
+      console.error("Erreur de traduction:", error);
+      translateWithFallback(targetLang);
+    }
+
+    hideGoogleBar();
+    isTranslating = false;
+  }
+
+  // --- Application de la langue sauvegardée ---
+
   function applySavedLanguage() {
     const savedLang = loadLanguage();
     if (savedLang && savedLang !== DEFAULT_LANGUAGE) {
-      // Restaurer la valeur dans le select
+      // Mettre à jour le select
       languageSelect.value = savedLang;
       // Traduire la page
       translatePage(savedLang);
     }
   }
 
-  // Gestionnaire de changement de langue (version réutilisable)
-  async function translatePage(targetLang) {
-    // Empêcher les requêtes multiples
-    if (isTranslating) return;
-    isTranslating = true;
+  // --- Événement de changement de langue ---
 
-    // Réinitialiser d'abord
-    resetPage();
-
-    try {
-      // Vérifier si l'API est disponible
-      const apiAvailable = await isApiAvailable();
-
-      if (apiAvailable) {
-        // Tenter la traduction via l'API
-        await translatePageWithApi(targetLang);
-        // Sauvegarder la langue
-        saveLanguage(targetLang);
-      } else {
-        // Fallback : ouvrir Google Translate dans un nouvel onglet
-        translateWithFallback(targetLang);
-      }
-    } catch (error) {
-      console.error("Erreur de traduction:", error);
-      // Fallback en cas d'erreur
-      translateWithFallback(targetLang);
-    }
-
-    // Cacher la barre Google Translate
-    hideGoogleBar();
-
-    isTranslating = false;
-  }
-
-  // Gestionnaire de changement de langue (événement)
   languageSelect.addEventListener("change", function () {
     const targetLang = this.value;
     if (!targetLang) return;
@@ -186,17 +193,16 @@
     translatePage(targetLang);
   });
 
-  // Appliquer la langue sauvegardée au chargement de la page
+  // --- Démarrage ---
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", applySavedLanguage);
   } else {
     applySavedLanguage();
   }
 
-  // Cacher la barre au chargement
   hideGoogleBar();
 
-  // Observer les changements dans le DOM
   const observer = new MutationObserver(hideGoogleBar);
   observer.observe(document.body, { childList: true, subtree: true });
 })();
