@@ -18,7 +18,6 @@
     );
   };
 
-  // Charger le script Google Translate
   const script = document.createElement("script");
   script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
   document.head.appendChild(script);
