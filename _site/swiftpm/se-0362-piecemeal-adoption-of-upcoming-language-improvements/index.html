@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0362 - Piecemeal adoption of upcoming language improvements</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swiftpm/se-0362-piecemeal-adoption-of-upcoming-language-improvements/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swiftpm/se-0362-piecemeal-adoption-of-upcoming-language-improvements/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swiftpm/">
+                  Swift Package Manager (SwiftPM)
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0362 - Piecemeal adoption of upcoming language improvements</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+        <li class="lang-selector">
+          <div id="google_translate_element"></div>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0362 - Piecemeal adoption of upcoming language improvements</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.8</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0362-piecemeal-future-features.md">SE-0362 - Piecemeal adoption of upcoming language improvements</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit un mécanisme permettant d'adopter progressivement les nouvelles fonctionnalités de Swift 6 dans des projets utilisant encore Swift 4 ou 5. L'objectif est de lisser la transition vers la version 6 en évitant une migration massive et brutale de tout un codebase d'un coup.</p>
+<p>Le mécanisme repose sur trois piliers :</p>
+<ol>
+<li><strong>Flag de compilation</strong> : L'utilisation de <code>-enable-upcoming-feature &lt;NomDeLaFeature&gt;</code> pour activer une fonctionnalité spécifique (ex: <code>StrictConcurrency</code>, <code>BareSlashRegexLiterals</code>) sans changer la version globale du langage.</li>
+<li><strong>Détection de fonctionnalités</strong> : Introduction de la directive de compilation <code>#if hasFeature(NomDeLaFeature)</code> permettant au code de s'adapter dynamiquement selon que la fonctionnalité est activée ou non.</li>
+<li><strong>Support Package Manager</strong> : Extension de l'API SwiftPM pour permettre de spécifier ces fonctionnalités directement dans les cibles (<code>targets</code>) via une nouvelle méthode <code>enableUpcomingFeature</code>.</li>
+</ol>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0362" tabindex="-1"><a href="#avant-se-0362" class="header-anchor">Avant SE-0362</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// On ne peut pas utiliser les nouvelles syntaxes ou règles </span>
+<span class="token comment">// sans passer globalement à Swift 6, ce qui peut briser le code existant.</span>
+<span class="token keyword">func</span> <span class="token function-definition function">checkRegex</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> regex <span class="token operator">=</span> <span class="token keyword">try</span><span class="token operator">!</span> <span class="token class-name">NSRegularExpression</span><span class="token punctuation">(</span>pattern<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"..."</span></span><span class="token punctuation">)</span> 
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'impossibilité d'utiliser les nouvelles syntaxes (comme <code>/.../</code> pour les Regex) ou les nouvelles règles de concurrence sans effectuer une migration complète vers Swift 6, augmentant le risque de régression.</p>
+<h3 id="apr%C3%A8s-se-0362" tabindex="-1"><a href="#apr%C3%A8s-se-0362" class="header-anchor">Après SE-0362</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token directive property"><span class="token directive-name">#if</span> hasFeature<span class="token punctuation">(</span>BareSlashRegexLiterals<span class="token punctuation">)</span></span>
+<span class="token keyword">let</span> regex <span class="token operator">=</span> <span class="token operator">/</span><span class="token operator">.../</span>
+<span class="token directive property"><span class="token directive-name">#else</span></span>
+<span class="token keyword">let</span> regex <span class="token operator">=</span> <span class="token keyword">try</span><span class="token operator">!</span> <span class="token class-name">NSRegularExpression</span><span class="token punctuation">(</span>pattern<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"..."</span></span><span class="token punctuation">)</span>
+<span class="token directive property"><span class="token directive-name">#endif</span></span>
+</code></pre>
+<p>Le développeur peut activer la nouvelle syntaxe de Regex via un flag, tout en conservant une version compatible avec les anciens compilateurs grâce à la directive <code>#if hasFeature</code>.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

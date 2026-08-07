@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0278 - Package Manager Localized Resources</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swiftpm/se-0278-package-manager-localized-resources/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swiftpm/se-0278-package-manager-localized-resources/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swiftpm/">
+                  Swift Package Manager (SwiftPM)
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0278 - Package Manager Localized Resources</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+        <li class="lang-selector">
+          <div id="google_translate_element"></div>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0278 - Package Manager Localized Resources</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.3</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0278-package-manager-localized-resources.md">SE-0278 - Package Manager Localized Resources</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit le support des ressources localisées au sein de Swift Package Manager (SwiftPM). Elle permet aux développeurs de définir des variantes de ressources (images, fichiers de données, etc.) pour différentes langues et régions, lesquelles deviennent automatiquement accessibles via les APIs Foundation (<code>Bundle</code>) au moment de l'exécution.</p>
+<p>Les points clés incluent :</p>
+<ul>
+<li>L'ajout d'un paramètre <code>defaultLocalization</code> dans l'initialiseur <code>Package</code> pour définir la langue de repli.</li>
+<li>La reconnaissance automatique des fichiers situés dans des répertoires se terminant par <code>.lproj</code> (ex: <code>en.lproj</code>, <code>fr-FR.lproj</code>).</li>
+<li>L'utilisation de la règle <code>.process</code> pour permettre la gestion automatique de la structure de localisation.</li>
+<li>L'ajout d'un paramètre <code>localization</code> à la fonction <code>Resource.process</code> pour déclarer explicitement des ressources localisées en dehors des répertoires <code>.lproj</code>.</li>
+<li>L'implémentation de diagnostics par SwiftPM pour détecter les erreurs de configuration (ex: absence de variante par défaut, collision entre ressources localisées et non-localisées, ou sous-répertoires invalides dans les dossiers de localisation).</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0278" tabindex="-1"><a href="#avant-se-0278" class="header-anchor">Avant SE-0278</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Les ressources sont stockées dans un dossier simple.</span>
+<span class="token comment">// Il n'y a aucun moyen natif pour SwiftPM de gérer </span>
+<span class="token comment">// automatiquement les variantes linguistiques via le manifeste.</span>
+<span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
+    targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyTarget"</span></span><span class="token punctuation">,</span> resources<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">.</span><span class="token function">copy</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Resources/image.png"</span></span><span class="token punctuation">)</span>
+        <span class="token punctuation">]</span><span class="token punctuation">)</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">)</span>
+</code></pre>
+<p>Il n'était pas possible de définir des variantes linguistiques qui seraient automatiquement sélectionnées par <code>Bundle.module</code> selon la langue de l'utilisateur. L'utilisateur devait gérer manuellement la structure des fichiers et risquait des erreurs de configuration.</p>
+<h3 id="apr%C3%A8s-se-0278" tabindex="-1"><a href="#apr%C3%A8s-se-0278" class="header-anchor">Après SE-0278</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du manifeste avec une localisation par défaut</span>
+<span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
+    defaultLocalization<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"en"</span></span><span class="token punctuation">,</span>
+    targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyTarget"</span></span><span class="token punctuation">,</span> resources<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+            <span class="token comment">// SwiftPM cherche automatiquement dans en.lproj/image.png, fr.lproj/image.png, etc.</span>
+            <span class="token punctuation">.</span><span class="token function">process</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Resources/image.png"</span></span><span class="token punctuation">)</span>
+        <span class="token punctuation">]</span><span class="token punctuation">)</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Structure de fichiers suggérée :</span>
+<span class="token comment">// Resources/</span>
+<span class="token comment">//   ├── image.png (Ressource par défaut/fallback)</span>
+<span class="token comment">//   ├── en.lproj/</span>
+<span class="token comment">//   │   └── image.png (Variante anglaise)</span>
+<span class="token comment">//   └── fr.lproj/</span>
+<span class="token comment">//       └── image.png (Variante française)</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation au runtime</span>
+<span class="token keyword">let</span> image <span class="token operator">=</span> <span class="token class-name">UIImage</span><span class="token punctuation">(</span>named<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"image"</span></span><span class="token punctuation">,</span> <span class="token keyword">in</span><span class="token punctuation">:</span> <span class="token class-name">Bundle</span><span class="token punctuation">.</span>module<span class="token punctuation">,</span> with<span class="token punctuation">:</span> <span class="token nil constant">nil</span><span class="token punctuation">)</span>
+</code></pre>
+<p>La proposition permet une gestion transparente : SwiftPM organise les fichiers dans le bundle final et configure le <code>Info.plist</code> avec la région de développement appropriée. L'API <code>Bundle</code> sélectionne alors automatiquement la ressource correspondant à la langue du système de l'utilisateur.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

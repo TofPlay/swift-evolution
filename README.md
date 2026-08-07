@@ -32,6 +32,7 @@ Each proposal is summarized with:
 | Swift 6.2 | ✅ Available |
 | Swift 6.3 | ✅ Available |
 | Swift 6.4 | ✅ Available |
+| SwiftPM | ✅ Available |
 
 ## How to Use
 

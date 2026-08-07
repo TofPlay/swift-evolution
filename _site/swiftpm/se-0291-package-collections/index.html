@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0291 - Package Collections</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swiftpm/se-0291-package-collections/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swiftpm/se-0291-package-collections/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swiftpm/">
+                  Swift Package Manager (SwiftPM)
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0291 - Package Collections</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+        <li class="lang-selector">
+          <div id="google_translate_element"></div>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0291 - Package Collections</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.5</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0291-package-collections.md">SE-0291 - Package Collections</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit le concept de <strong>Package Collections</strong> pour Swift Package Manager (SwiftPM). Une collection est une liste organisée et curatée de packages accompagnée de métadonnées, permettant de faciliter la découverte de dépendances pour des cas d'utilisation spécifiques (ex: matériel pédagogique, environnements d'entreprise).</p>
+<p>La proposition définit :</p>
+<ul>
+<li>Une nouvelle interface en ligne de commande : <code>swift package-collection</code>.</li>
+<li>Des fonctionnalités de gestion (add, remove, list, refresh) et de recherche (par mots-clés ou par modules).</li>
+<li>Un système de métadonnées étendu via une commande <code>describe</code>.</li>
+<li>Un fichier de configuration utilisateur pour stocker les collections et les certificats de confiance.</li>
+<li>Un mécanisme optionnel de signature numérique pour garantir l'intégrité et l'authenticité des collections.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0291" tabindex="-1"><a href="#avant-se-0291" class="header-anchor">Avant SE-0291</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Actuellement, la découverte de packages repose sur des recherches manuelles </span>
+<span class="token comment">// sur le web ou l'utilisation de Swift Package Index, sans lien direct </span>
+<span class="token comment">// et standardisé avec l'outil CLI SwiftPM pour des listes curatées.</span>
+</code></pre>
+<p>La difficulté de trouver des packages adaptés à un usage précis et l'absence de moyen standardisé pour accéder à des métadonnées non présentes dans le <code>Package.swift</code> augmentent la charge cognitive lors de l'ajout de dépendances.</p>
+<h3 id="apr%C3%A8s-se-0291" tabindex="-1"><a href="#apr%C3%A8s-se-0291" class="header-anchor">Après SE-0291</a></h3>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Ajouter une collection via une URL
+$ swift package-collection add https://www.example.com/packages.json
+
+# Rechercher un package par mot-clé dans les collections
+$ swift package-collection search --keywords yaml
+
+# Obtenir des détails sur un package au sein d'une collection
+$ swift package-collection describe https://github.com/jpsim/yams
+</code></pre>
+<p>L'utilisateur peut désormais s'abonner à des listes de confiance, facilitant l'intégration de bundles de packages pré-approuvés ou pédagogiques directement via l'interface de commande SwiftPM.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

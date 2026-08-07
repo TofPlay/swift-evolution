@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - Swift Package Manager (SwiftPM)</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swiftpm/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swiftpm/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <span aria-current="page">Swift Package Manager (SwiftPM)</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+        <li class="lang-selector">
+          <div id="google_translate_element"></div>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>Swift Package Manager (SwiftPM)</h1>
+<h2 id="introduction" tabindex="-1"><a href="#introduction" class="header-anchor">Introduction</a></h2>
+<p>Cette page liste l'ensemble des propositions d'évolution de la version Swift Package Manager (SwiftPM)</p>
+<h2 id="liste-des-se" tabindex="-1"><a href="#liste-des-se" class="header-anchor">Liste des SE</a></h2>
+<p>Il y a 30 propositions :</p>
+<ul>
+<li><a href="/swift-evolution/swiftpm/se-0063-swiftpm-system-module-search-paths/">SE-0063 - SwiftPM System Module Search Paths</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0085-package-manager-command-names/">SE-0085 - Package Manager Command Names</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0179-swift-run-command/">SE-0179 - Swift run Command</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0181-package-manager-cc-language-standard-support/">SE-0181 - Package Manager CC++ Language Standard Support</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0201-package-manager-local-dependencies/">SE-0201 - Package Manager Local Dependencies</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0208-package-manager-system-library-targets/">SE-0208 - Package Manager System Library Targets</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0209-package-manager-swift-language-version-api-update/">SE-0209 - Package Manager Swift Language Version API Update</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0219-package-manager-dependency-mirroring/">SE-0219 - Package Manager Dependency Mirroring</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0271-package-manager-resources/">SE-0271 - Package Manager Resources</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0272-package-manager-binary-dependencies/">SE-0272 - Package Manager Binary Dependencies</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0273-package-manager-conditional-target-dependencies/">SE-0273 - Package Manager Conditional Target Dependencies</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0278-package-manager-localized-resources/">SE-0278 - Package Manager Localized Resources</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0291-package-collections/">SE-0291 - Package Collections</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0292-package-registry-service/">SE-0292 - Package Registry Service</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0294-declaring-executable-targets-in-package-manifests/">SE-0294 - Declaring executable targets in Package Manifests</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0301-package-editor-commands/">SE-0301 - Package Editor Commands</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0325-additional-package-plugin-apis/">SE-0325 - Additional Package Plugin APIs</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0332-package-manager-command-plugins/">SE-0332 - Package Manager Command Plugins</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0339-module-aliasing-for-disambiguation/">SE-0339 - Module Aliasing For Disambiguation</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0356-swift-snippets/">SE-0356 - Swift Snippets</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0362-piecemeal-adoption-of-upcoming-language-improvements/">SE-0362 - Piecemeal adoption of upcoming language improvements</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0378-package-registry-authentication/">SE-0378 - Package Registry Authentication</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0387-swift-sdks-for-cross-compilation/">SE-0387 - Swift SDKs for Cross-Compilation</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0391-package-registry-publish/">SE-0391 - Package Registry Publish</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0394-package-manager-support-for-custom-macros/">SE-0394 - Package Manager Support for Custom Macros</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0441-formalize-language-mode-terminology/">SE-0441 - Formalize 'language mode' terminology</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0480-warning-control-settings-for-swiftpm/">SE-0480 - Warning Control Settings for SwiftPM</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0482-binary-static-library-dependencies/">SE-0482 - Binary Static Library Dependencies</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0509-software-bill-of-materials-sbom-generation-for-swift-package-manager/">SE-0509 - Software Bill of Materials (SBOM) Generation for Swift Package Manager</a></li>
+</ul>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

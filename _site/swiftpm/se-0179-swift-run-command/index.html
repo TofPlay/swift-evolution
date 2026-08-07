@@ -2,7 +2,7 @@
 <html lang="fr"><head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TofPlay - Intro</title>
+    <title>TofPlay - SE-0179 - Swift run Command</title>
 
     <meta name="supported-color-schemes" content="light dark">
     <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
@@ -12,7 +12,7 @@
     <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
     <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
     <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
-    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/intro/">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swiftpm/se-0179-swift-run-command/">
     <script src="/swift-evolution/js/main.js" type="module"></script>
     <link rel="stylesheet" href="/swift-evolution/custom.css">
   <meta property="og:type" content="website">
@@ -20,7 +20,7 @@
 <meta property="og:locale" content="fr">
 <meta property="og:title" content="Acceuil">
 <meta property="og:description" content="Encore un site dédié à Swift">
-<meta property="og:url" content="https://tofplay.github.io/swift-evolution/intro/">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swiftpm/se-0179-swift-run-command/">
 <meta name="twitter:card" content="summary">
 <meta name="description" content="Encore un site dédié à Swift">
 <meta name="generator" content="Lume 3.3.0">
@@ -35,7 +35,12 @@
       <li><a href="/swift-evolution/">Swift Evolution</a></li>
 
           <li>
-              <span aria-current="page">Intro</span>
+              <a href="/swift-evolution/swiftpm/">
+                  Swift Package Manager (SwiftPM)
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0179 - Swift run Command</span>
           </li>
       </ol>
 
@@ -68,21 +73,25 @@
     <main class="body-tag">
       <article class="post" data-pagefind-body="">
   <div class="post-body">
-    <p>Les versions Swift supportées sont :</p>
-<ul>
-<li><a href="/swift-evolution/swift-5-5/">Swift 5.5</a></li>
-<li><a href="/swift-evolution/swift-5-6/">Swift 5.6</a></li>
-<li><a href="/swift-evolution/swift-5-7/">Swift 5.7</a></li>
-<li><a href="/swift-evolution/swift-5-8/">Swift 5.8</a></li>
-<li><a href="/swift-evolution/swift-5-9/">Swift 5.9</a></li>
-<li><a href="/swift-evolution/swift-5-10/">Swift 5.10</a></li>
-<li><a href="/swift-evolution/swift-6-0/">Swift 6.0</a></li>
-<li><a href="/swift-evolution/swift-6-1/">Swift 6.1</a></li>
-<li><a href="/swift-evolution/swift-6-2/">Swift 6.2</a></li>
-<li><a href="/swift-evolution/swift-6-3/">Swift 6.3</a></li>
-<li><a href="/swift-evolution/swift-6-4/">Swift 6.4</a></li>
-<li><a href="/swift-evolution/swiftpm/">Swift Package Manager (SwiftPM)</a></li>
-</ul>
+    <h1>SE-0179 - Swift run Command</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 4.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0179-swift-run-command.md">SE-0179 - Swift run Command</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit la commande <code>swift run</code> pour simplifier le flux de travail des développeurs utilisant le Swift Package Manager. Cette commande permet de compiler et d'exécuter directement un produit exécutable défini dans le manifeste <code>Package.swift</code> en une seule étape, évitant ainsi de devoir localiser manuellement le binaire dans les sous-dossiers de build (qui deviennent plus complexes avec les changements de structure de dossiers selon la plateforme).</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0179" tabindex="-1"><a href="#avant-se-0179" class="header-anchor">Avant SE-0179</a></h3>
+<pre class="language-bash" tabindex="0"><code class="language-bash">$ swift build
+$ .build/debug/myexecutable
+</code></pre>
+<p>L'utilisateur doit exécuter manuellement la commande de compilation, puis localiser et exécuter le binaire produit, ce qui devient complexe lorsque le chemin de build inclut des informations sur la plateforme (ex: <code>.build/macosx-x86_64/debug/</code>).</p>
+<h3 id="apr%C3%A8s-se-0179" tabindex="-1"><a href="#apr%C3%A8s-se-0179" class="header-anchor">Après SE-0179</a></h3>
+<pre class="language-bash" tabindex="0"><code class="language-bash">$ swift run
+</code></pre>
+<p>La commande <code>swift run</code> compile automatiquement le projet si nécessaire et lance l'exécutable par défaut défini dans le <code>Package.swift</code>. Il est également possible de spécifier un exécutable particulier et de lui passer des arguments : <code>swift run myexecutable arg1 arg2</code>.</p>
 
   </div>
 </article>

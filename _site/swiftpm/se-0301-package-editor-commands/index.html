@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0301 - Package Editor Commands</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swiftpm/se-0301-package-editor-commands/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swiftpm/se-0301-package-editor-commands/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swiftpm/">
+                  Swift Package Manager (SwiftPM)
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0301 - Package Editor Commands</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+        <li class="lang-selector">
+          <div id="google_translate_element"></div>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0301 - Package Editor Commands</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0301-package-editing-commands.md">SE-0301 - Package Editor Commands</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit des sous-commandes pour l'outil en ligne de commande <code>swift package</code> afin d'automatiser les modifications courantes du fichier <code>Package.swift</code>. L'objectif est de réduire les erreurs humaines lors de l'édition manuelle et de permettre une automatisation via des outils tiers ou des IDE.</p>
+<p>Les nouvelles commandes sont :</p>
+<ul>
+<li><code>add-product</code> : Pour ajouter un nouveau produit (exécutable ou bibliothèque) au manifeste.</li>
+<li><code>add-target</code> : Pour ajouter une cible (target) et créer automatiquement les répertoires de sources/tests nécessaires.</li>
+<li><code>add-dependency</code> : Pour ajouter une dépendance externe en spécifiant des règles de version (exacte, par branche, etc.).</li>
+</ul>
+<p>Ces commandes opèrent par transformation syntaxique sur les parties déclaratives du manifeste.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0301" tabindex="-1"><a href="#avant-se-0301" class="header-anchor">Avant SE-0301</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// swift-tools-version:5.3</span>
+<span class="token keyword">import</span> <span class="token class-name">PackageDescription</span>
+
+<span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
+    targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">,</span>
+            dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+        <span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">)</span>
+</code></pre>
+<p>L'ajout manuel d'une dépendance ou d'une cible nécessite de modifier le fichier <code>Package.swift</code> manuellement, ce qui peut être source d'erreurs de syntaxe ou d'oublis de structure de dossiers.</p>
+<h3 id="apr%C3%A8s-se-0301" tabindex="-1"><a href="#apr%C3%A8s-se-0301" class="header-anchor">Après SE-0301</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// swift-tools-version:5.3</span>
+<span class="token keyword">import</span> <span class="token class-name">PackageDescription</span>
+
+<span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
+    products<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">library</span><span class="token punctuation">(</span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">,</span>
+            targets<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">package</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"swift-argument-parser"</span></span><span class="token punctuation">,</span> url<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"https://github.com/apple/swift-argument-parser"</span></span><span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token function">upToNextMajor</span><span class="token punctuation">(</span>from<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"0.3.1"</span></span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">,</span>
+            dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+        <span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">.</span><span class="token function">testTarget</span><span class="token punctuation">(</span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyLibraryTests"</span></span><span class="token punctuation">,</span>
+            dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">]</span>
+        <span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyExecutable"</span></span><span class="token punctuation">,</span>
+            dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+                <span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">,</span>
+                <span class="token punctuation">.</span><span class="token function">product</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"ArgumentParser"</span></span><span class="token punctuation">,</span> package<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"swift-argument-parser"</span></span><span class="token punctuation">)</span>
+            <span class="token punctuation">]</span>
+        <span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">)</span>
+</code></pre>
+<p>L'utilisation de la commande <code>swift package add-dependency &lt;URL&gt;</code> ou <code>swift package add-target &lt;Name&gt;</code> génère automatiquement les entrées de code appropriées dans le manifeste et prépare la structure des fichiers sur le disque.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>
