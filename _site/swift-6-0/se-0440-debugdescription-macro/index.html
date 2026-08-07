@@ -95,14 +95,6 @@
 </code></pre>
 <p>Pour voir le résultat dans le debugger, l'utilisateur doit exécuter manuellement <code>po team</code> dans la console. L'affichage via l'interface graphique (variable view) montrera un arbre de propriétés complet et potentiellement très volumineux, plutôt que le résumé souhaité.</p>
 <h3 id="apr%C3%A8s-se-0440" tabindex="-1"><a href="#apr%C3%A8s-se-0440" class="header-anchor">Après SE-0440</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@DebugDescription</span>
-<span class="token keyword">struct</span> <span class="token class-name">Organization</span><span class="token punctuation">:</span> <span class="token class-name">CustomDebugStringConvertible</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> id<span class="token punctuation">:</span> <span class="token class-name">String</span>
-    <span class="token keyword">var</span> name<span class="token punctuation">:</span> <span class="token class-name">String</span>
-    <span class="token keyword">var</span> manager<span class="token punctuation">:</span> <span class="token class-name">Person</span>
-    <span class="token keyword">var</span> members<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Person</span><span class="token punctuation">]</span>
-<span class="token punctuation">}</span>
-</code></pre>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro</span>
 <span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>member<span class="token punctuation">)</span>
 <span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>memberAttribute<span class="token punctuation">)</span>
@@ -115,16 +107,17 @@
 </code></pre>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation du macro</span>
 <span class="token attribute atrule">@DebugDescription</span>
-<span class="token keyword">struct</span> <span class="token class-name">Organization</span> <span class="token punctuation">{</span>
+<span class="token keyword">struct</span> <span class="token class-name">Organization</span><span class="token punctuation">:</span> <span class="token class-name">CustomDebugStringConvertible</span> <span class="token punctuation">{</span>
     <span class="token keyword">var</span> id<span class="token punctuation">:</span> <span class="token class-name">String</span>
     <span class="token keyword">var</span> name<span class="token punctuation">:</span> <span class="token class-name">String</span>
     <span class="token keyword">var</span> manager<span class="token punctuation">:</span> <span class="token class-name">Person</span>
+    <span class="token keyword">var</span> members<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Person</span><span class="token punctuation">]</span>
 <span class="token punctuation">}</span>
 </code></pre>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code généré par la macro (Expansion)</span>
-<span class="token comment">// #${var.id} ${var.name} (${var.manager.name})</span>
+<span class="token keyword">static</span> <span class="token keyword">let</span> _lldb_summary <span class="token operator">=</span> <span class="token punctuation">(</span>id<span class="token punctuation">:</span> #$<span class="token punctuation">{</span><span class="token keyword">var</span><span class="token punctuation">.</span>id<span class="token punctuation">}</span><span class="token punctuation">,</span> name<span class="token punctuation">:</span> $<span class="token punctuation">{</span><span class="token keyword">var</span><span class="token punctuation">.</span>name<span class="token punctuation">}</span><span class="token punctuation">,</span> manager<span class="token punctuation">:</span> <span class="token punctuation">(</span>$<span class="token punctuation">{</span><span class="token keyword">var</span><span class="token punctuation">.</span>manager<span class="token punctuation">.</span>name<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
 </code></pre>
-<p>La macro extrait la logique de la propriété <code>debugDescription</code> (ou <code>description</code> ou <code>lldbDescription</code>) et l'injecte sous la forme d'une propriété statique <code>_lldb_summary</code> compatible avec LLDB. Cela permet au debugger d'afficher le résumé formaté directement dans l'interface utilisateur sans exécuter de code Swift.</p>
+<p>La macro extrait la logique de la propriété <code>debugDescription</code> (ou <code>description</code> ou <code>lldbDescription</code>) et l'injecte sous la forme d'une propriété statique compatible avec le format des "Type Summaries" de LLDB. Cela permet au debugger d'afficher le résumé formaté directement dans l'interface utilisateur (comme la liste des variables de l'IDE) sans avoir besoin d'exécuter du code dans le processus en cours d'exécution.</p>
 
   </div>
 </article>
