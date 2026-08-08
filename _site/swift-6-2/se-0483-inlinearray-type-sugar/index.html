@@ -2,7 +2,7 @@
 <html lang="fr"><head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TofPlay - SE-0483 - InlineArray Type Sugar Proposal</title>
+    <title>TofPlay - SE-0483 - InlineArray Type Sugar</title>
 
     <meta name="supported-color-schemes" content="light dark">
     <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
@@ -40,7 +40,7 @@
               </a>
           </li>
           <li>
-              <span aria-current="page">SE-0483 - InlineArray Type Sugar Proposal</span>
+              <span aria-current="page">SE-0483 - InlineArray Type Sugar</span>
           </li>
       </ol>
 
@@ -73,27 +73,39 @@
     <main class="body-tag">
       <article class="post" data-pagefind-body="">
   <div class="post-body">
-    <h1>SE-0483 - InlineArray Type Sugar Proposal</h1>
+    <h1>SE-0483 - InlineArray Type Sugar</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
 <h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
 <p>Swift 6.2</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
-<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0483-inline-array-sugar.md">SE-0483 - InlineArray Type Sugar Proposal</a></p>
+<p><a href="https://github.com/swiftlang/swift-proposals/blob/main/proposals/0483-inline-array-sugar.md">SE-0483 - InlineArray Type Sugar</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit une syntaxe simplifiée (sugar) pour le type <code>InlineArray</code> introduit avec SE-0453. Actuellement, la déclaration d'un tableau à taille fixe est verbeuse car elle nécessite l'utilisation de la syntaxe générique <code>InlineArray&lt;Size, Element&gt;</code>. La proposition introduit la syntaxe <code>[Size of Element]</code>, offrant une lecture plus naturelle et une syntaxe plus concise, comparable aux tableaux dynamiques <code>[Element]</code>. Cette amélioration vise à rendre l'utilisation des types à taille fixe plus ergonomique, facilitant ainsi l'adoption de types performants (évitant les allocations sur le tas et le comptage de références) pour des besoins de micro-optimisation, notamment pour les structures multidimensionnelles.</p>
+<p>La proposition introduit une syntaxe simplifiée (syntax sugar) pour le type <code>InlineArray</code>. Le type <code>InlineArray</code> est un type dont la taille est partie intégrante de sa définition via des paramètres génériques. La nouvelle syntaxe utilise la forme <code>[Taille of Type]</code> pour déclarer ces tableaux de taille fixe, offrant une alternative plus concise et lisible à la syntaxe générique complète <code>InlineArray&lt;Taille, Type&gt;</code>. Cette amélioration facilite l'utilisation de tableaux multidimensionnels et aligne la syntaxe de Swift sur d'autres langages performants (comme Rust ou C++) tout en conservant l'ergonomie du langage.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0483" tabindex="-1"><a href="#avant-se-0483" class="header-anchor">Avant SE-0483</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> fiveIntegers<span class="token punctuation">:</span> <span class="token class-name">InlineArray</span><span class="token operator">&lt;</span><span class="token number">5</span><span class="token punctuation">,</span> <span class="token class-name">Int</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token keyword">init</span><span class="token punctuation">(</span>repeating<span class="token punctuation">:</span> <span class="token number">99</span><span class="token punctuation">)</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Déclaration explicite et verbeuse du type</span>
+<span class="token keyword">let</span> fiveIntegers<span class="token punctuation">:</span> <span class="token class-name">InlineArray</span><span class="token operator">&lt;</span><span class="token number">5</span><span class="token punctuation">,</span> <span class="token class-name">Int</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token keyword">init</span><span class="token punctuation">(</span>repeating<span class="token punctuation">:</span> <span class="token number">99</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Déclaration multidimensionnelle complexe</span>
 <span class="token keyword">let</span> fiveByFive<span class="token punctuation">:</span> <span class="token class-name">InlineArray</span><span class="token operator">&lt;</span><span class="token number">5</span><span class="token punctuation">,</span> <span class="token class-name">InlineArray</span><span class="token operator">&lt;</span><span class="token number">5</span><span class="token punctuation">,</span> <span class="token class-name">Int</span><span class="token operator">&gt;&gt;</span> <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token keyword">init</span><span class="token punctuation">(</span>repeating<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token keyword">init</span><span class="token punctuation">(</span>repeating<span class="token punctuation">:</span> <span class="token number">99</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
 </code></pre>
-<p>La syntaxe actuelle est lourde et répétitive, particulièrement lors de l'utilisation de structures multidimensionnelles, ce qui peut décourager l'utilisation d' <code>InlineArray</code> au profit de <code>Array</code> malgré des implications de performance différentes.</p>
+<p>L'utilisation de la syntaxe générique pour <code>InlineArray</code> est très verbeuse, surtout lorsqu'il faut imbriquer plusieurs dimensions, ce qui rend le code difficile à lire et à écrire.</p>
 <h3 id="apr%C3%A8s-se-0483" tabindex="-1"><a href="#apr%C3%A8s-se-0483" class="header-anchor">Après SE-0483</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> fiveIntegers<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token number">5</span> of <span class="token class-name">Int</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token keyword">init</span><span class="token punctuation">(</span>repeating<span class="token punctuation">:</span> <span class="token number">99</span><span class="token punctuation">)</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Déclaration concise avec le nouveau "sugar"</span>
+<span class="token keyword">let</span> fiveIntegers<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token number">5</span> of <span class="token class-name">Int</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token keyword">init</span><span class="token punctuation">(</span>repeating<span class="token punctuation">:</span> <span class="token number">99</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Déclaration multidimensionnelle beaucoup plus lisible</span>
 <span class="token keyword">let</span> fiveByFive<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token number">5</span> of <span class="token punctuation">[</span><span class="token number">5</span> of <span class="token class-name">Int</span><span class="token punctuation">]</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token keyword">init</span><span class="token punctuation">(</span>repeating<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token keyword">init</span><span class="token punctuation">(</span>repeating<span class="token punctuation">:</span> <span class="token number">99</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Utilisation avec inférence de type partielle</span>
 <span class="token keyword">let</span> fourBytes<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token omit keyword">_</span> of <span class="token class-name">Int8</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">]</span>
+<span class="token keyword">let</span> fourIntegers<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token omit keyword">_</span> of <span class="token omit keyword">_</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">]</span>
+
+<span class="token comment">// Utilisation directe comme type pour un initialiseur</span>
+<span class="token keyword">let</span> fiveDoubles <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">5</span> of <span class="token omit keyword">_</span><span class="token punctuation">]</span><span class="token punctuation">(</span>repeating<span class="token punctuation">:</span> <span class="token number">1.23</span><span class="token punctuation">)</span>
 </code></pre>
-<p>La nouvelle syntaxe <code>[Size of Element]</code> est beaucoup plus concise et lisible. Elle permet également l'inférence de type partielle (ex: <code>[5 of _]</code>) et une utilisation plus fluide dans des contextes complexes, tout en restant une simple transformation syntaxique lors de la compilation sans impact sur l'ABI.</p>
+<p>La nouvelle syntaxe <code>[Taille of Type]</code> permet de déclarer des tableaux de taille fixe de manière beaucoup plus naturelle et compacte, tout en permettant l'inférence de type avec l'underscore <code>_</code>.</p>
 
   </div>
 </article>

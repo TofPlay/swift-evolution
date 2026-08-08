@@ -81,33 +81,41 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0523-hashable-unownedtask-executor.md">SE-0523 - Hashable conformance for UnownedTaskExecutor</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit la conformité au protocole <code>Hashable</code> pour le type <code>UnownedTaskExecutor</code>. Actuellement, ce type ne respecte que le protocole <code>Equatable</code>, ce qui limite ses capacités d'utilisation dans des structures de données indexées. L'ajout de <code>Hashable</code> permet d'utiliser un exécuteur comme clé dans un dictionnaire (<code>Dictionary</code>) ou dans un ensemble (<code>Set</code>), offrant ainsi des performances de recherche en temps constant $O(1)$ au lieu d'une recherche linéaire $O(n)$. Cette amélioration est particulièrement utile pour les systèmes de gestion de ressources (comme le pooling de connexions) qui doivent associer des ressources à l'exécuteur d'une tâche pour minimiser les changements de contexte.</p>
+<p>La proposition introduit la conformité au protocole <code>Hashable</code> pour le type <code>UnownedTaskExecutor</code>. Ce type, qui est une <code>struct</code> encapsulant une valeur <code>Builtin.Executor</code>, possède déjà une conformité à <code>Equatable</code> basée sur l'identité de l'exécuteur sous-jacent. L'ajout de <code>Hashable</code> permet d'utiliser un <code>UnownedTaskExecutor</code> comme clé dans un <code>dictionary</code> ou comme élément dans un <code>set</code>, rendant possible des recherches de ressources liées à un exécuteur en temps constant ($O(1)$) plutôt qu'en temps linéaire ($O(n)$).</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0523" tabindex="-1"><a href="#avant-se-0523" class="header-anchor">Avant SE-0523</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Aujourd'hui : recherche linéaire O(n)</span>
-<span class="token keyword">func</span> <span class="token function-definition function">pickConnection</span><span class="token punctuation">(</span>preferring executor<span class="token punctuation">:</span> <span class="token class-name">UnownedTaskExecutor</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Connection</span> <span class="token punctuation">{</span>
-    <span class="token keyword">for</span> <span class="token punctuation">(</span>e<span class="token punctuation">,</span> connection<span class="token punctuation">)</span> <span class="token keyword">in</span> executorConnectionList <span class="token punctuation">{</span>
-        <span class="token keyword">if</span> e <span class="token operator">==</span> executor <span class="token punctuation">{</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Simulation du comportement actuel (nécessitant Equatable uniquement)</span>
+<span class="token keyword">struct</span> <span class="token class-name">ConnectionPool</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> executorConnectionList<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">(</span>executor<span class="token punctuation">:</span> <span class="token class-name">UnownedTaskExecutor</span><span class="token punctuation">,</span> connection<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+
+    <span class="token keyword">func</span> <span class="token function-definition function">pickConnection</span><span class="token punctuation">(</span>preferring executor<span class="token punctuation">:</span> <span class="token class-name">UnownedTaskExecutor</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">String</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Recherche linéaire nécessaire car l'exécuteur n'est pas Hashable</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span>e<span class="token punctuation">,</span> connection<span class="token punctuation">)</span> <span class="token keyword">in</span> executorConnectionList <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> e <span class="token operator">==</span> executor <span class="token punctuation">{</span>
+                <span class="token keyword">return</span> connection
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> executorConnectionList<span class="token punctuation">.</span>first<span class="token operator">!</span><span class="token punctuation">.</span>connection
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La limitation actuelle est que <code>UnownedTaskExecutor</code> ne peut pas être utilisé comme clé dans un <code>dictionary</code>. Pour trouver une ressource associée à un exécuteur spécifique, le développeur est obligé de parcourir manuellement toute une liste (recherche linéaire), ce qui devient inefficace lorsque le nombre d'exécuteurs augmente.</p>
+<h3 id="apr%C3%A8s-se-0523" tabindex="-1"><a href="#apr%C3%A8s-se-0523" class="header-anchor">Après SE-0523</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Simulation du nouveau comportement (avec Hashable)</span>
+<span class="token keyword">struct</span> <span class="token class-name">ConnectionPool</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Utilisation d'un dictionary pour une recherche rapide</span>
+    <span class="token keyword">var</span> connectionsByExecutor<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">UnownedTaskExecutor</span><span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">]</span>
+
+    <span class="token keyword">func</span> <span class="token function-definition function">pickConnection</span><span class="token punctuation">(</span>preferring executor<span class="token punctuation">:</span> <span class="token class-name">UnownedTaskExecutor</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">String</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Recherche en temps constant O(1)</span>
+        <span class="token keyword">if</span> <span class="token keyword">let</span> connection <span class="token operator">=</span> connectionsByExecutor<span class="token punctuation">[</span>executor<span class="token punctuation">]</span> <span class="token punctuation">{</span>
             <span class="token keyword">return</span> connection
         <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> connectionsByExecutor<span class="token punctuation">.</span>values<span class="token punctuation">.</span>first<span class="token operator">!</span>
     <span class="token punctuation">}</span>
-    <span class="token comment">// fallback</span>
-    <span class="token keyword">return</span> executorConnectionList<span class="token punctuation">.</span>first<span class="token operator">!</span><span class="token punctuation">.</span>connection
 <span class="token punctuation">}</span>
 </code></pre>
-<p>La conformité limitée à <code>Equatable</code> oblige le développeur à parcourir manuellement chaque élément d'une liste pour trouver une correspondance avec l'exécuteur, ce qui est inefficace pour de grands ensembles de données.</p>
-<h3 id="apr%C3%A8s-se-0523" tabindex="-1"><a href="#apr%C3%A8s-se-0523" class="header-anchor">Après SE-0523</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Avec Hashable : recherche en dictionnaire O(1)</span>
-<span class="token keyword">func</span> <span class="token function-definition function">pickConnection</span><span class="token punctuation">(</span>preferring executor<span class="token punctuation">:</span> <span class="token class-name">UnownedTaskExecutor</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Connection</span> <span class="token punctuation">{</span>
-    <span class="token keyword">if</span> <span class="token keyword">let</span> connection <span class="token operator">=</span> connectionsByExecutor<span class="token punctuation">[</span>executor<span class="token punctuation">]</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> connection
-    <span class="token punctuation">}</span>
-    <span class="token comment">// fallback</span>
-    <span class="token keyword">return</span> connectionsByExecutor<span class="token punctuation">.</span>values<span class="token punctuation">.</span>first<span class="token operator">!</span>
-<span class="token punctuation">}</span>
-</code></pre>
-<p>La conformité à <code>Hashable</code> permet d'utiliser l'exécuteur comme clé de dictionnaire, permettant une récupération immédiate de la ressource associée, optimisant ainsi les performances du système de scheduling.</p>
-<hr>
+<p>La proposition résout le problème en permettant l'utilisation de <code>UnownedTaskExecutor</code> comme clé de <code>dictionary</code>. Cela permet de transformer une recherche lente et coûteuse en une opération de hachage instantanée, optimisant ainsi les systèmes de gestion de connexions ou de cache basés sur l'identité de l'exécuteur.</p>
 
   </div>
 </article>

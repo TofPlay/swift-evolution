@@ -81,40 +81,43 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0420-inheritance-of-actor-isolation.md">SE-0420 - Inheritance of actor isolation</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit la possibilité pour une fonction asynchrone d'hériter de l'isolation de l'acteur de son appelant. Actuellement, les fonctions asynchronues non isolées réinitialisent l'isolation, ce qui oblige à traverser une barrière d'isolation, imposant des contraintes de conformité au protocole Sendable et provoquant des suspensions et des changements d'exécuteur inutiles.</p>
-<p>La solution repose sur deux évolutions :</p>
+<p>La proposition introduit la capacité pour les fonctions <code>async</code> d'hériter de l'isolation de l'acteur de leur appelant. Cela est réalisé via deux mécanismes principaux :</p>
 <ol>
-<li>La possibilité pour un paramètre isolé d'accepter un type optionnel, permettant ainsi à une fonction d'être dynamiquement non isolée si le paramètre est nul.</li>
-<li>L'introduction de l'expression spéciale <code>#isolation</code> pour les arguments par défaut. Cette expression permet de propager automatiquement l'isolation du contexte appelant vers le paramètre isolé de la fonction appelée.</li>
+<li><strong>Paramètres isolés optionnels</strong> : Les <code>isolated parameters</code> peuvent désormais accepter un type <code>(any Actor)?</code>. Cela permet de définir une isolation dynamique qui peut être <code>nil</code> (se comportant comme une fonction <code>non-isolated</code>).</li>
+<li><strong>Expression <code>#isolation</code></strong> : Une nouvelle forme d'expression pour les arguments par défaut qui récupère automatiquement l'isolation de l'acteur du contexte appelant.</li>
 </ol>
-<p>Cette fonctionnalité améliore l'expressivité pour les fonctions d'ordre supérieur (comme <code>map</code>) et optimise les performances en évitant les "sauts" d'exécuteur inutiles lorsque le contexte de l'appelant et celui de la fonction partagent le même acteur.</p>
+<p>Ce mécanisme permet de maintenir la même isolation entre l'appelant et l'appelé, garantissant que les données non <code>Sendable</code> peuvent être passées et retournées sans franchir de barrière d'isolation, et en évitant des suspensions (<code>suspensions</code>) et des changements d'exécuteur (<code>executor</code>) inutiles.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0420" tabindex="-1"><a href="#avant-se-0420" class="header-anchor">Avant SE-0420</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@MainActor</span> 
 <span class="token keyword">func</span> <span class="token function-definition function">iterate</span><span class="token punctuation">(</span>over stream<span class="token punctuation">:</span> <span class="token class-name">AsyncStream</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span> 
     <span class="token keyword">var</span> iterator <span class="token operator">=</span> stream<span class="token punctuation">.</span><span class="token function">makeAsyncIterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
     <span class="token keyword">while</span> <span class="token keyword">let</span> element <span class="token operator">=</span> <span class="token keyword">await</span> iterator<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> 
-        <span class="token comment">// do something with 'element' </span>
+        <span class="token comment">// 'element' est récupéré, mais iterator n'est pas Sendable</span>
+        <span class="token comment">// Cela provoque une erreur car 'next()' est non-isolated et non-Sendable</span>
+        <span class="token function">print</span><span class="token punctuation">(</span>element<span class="token punctuation">)</span>
     <span class="token punctuation">}</span> 
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'appel de <code>iterator.next()</code> (qui est une fonction asynchrone non isolée) depuis un contexte isolé au <code>@MainActor</code> provoque un avertissement car l'itérateur n'est pas <code>Sendable</code> et l'isolation est réinitialisée, créant une barrière de sécurité et une suspension inutile.</p>
+<p>L'utilisation de fonctions <code>async</code> non-isolées (comme <code>next()</code> dans <code>AsyncIteratorProtocol</code>) provoque un "reset" de l'isolation. Cela signifie que même si on appelle la fonction depuis le <code>@MainActor</code>, la fonction <code>next()</code> est traitée comme étant hors de l'acteur. Par conséquent, le compilateur refuse de passer des types non <code>Sendable</code> (comme l'itérateur lui-même) car il considère qu'on franchit une barrière de sécurité entre deux domaines d'isolation différents. Cela crée des erreurs de compilation et des performances réduites dues aux changements d'exécuteur.</p>
 <h3 id="apr%C3%A8s-se-0420" tabindex="-1"><a href="#apr%C3%A8s-se-0420" class="header-anchor">Après SE-0420</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">extension</span> <span class="token class-name">AsyncIteratorProtocol</span> <span class="token punctuation">{</span> 
-    <span class="token keyword">func</span> <span class="token function-definition function">next</span><span class="token punctuation">(</span>isolation<span class="token punctuation">:</span> <span class="token keyword">isolated</span> <span class="token punctuation">(</span>any <span class="token class-name">Actor</span><span class="token punctuation">)</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token other-directive property">#isolation</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token operator">-&gt;</span> <span class="token class-name">Element</span> <span class="token punctuation">{</span> 
-        <span class="token comment">// implémentation</span>
-    <span class="token punctuation">}</span> 
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Extension de l'itérateur pour supporter l'héritage d'isolation</span>
+<span class="token keyword">extension</span> <span class="token class-name">AsyncIteratorProtocol</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">next</span><span class="token punctuation">(</span>isolation<span class="token punctuation">:</span> <span class="token keyword">isolated</span> <span class="token punctuation">(</span>any <span class="token class-name">Actor</span><span class="token punctuation">)</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token other-directive property">#isolation</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token operator">-&gt;</span> <span class="token class-name">Element</span> <span class="token punctuation">{</span>
+        <span class="token comment">// ... implémentation ...</span>
+    <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 
 <span class="token attribute atrule">@MainActor</span> 
 <span class="token keyword">func</span> <span class="token function-definition function">iterate</span><span class="token punctuation">(</span>over stream<span class="token punctuation">:</span> <span class="token class-name">AsyncStream</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span> 
     <span class="token keyword">var</span> iterator <span class="token operator">=</span> stream<span class="token punctuation">.</span><span class="token function">makeAsyncIterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
+    <span class="token comment">// L'isolation est héritée du @MainActor via #isolation</span>
     <span class="token keyword">while</span> <span class="token keyword">let</span> element <span class="token operator">=</span> <span class="token keyword">await</span> iterator<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> 
-        <span class="token comment">// do something with 'element' </span>
+        <span class="token function">print</span><span class="token punctuation">(</span>element<span class="token punctuation">)</span>
     <span class="token punctuation">}</span> 
 <span class="token punctuation">}</span>
 </code></pre>
-<p>En utilisant <code>#isolation</code> comme argument par défaut, la fonction <code>next</code> hérite dynamiquement de l'isolation du <code>@MainActor</code>. Cela permet de manipuler des types non-Sendable sans avertissement et d'éviter les changements d'exécuteur superflus.</p>
+<p>La proposition permet de définir un paramètre qui capture dynamiquement l'acteur de l'appelant grâce à <code>#isolation</code>. En utilisant un type <code>(any Actor)?</code> pour ce paramètre, la fonction peut accepter l'isolation de l'appelant. Dans l'exemple, la fonction <code>next()</code> est maintenant vue par le compilateur comme partageant la même isolation que le <code>@MainActor</code>, ce qui permet de manipuler l'itérateur (non <code>Sendable</code>) sans erreur de sécurité et sans coût de suspension inutile.</p>
 
   </div>
 </article>

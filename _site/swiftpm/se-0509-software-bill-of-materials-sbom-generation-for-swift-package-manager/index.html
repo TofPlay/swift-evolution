@@ -76,36 +76,31 @@
     <h1>SE-0509 - Software Bill of Materials (SBOM) Generation for Swift Package Manager</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
-<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<h2 id="disponible-%C3%A0-part" tabindex="-1"><a href="#disponible-%C3%A0-part" class="header-anchor">Disponible à part</a></h2>
 <p>Swift 6.4</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0509-swift-sboms-via-swiftpm.md">SE-0509 - Software Bill of Materials (SBOM) Generation for Swift Package Manager</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit la génération de <strong>Software Bill of Materials (SBOM)</strong> directement via le Swift Package Manager (SwiftPM). L'objectif est de fournir un inventaire détaillé des composants logiciels (dépendances, versions, sources) pour améliorer la sécurité de la chaîne d'approvisionnement logicielle et répondre aux exigences réglementaires.</p>
-<p>La solution inclut :</p>
-<ul>
-<li>La génération des formats <strong>CycloneDX</strong> et <strong>SPX</strong> via la commande <code>swift build</code> (avec l'option <code>--sbom-spec</code>) ou via une nouvelle sous-commande <code>swift package generate-sbom</code>.</li>
-<li>L'utilisation du graphe de dépendances de construction (SwiftBuild) pour inclure ou exclure des dépendances selon les conditions (OS, traits), offrant ainsi une vue plus précise que le simple graphe de résolution des packages.</li>
-<li>Un système de filtrage permettant de générer des SBOM pour l'ensemble du package, un produit spécifique ou uniquement les packages.</li>
-</ul>
+<p>La proposition introduit la génération de Software Bill of Materials (SBOM) directement via Swift Package Manager (SwiftPM). Cette fonctionnalité permet de produire des inventaires détaillés des composants logiciels inclus dans un artefact, en supportant les formats standards CycloneDX et SPDX. La génération peut s'effectuer de deux manières : via une option <code>--sbom-spec</code> de la commande <code>swift build</code> (intégrant le graphe de dépendances de <code>SwiftBuild</code> pour une précision accrue, notamment pour les dépendances conditionnelles) ou via une nouvelle commande <code>swift package generate-sbom</code> (basée uniquement sur le graphe de modules). Le système supporte le filtrage par produit ou par package et permet une traçabilité précise de la chaîne d'approvisionnement logicielle.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0509" tabindex="-1"><a href="#avant-se-0509" class="header-anchor">Avant SE-0509</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// SwiftPM ne possède pas de mécanisme natif pour générer des SBOM.</span>
-<span class="token comment">// Les développeurs doivent utiliser des outils tiers pour analyser </span>
-<span class="token comment">// Package.swift et Package.resolved.</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// SwiftPM ne possède pas de support natif pour générer des SBOM</span>
+<span class="token comment">// Les développeurs doivent utiliser des outils tiers</span>
+<span class="token comment">// L'analyse repose souvent sur Package.swift et Package.resolved</span>
+<span class="token comment">// Les dépendances conditionnelles (OS-specific) ne sont pas capturées par ces outils</span>
 </code></pre>
-<p>L'absence de support natif oblige à utiliser des outils externes qui analysent souvent les fichiers de résolution sans tenir compte des dépendances spécifiques au système d'exploitation ou aux flags de construction, risquant de fournir un inventaire incomplet.</p>
+<p>L'absence de support intégré oblige les développeurs à dépendre d'outils externes. Ces outils analysent les fichiers de résolution de dépendances mais ne possèdent pas la visibilité nécessaire sur le graphe de build réel, ce qui peut entraîner l'omission de dépendances spécifiques à une plateforme ou à une configuration donnée.</p>
 <h3 id="apr%C3%A8s-se-0509" tabindex="-1"><a href="#apr%C3%A8s-se-0509" class="header-anchor">Après SE-0509</a></h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Générer un SBOM au format CycloneDX lors de la compilation
-swift build --sbom-spec cyclonedx
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Génération d'un SBOM CycloneDX via la commande de build
+$ swift build --sbom-spec cyclonedx
 
-# Générer un SBOM au format SPDX pour un produit spécifique
-swift package generate-sbom --product MyProduct --sbom-spec spdx
+# Génération d'un SBOM SPDX via une commande dédiée (graphe de modules uniquement)
+$ swift package generate-sbom --sbom-spec spdx
 
-# Générer les deux formats dans un répertoire spécifique
-swift build --sbom-spec cyclonedx --sbom-spec spdx --sbom-output-dir /mon/chemin
+# Génération pour un produit spécifique avec SwiftBuild pour la précision
+$ swift build --build-system swiftbuild --product MyProduct --sbom-spec spdx
 </code></pre>
-<p>La commande <code>swift build</code> peut désormais générer automatiquement des inventaires JSON (CycloneDX ou SPDX) qui reflètent fidèlement les dépendances réellement utilisées lors de la compilation, incluant les informations de provenance (commit SHA, URL du dépôt) et de version.</p>
+<p>La proposition permet de générer des fichiers JSON conformes aux spécifications CycloneDX et SPDX directement depuis l'outil de gestion de packages. L'utilisation de <code>SwiftBuild</code> garantit que seules les dépendances réellement utilisées pour une cible spécifique sont incluses, résolvant ainsi le problème de l'exactitude des inventaires.</p>
 
   </div>
 </article>

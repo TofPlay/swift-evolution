@@ -2,7 +2,7 @@
 <html lang="fr"><head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TofPlay - SE-0209 - Package Manager Swift Language Version API Update</title>
+    <title>TofPlay - Acceuil</title>
 
     <meta name="supported-color-schemes" content="light dark">
     <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
@@ -40,7 +40,7 @@
               </a>
           </li>
           <li>
-              <span aria-current="page">SE-0209 - Package Manager Swift Language Version API Update</span>
+              <span aria-current="page">se-0209-package-manager-swift-language-version-api-update</span>
           </li>
       </ol>
 
@@ -73,15 +73,15 @@
     <main class="body-tag">
       <article class="post" data-pagefind-body="">
   <div class="post-body">
-    <h1>SE-0209 - Package Manager Swift Language Version API Update</h1>
+    <p>SE-0209 - Package Manager Swift Language Version API Update Proposal</p>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
-<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<h2 id="disponible-%C3%A0-partir" tabindex="-1"><a href="#disponible-%C3%A0-partir" class="header-anchor">Disponible à partir</a></h2>
 <p>Swift 4.2</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
-<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0209-package-manager-swift-lang-version-update.md">SE-0209 - Package Manager Swift Language Version API Update</a></p>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0209-package-manager-swift-lang-version-update.md">SE-0209 - Package Manager Swift Language Version API Update Proposal</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition modifie l'API du manifeste <code>Package.swift</code> pour la déclaration des versions du langage Swift. Le type de la propriété <code>swiftLanguageVersions</code> passe d'un tableau d'entiers (<code>[Int]</code>) à un tableau d'énumération (<code>[SwiftVersion]</code>). Cette modification permet d'intégrer des versions de langage plus précises (comme la version 4.2) et offre la possibilité de spécifier des versions personnalisées via un cas associatif, garantissant ainsi la scalabilité de l'outil face aux nouvelles versions du compilateur.</p>
+<p>La proposition modifie l'API du manifest <code>Package.swift</code> pour la déclaration des versions du langage Swift. La propriété <code>swiftLanguageVersions</code> passe d'un tableau d'entiers (<code>[Int]</code>) à un tableau d'énumérations (<code>[SwiftVersion]</code>). Cette énumération inclut des cas prédéfinis pour les versions connues et un cas <code>.version(String)</code> permettant de spécifier des versions personnalisées. Ce changement permet une gestion plus rigoureuse et extensible des versions de langage supportées par un package.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0209" tabindex="-1"><a href="#avant-se-0209" class="header-anchor">Avant SE-0209</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// swift-tools-version:4.0</span>
@@ -92,7 +92,7 @@
     swiftLanguageVersions<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token number">4</span><span class="token punctuation">]</span>
 <span class="token punctuation">)</span>
 </code></pre>
-<p>L'utilisation d'un tableau d'entiers (<code>[Int]</code>) limite la précision des versions et ne permet pas de gérer facilement des versions décimales ou des versions futures non encore définies dans le langage.</p>
+<p>La déclaration utilise un tableau d'entiers simple pour définir les versions du langage Swift.</p>
 <h3 id="apr%C3%A8s-se-0209" tabindex="-1"><a href="#apr%C3%A8s-se-0209" class="header-anchor">Après SE-0209</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// swift-tools-version:4.2</span>
 <span class="token keyword">import</span> <span class="token class-name">PackageDescription</span>
@@ -102,7 +102,18 @@
     swiftLanguageVersions<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">.</span>v4<span class="token punctuation">,</span> <span class="token punctuation">.</span>v4_2<span class="token punctuation">]</span>
 <span class="token punctuation">)</span>
 </code></pre>
-<p>L'utilisation de l'énumération <code>SwiftVersion</code> permet de spécifier explicitement des versions comme <code>.v4_2</code> ou d'utiliser des valeurs personnalisées pour assurer la compatibilité avec les versions futures du compilateur.</p>
+<p>La syntaxe utilise une énumération <code>SwiftVersion</code> pour spécifier les versions de manière explicite et sûre.</p>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// swift-tools-version:4.2</span>
+<span class="token keyword">import</span> <span class="token class-name">PackageDescription</span>
+
+<span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"HTTPClient"</span></span><span class="token punctuation">,</span>
+    swiftLanguageVersions<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">.</span>v4<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token function">version</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"5"</span></span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+<span class="token punctuation">)</span>
+</code></pre>
+<p>Le système permet d'utiliser des versions de langage non encore répertoriées dans l'API via le cas <code>.version(String)</code>, assurant la compatibilité avec de futures évolutions du compilateur.</p>
+<p>L'utilisation de l'énumération <code>SwiftVersion</code> résout le problème de typage limité et permet de supporter des versions de langage spécifiques (comme la version 4.2) ou des versions futures inconnues de l'API actuelle grâce à la capacité de passer une <code>String</code> directement au compilateur.</p>
+<hr>
 
   </div>
 </article>

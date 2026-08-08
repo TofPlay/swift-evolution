@@ -132,7 +132,7 @@
 <p>Le manque de mécanismes de vérification rend la migration vers la concurrence Swift risquée lorsqu'on manipule du code legacy synchronisé par des files d'attente.</p>
 <h3 id="apr%C3%A8s-se-0392-1" tabindex="-1"><a href="#apr%C3%A8s-se-0392-1" class="header-anchor">Après SE-0392</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">syncFunction</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Vérifie si l'exécution est actuellement sur le MainActor (crash si non)</span>
+    <span class="token comment">// Vérifie si l'exécution est sur le MainActor (crash si non)</span>
     <span class="token class-name">MainActor</span><span class="token punctuation">.</span><span class="token function">preconditionIsolated</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
     
     <span class="token comment">// Ou exécute une opération en "assumant" l'isolation</span>

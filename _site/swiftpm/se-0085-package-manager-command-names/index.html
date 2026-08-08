@@ -81,33 +81,27 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0085-package-manager-command-name.md">SE-0085 - Package Manager Command Names</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition redéfinit l'interface en ligne de commande du gestionnaire de paquets Swift pour offrir une syntaxe plus expressive et évolutive. Au lieu d'utiliser des drapeaux (flags) sur les commandes existantes pour des actions distinctes, elle introduit une nouvelle commande de premier niveau <code>swift package</code> avec ses propres sous-commandes.</p>
-<p>Les changements clés incluent :</p>
-<ul>
-<li>Création de la commande <code>swift package</code>.</li>
-<li>Transformation des drapeaux comme <code>--init</code> en sous-commandes (ex: <code>swift package init</code>).</li>
-<li>Introduction de sous-commandes dédiées pour de nouvelles fonctionnalités (ex: <code>swift package update</code>).</li>
-<li>Maintien de <code>swift build</code> et <code>swift test</code> comme commandes de premier niveau, agissant comme des alias de <code>swift package build</code> et <code>swift package test</code> pour des raisons d'usage fréquent.</li>
-</ul>
+<p>La proposition redéfinit l'interface en ligne de commande du gestionnaire de paquets Swift. Le système introduit une nouvelle commande de haut niveau <code>swift package</code> qui regroupe les fonctionnalités de gestion de dépendances sous forme de sous-commandes (ex: <code>swift package init</code>, <code>swift package update</code>). Les commandes <code>swift build</code> et <code>swift test</code> sont conservées en tant que commandes de premier niveau pour des raisons d'ergonomie, mais elles agissent comme des alias vers <code>swift package build</code> et <code>swift package test</code>. Cette structure permet de séparer les actions de modification de l'état du projet (comme l'initialisation) des simples modificateurs de configuration de compilation.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0085" tabindex="-1"><a href="#avant-se-0085" class="header-anchor">Avant SE-0085</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de drapeaux pour des actions qui sont en réalité des commandes</span>
-swift build <span class="token operator">--</span><span class="token keyword">init</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift">swift build <span class="token operator">--</span><span class="token keyword">init</span>
 swift build <span class="token operator">--</span>fetch
 swift build <span class="token operator">--</span>update
+swift build <span class="token operator">--</span>generate<span class="token operator">-</span>xcodeproj
 </code></pre>
-<p>L'utilisation de drapeaux pour gérer des opérations de cycle de vie du paquet (comme l'initialisation) est maladroite, car ces actions ne sont pas des modificateurs de l'action de compilation (build), mais des commandes à part entière.</p>
+<p>L'utilisation de flags pour déclencher des actions majeures comme l'initialisation d'un package crée une syntaxe confuse où des commandes distinctes sont traitées comme de simples modificateurs d'une commande de compilation.</p>
 <h3 id="apr%C3%A8s-se-0085" tabindex="-1"><a href="#apr%C3%A8s-se-0085" class="header-anchor">Après SE-0085</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de sous-commandes explicites et cohérentes</span>
-swift package <span class="token keyword">init</span>
-swift package fetch
-swift package update
-
-<span class="token comment">// Les commandes fréquentes restent disponibles par commodité via des alias</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation directe pour les actions fréquentes</span>
 swift build
 swift test
+
+<span class="token comment">// Utilisation de la nouvelle structure pour la gestion de paquets</span>
+swift package <span class="token keyword">init</span>
+swift package update
+swift package fetch
+swift package generate<span class="token operator">-</span>xcodeproj
 </code></pre>
-<p>La nouvelle structure sépare clairement les modificateurs de compilation (qui restent des drapeaux) des actions de gestion de paquet (qui deviennent des sous-commandes), rendant l'interface plus claire et prête pour de futures extensions.</p>
+<p>La proposition introduit une hiérarchie claire où le gestionnaire de paquets est une entité explicite via <code>swift package</code>, tout en maintenant des accès rapides via les commandes de haut niveau pour les flux de travail les plus courants.</p>
 
   </div>
 </article>

@@ -76,60 +76,54 @@
     <h1>SE-0325 - Additional Package Plugin APIs</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
-<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<h2 id="disponible-%C3%A0-partir" tabindex="-1"><a href="#disponible-%C3%A0-partir" class="header-anchor">Disponible à partir</a></h2>
 <p>Swift 5.6</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0325-swiftpm-additional-plugin-apis.md">SE-0325 - Additional Package Plugin APIs</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition étend l'API des plugins d'outils de construction (build tool plugins) de Swift Package Manager (SwiftPM). L'objectif est de fournir un contexte plus riche que l'API initiale limitée à un seul module, en introduisant une structure <code>PluginContext</code> qui donne accès à l'intégralité du graphe de packages résolu.</p>
-<p>Les évolutions clés incluent :</p>
-<ul>
-<li><strong>Introduction de <code>PluginContext</code></strong> : remplace <code>TargetBuildContext</code> pour offrir une vue globale du package et de ses dépendances (via l'objet <code>Package</code>).</li>
-<li><strong>Accès au graphe de dépendances</strong> : capacité de parcourir récursivement les dépendances d'une cible (<code>recursiveTargetDependencies</code>) pour obtenir une liste triée topologiquement.</li>
-<li><strong>Recherche d'outils</strong> : amélioration de la manière dont les plugins localisent les exécutables via <code>context.tool(named:)</code>.</li>
-<li><strong>Accès aux fichiers sources</strong> : ajout de méthodes pour filtrer les fichiers par extension (ex: <code>.proto</code>) au sein d'une cible.</li>
-</ul>
-<p>Cette extension prépare le terrain pour de nouveaux types de plugins qui nécessitent une vision transversale du projet plutôt que de se limiter aux fichiers d'une seule cible.</p>
+<p>La proposition introduit une extension de l'API <code>PackagePlugin</code> pour fournir un contexte enrichi aux plugins de build dans SwiftPM. Elle remplace le type <code>TargetBuildContext</code> par une structure <code>PluginContext</code> plus exhaustive. Cette nouvelle structure permet d'accéder à l'intégralité du graphe des packages (via une référence à <code>Package</code>) plutôt qu'à une vue limitée du target actuel. La proposition définit également des protocoles pour représenter les <code>Package</code>, <code>Product</code> et <code>Target</code> de manière hiérarchique, permettant de naviguer dans les dépendances. Des extensions sont ajoutées à <code>Target</code> pour obtenir les dépendances récursives (<code>recursiveTargetDependencies</code>) et à <code>SourceModuleTarget</code> pour filtrer les fichiers source par extension (<code>sourceFiles(withSuffix:)</code>).</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0325" tabindex="-1"><a href="#avant-se-0325" class="header-anchor">Avant SE-0325</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// L'API initiale était très limitée et centrée uniquement sur le module cible</span>
-<span class="token comment">// Le plugin n'avait pas de vue globale sur le reste du graphe de packages</span>
-<span class="token comment">// Il devait se limiter aux informations restreintes de TargetBuildContext</span>
-</code></pre>
-<p>L'API initiale était orientée vers la génération de code simple (ex: de fichiers <code>.proto</code>) et ne permettait pas d'inspecter facilement les chemins de recherche des dépendances ou l'arborescence complète du package.</p>
-<h3 id="apr%C3%A8s-se-0325" tabindex="-1"><a href="#apr%C3%A8s-se-0325" class="header-anchor">Après SE-0325</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">PackagePlugin</span>
-<span class="token keyword">import</span> <span class="token class-name">Foundation</span>
-
-<span class="token attribute atrule">@main</span>
-<span class="token keyword">struct</span> <span class="token class-name">MyPlugin</span><span class="token punctuation">:</span> <span class="token class-name">BuildToolPlugin</span> <span class="token punctuation">{</span>
-    <span class="token keyword">func</span> <span class="token function-definition function">createBuildCommands</span><span class="token punctuation">(</span>context<span class="token punctuation">:</span> <span class="token class-name">PluginContext</span><span class="token punctuation">,</span> target<span class="token punctuation">:</span> <span class="token class-name">Target</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">Command</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
-        <span class="token keyword">let</span> protocTool <span class="token operator">=</span> <span class="token keyword">try</span> context<span class="token punctuation">.</span><span class="token function">tool</span><span class="token punctuation">(</span>named<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"protoc"</span></span><span class="token punctuation">)</span>
-        
-        <span class="token comment">// Utilisation de la nouvelle API pour récupérer les chemins des dépendances</span>
-        <span class="token comment">// de manière récursive pour configurer les arguments de l'outil</span>
-        <span class="token keyword">var</span> protoSearchPaths <span class="token operator">=</span> target<span class="token punctuation">.</span>recursiveTargetDependencies<span class="token punctuation">.</span>map <span class="token punctuation">{</span> 
-            <span class="token short-argument">$0</span><span class="token punctuation">.</span>directory<span class="token punctuation">.</span><span class="token function">appending</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"protos"</span></span><span class="token punctuation">)</span> 
-        <span class="token punctuation">}</span>
-        
-        <span class="token keyword">let</span> genSourcesDir <span class="token operator">=</span> context<span class="token punctuation">.</span>pluginWorkDirectory<span class="token punctuation">.</span><span class="token function">appending</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"GeneratedSources"</span></span><span class="token punctuation">)</span>
-        <span class="token keyword">let</span> inputFiles <span class="token operator">=</span> target<span class="token punctuation">.</span><span class="token function">sourceFiles</span><span class="token punctuation">(</span>withSuffix<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">".proto"</span></span><span class="token punctuation">)</span>
-        
-        <span class="token keyword">return</span> inputFiles<span class="token punctuation">.</span>map <span class="token punctuation">{</span> inputFile <span class="token keyword">in</span>
-            <span class="token keyword">let</span> outputPath <span class="token operator">=</span> genSourcesDir<span class="token punctuation">.</span><span class="token function">appending</span><span class="token punctuation">(</span>inputFile<span class="token punctuation">.</span>path<span class="token punctuation">.</span>stem <span class="token operator">+</span> <span class="token string-literal"><span class="token string">".swift"</span></span><span class="token punctuation">)</span>
-            
-            <span class="token keyword">return</span> <span class="token punctuation">.</span><span class="token function">buildCommand</span><span class="token punctuation">(</span>
-                displayName<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Generating </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">inputFile<span class="token punctuation">.</span>path<span class="token punctuation">.</span>stem</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">,</span>
-                executable<span class="token punctuation">:</span> protocTool<span class="token punctuation">.</span>path<span class="token punctuation">,</span>
-                arguments<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"--swift_out=</span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">genSourcesDir</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">]</span> <span class="token operator">+</span> protoSearchPaths<span class="token punctuation">.</span>flatMap <span class="token punctuation">{</span> <span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"-I"</span></span><span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"</span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation"><span class="token short-argument">$0</span></span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-                inputFiles<span class="token punctuation">:</span> <span class="token punctuation">[</span>inputFile<span class="token punctuation">.</span>path<span class="token punctuation">]</span><span class="token punctuation">,</span>
-                outputFiles<span class="token punctuation">:</span> <span class="token punctuation">[</span>outputPath<span class="token punctuation">]</span>
-            <span class="token punctuation">)</span>
-        <span class="token punctuation">}</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// L'API initiale (SE-0303) est limitée au contexte du target</span>
+<span class="token keyword">extension</span> <span class="token class-name">BuildToolPlugin</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">createBuildCommands</span><span class="token punctuation">(</span>
+        context<span class="token punctuation">:</span> <span class="token class-name">TargetBuildContext</span><span class="token punctuation">,</span> 
+        target<span class="token punctuation">:</span> <span class="token class-name">Target</span>
+    <span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">Command</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Le plugin ne voit que les informations immédiates du target</span>
+        <span class="token comment">// La vision du graphe du package est limitée</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>La nouvelle API permet au plugin de parcourir récursivement les dépendances (<code>recursiveTargetDependencies</code>) et de filtrer les fichiers (<code>sourceFiles(withSuffix:)</code>), ce qui facilite la construction d'arguments de ligne de commande complexes (comme les chemins d'inclusion <code>-I</code>) basés sur l'ensemble du graphe de dépendances du projet.</p>
+<p>La limite réside dans le fait que le plugin ne possède qu'une vision restreinte du target pour lequel il est invoqué. L'accès aux dépendances et à la structure globale du package est limité, ce qui rend complexe la génération de code nécessitant des chemins de recherche (search paths) provenant de l'ensemble des dépendances.</p>
+<h3 id="apr%C3%A8s-se-0325" tabindex="-1"><a href="#apr%C3%A8s-se-0325" class="header-anchor">Après SE-0325</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">PackagePlugin</span>
+
+<span class="token attribute atrule">@main</span> 
+<span class="token keyword">struct</span> <span class="token class-name">MyPlugin</span><span class="token punctuation">:</span> <span class="token class-name">BuildToolPlugin</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">createBuildCommands</span><span class="token punctuation">(</span>
+        context<span class="token punctuation">:</span> <span class="token class-name">PluginContext</span><span class="token punctuation">,</span> 
+        target<span class="token punctuation">:</span> <span class="token class-name">Target</span>
+    <span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">Command</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Accès au graphe complet via context.package</span>
+        <span class="token keyword">let</span> package <span class="token operator">=</span> context<span class="token punctuation">.</span>package
+        
+        <span class="token comment">// Accès aux dépendances de manière récursive (topological sort)</span>
+        <span class="token keyword">let</span> dependencies <span class="token operator">=</span> target<span class="token punctuation">.</span>recursiveTargetDependencies
+        
+        <span class="token comment">// Accès aux fichiers avec un suffixe spécifique</span>
+        <span class="token keyword">let</span> protoFiles <span class="token operator">=</span> target<span class="token punctuation">.</span><span class="token function">sourceFiles</span><span class="token punctuation">(</span>withSuffix<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">".proto"</span></span><span class="token punctuation">)</span>
+        
+        <span class="token comment">// Recherche d'un outil dans le build context</span>
+        <span class="token keyword">let</span> protocTool <span class="token operator">=</span> <span class="token keyword">try</span> context<span class="token punctuation">.</span><span class="token function">tool</span><span class="token punctuation">(</span>named<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"protoc"</span></span><span class="token punctuation">)</span>
+        
+        <span class="token keyword">return</span> <span class="token punctuation">[</span>
+            <span class="token comment">// Configuration de commandes de build utilisant le contexte étendu</span>
+        <span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition résout le problème en fournissant un <code>PluginContext</code> qui expose le graphe des packages complet. Cela permet aux plugins de parcourir les dépendances de manière topologique et de construire des arguments de ligne de commande précis (comme les chemins d'inclusion <code>-I</code>) basés sur l'arborescence réelle du package et de ses dépendances.</p>
 
   </div>
 </article>

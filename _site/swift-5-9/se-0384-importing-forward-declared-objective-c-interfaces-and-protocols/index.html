@@ -81,35 +81,51 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0384-importing-forward-declared-objc-interfaces-and-protocols.md">SE-0384 - Importing Forward Declared Objective-C Interfaces and Protocols</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition vise à améliorer l'interopérabilité entre Swift et Objective-C en résolvant un problème majeur lié aux déclarations anticipées (<em>forward declarations</em>). Actuellement, lorsque l'importateur Clang de Swift rencontre une interface ou un protocole Objective-C qui n'est que "déclaré" (via <code>@class</code> ou <code>@protocol</code>) sans être défini dans l'en-tête, il échoue souvent à importer toute la section de l'API qui utilise ce type. Cela rend de larges portions de bibliothèques Objective-C totalement invisibles pour Swift.</p>
-<p>La solution propose de synthétiser des types "placeholders" (en substitut) pour ces déclarations. Ces types sont marqués avec l'attribut <code>@available(*, unavailable, ...)</code> pour empêcher l'utilisation directe (comme la création d'instances ou l'accès à des membres) tout en permettant de passer ces types en paramètre ou en retour de fonction. Cela permet de maintenir la visibilité de l'API Swift tout en informant l'utilisateur qu'il doit importer le module contenant la définition complète pour accéder aux membres du type.</p>
+<p>Cette proposition améliore l'interopérabilité entre Objective-C et Swift en gérant les déclarations anticipées (<em>forward declarations</em>). Auparavant, si un type Objective-C était déclaré via <code>@class</code> ou <code>@protocol</code> sans sa définition complète dans le header, le <code>ClangImporter</code> échouait à importer tout l'API dépendant de ce type. La solution consiste à synthétiser des types "placeholders" (substituts) en Swift pour ces déclarations. Ces types sont marqués avec l'attribut <code>@available(*, unavailable, ...)</code> pour empêcher l'utilisation directe (comme l'instanciation ou l'accès à des membres) tout en permettant de faire circuler les instances entre Swift et Objective-C. Cela garantit que l'importation d'un module ne "casse" pas l'accès à une grande partie de l'API Swift simplement à cause d'une déclaration incomplète.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0384" tabindex="-1"><a href="#avant-se-0384" class="header-anchor">Avant SE-0384</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Objective-C header avec forward declaration</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Objective-C</span>
 <span class="token comment">// @class ForwardDeclaredInterface;</span>
 <span class="token comment">// @protocol ForwardDeclaredProtocol;</span>
+<span class="token comment">// @interface IncompleteTypeConsumer1 : NSObject</span>
+<span class="token comment">// @property id&lt;ForwardDeclaredProtocol&gt; propertyUsingAForwardDeclaredProtocol1;</span>
+<span class="token comment">// @property ForwardDeclaredInterface *propertyUsingAForwardDeclaredInterface1;</span>
+<span class="token comment">// @end</span>
 
-<span class="token attribute atrule">@interface</span> <span class="token class-name">IncompleteTypeConsumer1</span> <span class="token punctuation">:</span> <span class="token class-name">NSObject</span>
-<span class="token attribute atrule">@property</span> id<span class="token operator">&lt;</span><span class="token class-name">ForwardDeclaredProtocol</span><span class="token operator">&gt;</span> propertyUsingAForwardDeclaredProtocol1<span class="token punctuation">;</span>
-<span class="token attribute atrule">@property</span> <span class="token class-name">ForwardDeclaredInterface</span> <span class="token operator">*</span>propertyUsingAForwardDeclaredInterface1<span class="token punctuation">;</span>
-<span class="token attribute atrule">@end</span>
+<span class="token comment">// Swift</span>
+<span class="token keyword">class</span> <span class="token class-name">IncompleteTypeConsumer1</span> <span class="token punctuation">:</span> <span class="token class-name">NSObject</span> <span class="token punctuation">{</span>
+    <span class="token comment">// L'importation de IncompleteTypeConsumer1 échoue ou est incomplète </span>
+    <span class="token comment">// car les types ForwardDeclaredInterface et ForwardDeclaredProtocol </span>
+    <span class="token comment">// ne sont pas définis (uniquement déclarés).</span>
+<span class="token punctuation">}</span>
 </code></pre>
-<p>L'importateur Clang de Swift échoue à importer <code>IncompleteTypeConsumer1</code> car il ne connaît pas la structure de <code>ForwardDeclaredInterface</code> ou <code>ForwardDeclaredProtocol</code>, rendant l'objet invisible en Swift.</p>
+<p>L'utilisation de <code>@class</code> ou <code>@protocol</code> en Objective-C est une pratique courante pour éviter les dépendances cycliques ou accélérer la compilation. Cependant, pour Swift, si la définition complète du type (sa <code>implementation</code>) n'est pas présente dans l'en-tête importé, le compilateur Swift ne peut pas construire l'interface complète de la classe qui l'utilise, rendant l'API inaccessible.</p>
 <h3 id="apr%C3%A8s-se-0384" tabindex="-1"><a href="#apr%C3%A8s-se-0384" class="header-anchor">Après SE-0384</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Swift voit désormais des types placeholders</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Objective-C</span>
+<span class="token comment">// @class ForwardDeclaredInterface;</span>
+<span class="token comment">// @protocol ForwardDeclaredProtocol;</span>
+<span class="token comment">// @interface IncompleteTypeConsumer1 : NSObject</span>
+<span class="token comment">// @property id&lt;ForwardDeclaredProtocol&gt; propertyUsingAForwardDeclaredProtocol1;</span>
+<span class="token comment">// @property ForwardDeclaredInterface *propertyUsingAForwardDeclaredInterface1;</span>
+<span class="token comment">// @end</span>
+
+<span class="token comment">// Swift</span>
+<span class="token comment">// Le compilateur génère automatiquement ces placeholders :</span>
 <span class="token attribute atrule">@available</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">,</span> unavailable<span class="token punctuation">,</span> message<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"This Objective-C class has only been forward-declared; import its owning module to use it"</span></span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">ForwardDeclaredInterface</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
 
 <span class="token attribute atrule">@available</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">,</span> unavailable<span class="token punctuation">,</span> message<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"This Objective-C protocol has only been forward-declared; import its owning module to use it"</span></span><span class="token punctuation">)</span>
 <span class="token keyword">protocol</span> <span class="token class-name">ForwardDeclaredProtocol</span><span class="token punctuation">:</span> <span class="token class-name">NSObjectProtocol</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
 
-<span class="token keyword">class</span> <span class="token class-name">IncompleteTypeConsumer1</span><span class="token punctuation">:</span> <span class="token class-name">NSObject</span> <span class="token punctuation">{</span>
+<span class="token keyword">class</span> <span class="token class-name">IncompleteTypeConsumer1</span> <span class="token punctuation">:</span> <span class="token class-name">NSObject</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Les propriétés sont désormais importées avec succès</span>
     <span class="token keyword">var</span> propertyUsingAForwardDeclaredProtocol1<span class="token punctuation">:</span> <span class="token class-name">ForwardDeclaredProtocol</span><span class="token operator">!</span>
     <span class="token keyword">var</span> propertyUsingAForwardDeclaredInterface1<span class="token punctuation">:</span> <span class="token class-name">ForwardDeclaredInterface</span><span class="token operator">!</span>
+    
     <span class="token keyword">init</span><span class="token operator">!</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>Swift importe avec succès la classe <code>IncompleteTypeConsumer1</code>. Il utilise des types synthétiques qui permettent de passer les instances entre Swift et Objective-C, tout en empêchant l'utilisation des membres de ces types jusqu'à ce que la définition réelle soit importée via le module approprié.</p>
+<p>La proposition introduit des types de remplacement qui permettent au <code>ClangImporter</code> de continuer le processus d'importation sans s'arrêter. Bien que l'on ne puisse pas accéder aux membres de ces types (car ils sont incomplets), cela permet de maintenir la structure de l'API Swift intacte. La solution permet de passer des instances de ces types entre Swift et Objective-C, résolvant ainsi le problème de visibilité de l'API sans forcer le développeur à modifier manuellement les fichiers Objective-C existants.</p>
 
   </div>
 </article>

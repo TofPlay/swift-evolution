@@ -81,53 +81,54 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0407-member-macro-conformances.md">SE-0407 - Member Macro Conformances</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit la capacité pour les <strong>Member Macros</strong> de raisonner sur les protocoles auxquels un type conforme déjà.</p>
-<p>Actuellement, les macros de membres ne disposent d'aucune information sur les protocoles visés, ce qui empêche une macro (comme <code>Codable</code>) de savoir si elle doit générer des membres directement dans la définition principale du type (nécessaire pour les initialiseurs <code>required</code> dans les classes non finales) ou dans une extension (préférable pour les <code>structs</code>).</p>
-<p>La solution permet de spécifier les protocoles d'intérêt via <code>@attached(member, conformances: ...)</code>. L'implémentation de la macro reçoit alors le paramètre <code>conformingTo</code>, lui permettant de déterminer dynamiquement s'il doit injecter des membres pour combler une absence de conformance ou pour gérer des cas spécifiques comme l'héritage de classes.</p>
+<p>La proposition introduit la capacité pour les <code>member macro</code> de connaître les <code>protocol</code> auxquels un <code>type</code> est déjà conforme. Cette fonctionnalité est essentielle pour les macros qui doivent générer des membres spécifiques (comme des <code>init</code> ou des méthodes) nécessaires à une conformance, tout en évitant de dupliquer des membres si le <code>type</code> possède déjà une conformance via une super-classe.</p>
+<p>Techniquement, la proposition étend l'attribut <code>@attached(member, ...)</code> pour inclure une liste de <code>protocols</code> d'intérêt. Lors de l'expansion, le protocole <code>MemberMacro</code> reçoit un nouveau paramètre, <code>conformingTo</code>, qui contient la liste des <code>protocols</code> spécifiés pour lesquels le <code>type</code> ne possède pas encore de conformance explicite. Cela permet à la macro de prendre des décisions intelligentes :</p>
+<ol>
+<li><strong>Pour les <code>struct</code>, <code>enum</code>, <code>actor</code> ou <code>final class</code></strong> : Générer les membres dans une <code>extension</code> (via le rôle <code>member</code>).</li>
+<li><strong>Pour les <code>class</code> non-final</strong> : Générer les membres directement dans la définition principale pour permettre la redirection (<code>override</code>) ou la satisfaction de contraintes <code>required</code>.</li>
+</ol>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0407" tabindex="-1"><a href="#avant-se-0407" class="header-anchor">Avant SE-0407</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">MyStruct</span><span class="token punctuation">:</span> <span class="token class-name">Codable</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> name<span class="token punctuation">:</span> <span class="token class-name">String</span>
-<span class="token punctuation">}</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Une macro de membre ne sait pas si le type est déjà conforme au protocole</span>
+<span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>member<span class="token punctuation">)</span>
+macro <span class="token class-name">MyMacro</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyModule"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyMacro"</span></span><span class="token punctuation">)</span>
+
+<span class="token comment">// Si MyMacro doit implémenter Decodable, elle ne sait pas si elle doit </span>
+<span class="token comment">// générer un init(from:) ou si le type l'hérite déjà d'une super-classe.</span>
 </code></pre>
-<p>Une macro de membre ne peut pas savoir si le type conforment déjà au protocole via une super-classe, ce qui rend l'implémentation de macros complexes (comme <code>Codable</code>) problématique pour gérer les classes et les structures de manière uniforme sans risque de redondance.</p>
+<p>Le rôle <code>member</code> actuel ne reçoit aucune information sur les protocoles. Si une macro doit implémenter un protocole comme <code>Decodable</code>, elle est incapable de savoir si elle doit générer un <code>init(from:)</code> ou si le <code>type</code> l'hérite déjà d'une super-classe. Cela rend l'implémentation de macros complexes comme <code>Codable</code> instable ou incomplète.</p>
 <h3 id="apr%C3%A8s-se-0407" tabindex="-1"><a href="#apr%C3%A8s-se-0407" class="header-anchor">Après SE-0407</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro</span>
-<span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>member<span class="token punctuation">,</span> conformances<span class="token punctuation">:</span> <span class="token class-name">Decodable</span><span class="token punctuation">,</span> <span class="token class-name">Encodable</span><span class="token punctuation">,</span> names<span class="token punctuation">:</span> <span class="token function">named</span><span class="token punctuation">(</span><span class="token keyword">init</span><span class="token punctuation">(</span>from<span class="token punctuation">:</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">encode</span><span class="token punctuation">(</span>to<span class="token punctuation">:</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-<span class="token attribute atrule">@attached</span><span class="token punctuation">(</span><span class="token keyword">extension</span><span class="token punctuation">,</span> conformances<span class="token punctuation">:</span> <span class="token class-name">Decodable</span><span class="token punctuation">,</span> <span class="token class-name">Encodable</span><span class="token punctuation">,</span> names<span class="token punctuation">:</span> <span class="token function">named</span><span class="token punctuation">(</span><span class="token keyword">init</span><span class="token punctuation">(</span>from<span class="token punctuation">:</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">encode</span><span class="token punctuation">(</span>to<span class="token punctuation">:</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// La macro spécifie les protocoles qui l'intéressent</span>
+<span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>member<span class="token punctuation">,</span> conformances<span class="token punctuation">:</span> <span class="token class-name">Decodable</span><span class="token punctuation">,</span> <span class="token class-name">Encodable</span><span class="token punctuation">)</span>
+<span class="token attribute atrule">@attached</span><span class="token punctuation">(</span><span class="token keyword">extension</span><span class="token punctuation">,</span> conformances<span class="token punctuation">:</span> <span class="token class-name">Decodable</span><span class="token punctuation">,</span> <span class="token class-name">Encodable</span><span class="token punctuation">)</span>
 macro <span class="token class-name">Codable</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyMacros"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"CodableMacro"</span></span><span class="token punctuation">)</span>
-</code></pre>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Implémentation du macro</span>
-<span class="token keyword">struct</span> <span class="token class-name">CodableMacroImplementation</span><span class="token punctuation">:</span> <span class="token class-name">MemberMacro</span> <span class="token punctuation">{</span>
-    <span class="token keyword">static</span> <span class="token keyword">func</span> <span class="token function-definition function">expansion</span><span class="token punctuation">(</span>
-        of node<span class="token punctuation">:</span> <span class="token class-name">AttributeSyntax</span><span class="token punctuation">,</span>
-        providingMembersOf declaration<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">DeclGroupSyntax</span><span class="token punctuation">,</span>
-        conformingTo protocols<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">TypeSyntax</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-        <span class="token keyword">in</span> context<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">MacroExpansionContext</span>
-    <span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">DeclSyntax</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
-        <span class="token comment">// La macro vérifie si le type ne conforment pas déjà aux protocoles</span>
-        <span class="token comment">// et génère les membres requis (ex: init(from:)) directement dans la classe.</span>
-        <span class="token keyword">return</span> <span class="token punctuation">[</span>
-            <span class="token string-literal"><span class="token string">"required init(from decoder: Decoder) throws { ... }"</span></span><span class="token punctuation">,</span>
-            <span class="token string-literal"><span class="token string">"func encode(to encoder: Encoder) throws { ... }"</span></span>
-        <span class="token punctuation">]</span>
-    <span class="token punctuation">}</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">User</span><span class="token punctuation">:</span> <span class="token class-name">Codable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> name<span class="token punctuation">:</span> <span class="token class-name">String</span>
 <span class="token punctuation">}</span>
+
+<span class="token comment">// L'implémentation de la macro reçoit les informations de conformité</span>
+<span class="token comment">// via l'argument 'conformingTo' dans la méthode 'expansion'.</span>
 </code></pre>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation du macro</span>
 <span class="token attribute atrule">@Codable</span>
-<span class="token keyword">class</span> <span class="token class-name">MyClass</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token operator">=</span> <span class="token number">0</span>
+<span class="token keyword">struct</span> <span class="token class-name">User</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> name<span class="token punctuation">:</span> <span class="token class-name">String</span>
 <span class="token punctuation">}</span>
 </code></pre>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code généré par la macro (Expansion)</span>
-<span class="token comment">// required init(from decoder: Decoder) throws {</span>
-<span class="token comment">//     try decoder.decode(MyClass.self, from: decoder)</span>
-<span class="token comment">//     self.value = try decoder.decode(Int.self, forKey: .value)</span>
-<span class="token comment">// }</span>
-<span class="token comment">// func encode(to encoder: Encoder) throws { ... }</span>
+<span class="token keyword">extension</span> <span class="token class-name">User</span><span class="token punctuation">:</span> <span class="token class-name">Decodable</span><span class="token punctuation">,</span> <span class="token class-name">Encodable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>from decoder<span class="token punctuation">:</span> <span class="token class-name">Decoder</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token punctuation">{</span>
+        <span class="token keyword">var</span> container <span class="token operator">=</span> <span class="token keyword">try</span> decoder<span class="token punctuation">.</span><span class="token function">container</span><span class="token punctuation">(</span>keyedBy<span class="token punctuation">:</span> <span class="token class-name">CodingKeys</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span>name <span class="token operator">=</span> <span class="token keyword">try</span> container<span class="token punctuation">.</span><span class="token function">decode</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">,</span> forKey<span class="token punctuation">:</span> <span class="token punctuation">.</span>name<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">encode</span><span class="token punctuation">(</span>to encoder<span class="token punctuation">:</span> <span class="token class-name">Encoder</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token punctuation">{</span>
+        <span class="token keyword">var</span> container <span class="token operator">=</span> encoder<span class="token punctuation">.</span><span class="token function">container</span><span class="token punctuation">(</span>keyedBy<span class="token punctuation">:</span> <span class="token class-name">CodingKeys</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
+        <span class="token keyword">try</span> container<span class="token punctuation">.</span><span class="token function">encode</span><span class="token punctuation">(</span>name<span class="token punctuation">,</span> forKey<span class="token punctuation">:</span> <span class="token punctuation">.</span>name<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
 </code></pre>
-<p>La macro utilise l'information des protocoles pour décider d'injecter un <code>required init</code> directement dans la classe afin de satisfaire les exigences de conformité tout en permettant l'héritage, ce qu'elle ne pourrait pas faire de manière fiable sans ces informations.</p>
+<p>L'utilisation de <code>conformingTo</code> dans le protocole <code>MemberMacro</code> permet à la macro de raisonner sur la structure complète du <code>type</code>. Cela résout le problème de la limitation des membres qui doivent absolument résider dans la définition principale (comme les <code>required init</code> dans une <code>class</code>) tout en conservant la flexibilité des <code>extension macros</code> pour les types simples.</p>
 
   </div>
 </article>

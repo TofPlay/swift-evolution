@@ -81,39 +81,36 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0409-access-level-on-imports.md">SE-0409 - Access-level modifiers on import declarations</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit la possibilité de spécifier des modificateurs de niveau d'accès (<code>public</code>, <code>package</code>, <code>internal</code>, <code>fileprivate</code>, <code>private</code>) directement sur les déclarations <code>import</code>. L'objectif est de permettre aux développeurs de contrôler la visibilité des types importés au sein de leur propre module et, surtout, de limiter la "dérive des dépendances" (dependency creep).</p>
-<p>En marquant une dépendance comme <code>internal</code> ou <code>private</code>, le développeur peut empêcher l'utilisation accidentelle de types d'implémentation dans des signatures de fonctions <code>public</code>. De plus, cela permet au compilateur d'optimiser les temps de compilation en évitant de charger des dépendances transitives qui ne sont pas nécessaires pour les clients externes du module.</p>
+<p>La proposition introduit la possibilité d'appliquer des modificateurs d'accès (<code>public</code>, <code>package</code>, <code>internal</code>, <code>fileprivate</code>, <code>private</code>) directement sur les déclarations <code>import</code>. L'objectif est de définir la visibilité d'un module importé afin d'encadrer la portée des types qu'il apporte.</p>
+<p>Techniquement, cela fonctionne ainsi :</p>
+<ol>
+<li><strong>Limitation de visibilité :</strong> Le niveau d'accès appliqué à l'import devient la limite supérieure de visibilité pour toutes les déclarations provenant de ce module. Si un module est importé en <code>internal</code>, aucune <code>public func</code> ne pourra utiliser un type provenant de ce module dans sa signature.</li>
+<li><strong>Optimisation de la compilation :</strong> En marquant une dépendance comme <code>internal</code> ou <code>package</code>, le compilateur peut éviter de charger ces dépendances transitives lors de la compilation des clients du module, réduisant ainsi le temps de build et limitant l'exposition des détails d'implémentation.</li>
+<li><strong>Gestion par défaut :</strong> Dans les versions actuelles (Swift 5 et 6), un <code>import</code> sans modificateur est <code>public</code>. Un changement futur rendra l'accès <code>internal</code> par défaut.</li>
+</ol>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0409" tabindex="-1"><a href="#avant-se-0409" class="header-anchor">Avant SE-0409</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">DatabaseAdapter</span>
 
-<span class="token keyword">internal</span> <span class="token keyword">func</span> <span class="token function-definition function">internalFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">DatabaseAdapter</span><span class="token punctuation">.</span><span class="token class-name">Entry</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Ok</span>
-    <span class="token keyword">return</span> <span class="token class-name">DatabaseAdapter</span><span class="token punctuation">.</span><span class="token class-name">Entry</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token punctuation">}</span>
+<span class="token comment">// Le type DatabaseAdapter.Entry est visible par tout le monde </span>
+<span class="token comment">// dès que le module est importé, sans contrôle de visibilité</span>
+<span class="token comment">// lié à l'import lui-même.</span>
+<span class="token keyword">func</span> <span class="token function-definition function">internalFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">DatabaseAdapter</span><span class="token punctuation">.</span><span class="token class-name">Entry</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
 
-<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">publicFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">DatabaseAdapter</span><span class="token punctuation">.</span><span class="token class-name">Entry</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Erreur de compilation : la fonction ne peut pas être publique </span>
-    <span class="token comment">// car son type de retour est lié à une dépendance non contrôlée.</span>
-    <span class="token keyword">return</span> <span class="token class-name">DatabaseAdapter</span><span class="token punctuation">.</span><span class="token class-name">Entry</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token punctuation">}</span>
+<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">publicFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">DatabaseAdapter</span><span class="token punctuation">.</span><span class="token class-name">Entry</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
 </code></pre>
-<p>Actuellement, toute dépendance importée est implicitement publique pour le module, ce qui rend difficile la distinction entre ce qui est une partie publique de l'API et ce qui est un détail d'implémentation interne. Cela peut mener à l'exposition involontaire de types d'implémentation via des fonctions publiques.</p>
+<p>L'absence de contrôle sur l'import permet d'utiliser accidentellement des dépendances d'implémentation dans des signatures publiques, exposant ainsi des détails internes du module aux utilisateurs finaux.</p>
 <h3 id="apr%C3%A8s-se-0409" tabindex="-1"><a href="#apr%C3%A8s-se-0409" class="header-anchor">Après SE-0409</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">internal</span> <span class="token keyword">import</span> <span class="token class-name">DatabaseAdapter</span>
 
-<span class="token keyword">internal</span> <span class="token keyword">func</span> <span class="token function-definition function">internalFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">DatabaseAdapter</span><span class="token punctuation">.</span><span class="token class-name">Entry</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Ok : l'accès est autorisé car la fonction est interne</span>
-    <span class="token keyword">return</span> <span class="token class-name">DatabaseAdapter</span><span class="token punctuation">.</span><span class="token class-name">Entry</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token punctuation">}</span>
+<span class="token comment">// Ok : La fonction est internal, elle peut utiliser un type internal</span>
+<span class="token keyword">internal</span> <span class="token keyword">func</span> <span class="token function-definition function">internalFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">DatabaseAdapter</span><span class="token punctuation">.</span><span class="token class-name">Entry</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
 
-<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">publicFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">DatabaseAdapter</span><span class="token punctuation">.</span><span class="token class-name">Entry</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Erreur : la fonction ne peut pas être publique car son type de retour </span>
-    <span class="token comment">// utilise un type issu d'un import 'internal'.</span>
-    <span class="token keyword">return</span> <span class="token class-name">DatabaseAdapter</span><span class="token punctuation">.</span><span class="token class-name">Entry</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-<span class="token punctuation">}</span>
+<span class="token comment">// Erreur : La signature est public, mais utilise un type </span>
+<span class="token comment">// dont l'import est restreint à internal</span>
+<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">publicFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">DatabaseAdapter</span><span class="token punctuation">.</span><span class="token class-name">Entry</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
 </code></pre>
-<p>Avec cette proposition, l'utilisation de <code>internal import</code> définit une limite de visibilité. Le compilateur vérifie que les signatures de fonctions publiques ne font pas référence à des types issus d'un import restreint, garantissant que les détails d'implémentation restent cachés aux clients du module.</p>
+<p>La proposition permet de restreindre l'accès au module importé. Si l'import est marqué <code>internal</code>, le compilateur interdit l'utilisation des types de ce module dans toute déclaration dont la visibilité est supérieure à <code>internal</code>. Cela garantit que les détails d'implémentation ne "fuient" pas vers l'API publique du module.</p>
 
   </div>
 </article>

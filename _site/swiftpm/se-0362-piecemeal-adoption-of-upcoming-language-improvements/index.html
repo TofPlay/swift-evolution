@@ -81,30 +81,31 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0362-piecemeal-future-features.md">SE-0362 - Piecemeal adoption of upcoming language improvements</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit un mécanisme permettant d'adopter progressivement les nouvelles fonctionnalités de Swift 6 dans des projets utilisant encore Swift 4 ou 5. L'objectif est de lisser la transition vers la version 6 en évitant une migration massive et brutale de tout un codebase d'un coup.</p>
-<p>Le mécanisme repose sur trois piliers :</p>
-<ol>
-<li><strong>Flag de compilation</strong> : L'utilisation de <code>-enable-upcoming-feature &lt;NomDeLaFeature&gt;</code> pour activer une fonctionnalité spécifique (ex: <code>StrictConcurrency</code>, <code>BareSlashRegexLiterals</code>) sans changer la version globale du langage.</li>
-<li><strong>Détection de fonctionnalités</strong> : Introduction de la directive de compilation <code>#if hasFeature(NomDeLaFeature)</code> permettant au code de s'adapter dynamiquement selon que la fonctionnalité est activée ou non.</li>
-<li><strong>Support Package Manager</strong> : Extension de l'API SwiftPM pour permettre de spécifier ces fonctionnalités directement dans les cibles (<code>targets</code>) via une nouvelle méthode <code>enableUpcomingFeature</code>.</li>
-</ol>
+<p>La proposition introduit un mécanisme d'adoption progressive des améliorations du langage Swift qui ne peuvent pas être activées par défaut dans les modes de langage existants (Swift 4.x et 5.x) en raison d'impacts sur la compatibilité du code source. Le système repose sur l'utilisation d'un flag de compilation <code>-enable-upcoming-feature X</code>, où <code>X</code> est un identifiant unique (en UpperCamelCase) représentant une fonctionnalité spécifique (par exemple <code>ExistentialAny</code> ou <code>StrictConcurrency</code>). Cette approche permet aux développeurs de migrer progressivement vers le mode Swift 6 en activant les changements sémantiques une par une. Pour supporter cette transition, la proposition introduit la directive de compilation <code>#if hasFeature(X)</code>, permettant de vérifier la présence d'une fonctionnalité dans le code source afin de maintenir une compatibilité avec les versions plus anciennes du compilateur. Le mécanisme est conçu pour être auto-nettoyant : une fois le passage à la version majeure suivante effectué, les flags deviennent implicites et le flag <code>-enable-upcoming-feature</code> est rejeté par le compilateur.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0362" tabindex="-1"><a href="#avant-se-0362" class="header-anchor">Avant SE-0362</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// On ne peut pas utiliser les nouvelles syntaxes ou règles </span>
-<span class="token comment">// sans passer globalement à Swift 6, ce qui peut briser le code existant.</span>
-<span class="token keyword">func</span> <span class="token function-definition function">checkRegex</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">let</span> regex <span class="token operator">=</span> <span class="token keyword">try</span><span class="token operator">!</span> <span class="token class-name">NSRegularExpression</span><span class="token punctuation">(</span>pattern<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"..."</span></span><span class="token punctuation">)</span> 
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le code utilise des fonctionnalités qui </span>
+<span class="token comment">// pourraient changer de sémantique dans Swift 6</span>
+<span class="token keyword">func</span> <span class="token function-definition function">process</span><span class="token punctuation">(</span>item<span class="token punctuation">:</span> <span class="token keyword">Any</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> 
+    <span class="token comment">// L'utilisation de types existentiels sans le mot-clé 'any'</span>
+    <span class="token comment">// ou certaines syntaxes de regex spécifiques</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'impossibilité d'utiliser les nouvelles syntaxes (comme <code>/.../</code> pour les Regex) ou les nouvelles règles de concurrence sans effectuer une migration complète vers Swift 6, augmentant le risque de régression.</p>
+<p>L'absence de contrôle granulaire empêche l'utilisation des nouveaux comportements sans risquer de briser la compatibilité avec des versions antérieures du compilateur ou des outils de build.</p>
 <h3 id="apr%C3%A8s-se-0362" tabindex="-1"><a href="#apr%C3%A8s-se-0362" class="header-anchor">Après SE-0362</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token directive property"><span class="token directive-name">#if</span> hasFeature<span class="token punctuation">(</span>BareSlashRegexLiterals<span class="token punctuation">)</span></span>
-<span class="token keyword">let</span> regex <span class="token operator">=</span> <span class="token operator">/</span><span class="token operator">.../</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Activation via flag : -enable-upcoming-feature ExistentialAny</span>
+
+<span class="token directive property"><span class="token directive-name">#if</span> hasFeature<span class="token punctuation">(</span>ExistentialAny<span class="token punctuation">)</span></span>
+<span class="token keyword">func</span> <span class="token function-definition function">process</span><span class="token punctuation">(</span>item<span class="token punctuation">:</span> any <span class="token keyword">Any</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> 
+    <span class="token comment">// Syntaxe avec 'any' exigée par la nouvelle sémantique</span>
+<span class="token punctuation">}</span>
 <span class="token directive property"><span class="token directive-name">#else</span></span>
-<span class="token keyword">let</span> regex <span class="token operator">=</span> <span class="token keyword">try</span><span class="token operator">!</span> <span class="token class-name">NSRegularExpression</span><span class="token punctuation">(</span>pattern<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"..."</span></span><span class="token punctuation">)</span>
+<span class="token keyword">func</span> <span class="token function-definition function">process</span><span class="token punctuation">(</span>item<span class="token punctuation">:</span> <span class="token keyword">Any</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> 
+    <span class="token comment">// Syntaxe classique pour les versions antérieures</span>
+<span class="token punctuation">}</span>
 <span class="token directive property"><span class="token directive-name">#endif</span></span>
 </code></pre>
-<p>Le développeur peut activer la nouvelle syntaxe de Regex via un flag, tout en conservant une version compatible avec les anciens compilateurs grâce à la directive <code>#if hasFeature</code>.</p>
+<p>La proposition résout le problème en offrant une voie de migration incrémentale. L'utilisation de <code>hasFeature(X)</code> permet au code de rester valide pour les outils plus anciens tout en exploitant les nouvelles règles sémantiques dès qu'elles sont disponibles via un flag spécifique.</p>
 
   </div>
 </article>

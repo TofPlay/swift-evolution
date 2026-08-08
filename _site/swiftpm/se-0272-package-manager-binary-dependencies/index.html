@@ -2,7 +2,7 @@
 <html lang="fr"><head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TofPlay - SE-0272 - Package Manager Binary Dependencies Proposal</title>
+    <title>TofPlay - SE-0272 - Package Manager Binary Dependencies</title>
 
     <meta name="supported-color-schemes" content="light dark">
     <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
@@ -40,7 +40,7 @@
               </a>
           </li>
           <li>
-              <span aria-current="page">SE-0272 - Package Manager Binary Dependencies Proposal</span>
+              <span aria-current="page">SE-0272 - Package Manager Binary Dependencies</span>
           </li>
       </ol>
 
@@ -73,50 +73,50 @@
     <main class="body-tag">
       <article class="post" data-pagefind-body="">
   <div class="post-body">
-    <h1>SE-0272 - Package Manager Binary Dependencies Proposal</h1>
+    <h1>SE-0272 - Package Manager Binary Dependencies</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
-<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<h2 id="disponible-%C3%A0-part-de" tabindex="-1"><a href="#disponible-%C3%A0-part-de" class="header-anchor">Disponible à part de</a></h2>
 <p>Swift 5.3</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
-<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0272-swiftpm-binary-dependencies.md">SE-0272 - Package Manager Binary Dependencies Proposal</a></p>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0272-swiftpm-binary-dependencies.md">SE-0272 - Package Manager Binary Dependencies</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit le support des dépendances binaires dans Swift Package Manager (SwiftPM). Jusqu'alors, SwiftPM ne gérait que des paquets contenant exclusivement du code source, ce qui limitait l'intégration de SDK propriétaires (sans accès au code source) ou de bibliothèques complexes dont le processus de compilation ne pouvait être décrit par le modèle de build de SwiftPM.</p>
-<p>La solution permet de définir des cibles de type <code>binaryTarget</code> dans le <code>Package.swift</code>. Ces cibles peuvent pointer vers un fichier compressé (<code>.zip</code>) via une URL (avec vérification de checksum pour la sécurité) ou vers un fichier <code>.xcframework</code> ou <code>.zip</code> situé localement sur le disque. Le format <code>XCFramework</code> a été choisi pour sa capacité à encapsuler des frameworks pour différentes plateformes Apple.</p>
+<p>La proposition introduit le support des dépendances binaires au sein de Swift Package Manager (SwiftPM). Le mécanisme permet d'intégrer des fichiers précompilés (comme des <code>.xcframework</code>) directement via le fichier <code>Package.swift</code>. La syntaxe permet de définir des <code>binaryTarget</code> via une <code>url</code> avec un <code>checksum</code> de sécurité, ou via un <code>path</code> pour des fichiers locaux. Le système supporte l'utilisation conjointe de <code>targets</code> de type source et de <code>targets</code> de type binaire au sein d'un même package. Cette évolution permet aux fournisseurs de SDK fermés ou aux bibliothèques avec des processus de compilation complexes d'utiliser SwiftPM pour distribuer leurs produits sur les plateformes Apple.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0272" tabindex="-1"><a href="#avant-se-0272" class="header-anchor">Avant SE-0272</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// SwiftPM ne supportait que les cibles de type source</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// SwiftPM ne supporte que les packages basés sur le code source.</span>
+<span class="token comment">// L'intégration d'une bibliothèque fermée nécessite des méthodes externes </span>
+<span class="token comment">// (ex: CocoaPods) ou une gestion manuelle des fichiers binaires.</span>
 <span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
-    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">,</span>
     targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
-        <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MySourceTarget"</span></span><span class="token punctuation">)</span>
+        <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyLibraryTarget"</span></span><span class="token punctuation">)</span>
     <span class="token punctuation">]</span>
 <span class="token punctuation">)</span>
 </code></pre>
-<p>La limitation principale était l'impossibilité d'intégrer des bibliothèques fermées ou pré-compilées sans fournir le code source, ce qui bloquait l'adoption de SwiftPM par certains éditeurs de logiciels tiers.</p>
+<p>Le modèle de compilation restrictif de SwiftPM limite l'utilisation de packages dont le code source ne peut pas être distribué ou dont le processus de compilation est trop complexe pour l'outil.</p>
 <h3 id="apr%C3%A8s-se-0272" tabindex="-1"><a href="#apr%C3%A8s-se-0272" class="header-anchor">Après SE-0272</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de binaryTarget pour des dépendances pré-compilées</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition d'un binaryTarget via une URL distante avec checksum</span>
 <span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
     name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"SomePackage"</span></span><span class="token punctuation">,</span>
     products<span class="token punctuation">:</span> <span class="token punctuation">[</span>
         <span class="token punctuation">.</span><span class="token function">library</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"SomePackage"</span></span><span class="token punctuation">,</span> targets<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"SomePackageLib"</span></span><span class="token punctuation">]</span><span class="token punctuation">)</span>
     <span class="token punctuation">]</span><span class="token punctuation">,</span>
     targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
-        <span class="token comment">// Target distant avec checksum pour la sécurité</span>
         <span class="token punctuation">.</span><span class="token function">binaryTarget</span><span class="token punctuation">(</span>
-            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"SomePackageLib"</span></span><span class="token punctuation">,</span> 
-            url<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"https://github.com/some/package/releases/download/1.0.0/SomePackage.zip"</span></span><span class="token punctuation">,</span> 
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"SomePackageLib"</span></span><span class="token punctuation">,</span>
+            url<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"https://example.com/SomePackage.xcframework.zip"</span></span><span class="token punctuation">,</span>
             checksum<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"839F9F30DC13C30795666DD8F6FB77DD0E097B83D06954073E34FE5154481F7A"</span></span>
         <span class="token punctuation">)</span><span class="token punctuation">,</span>
-        <span class="token comment">// Target local</span>
+        <span class="token comment">// Définition d'un binaryTarget via un chemin local</span>
         <span class="token punctuation">.</span><span class="token function">binaryTarget</span><span class="token punctuation">(</span>
-            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"SomeLibOnDisk"</span></span><span class="token punctuation">,</span> 
-            path<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"artifacts/SomeLibOnDisk.zip"</span></span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"SomeLibOnDisk"</span></span><span class="token punctuation">,</span>
+            path<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"artifacts/SomeLibOnDisk.xcframework"</span></span>
         <span class="token punctuation">)</span>
     <span class="token punctuation">]</span>
 <span class="token punctuation">)</span>
 </code></pre>
-<p>La proposition permet d'utiliser des artefacts pré-compilés (comme des <code>.xcframework</code>), simplifiant l'intégration de SDK propriétaires et offrant une solution pour les bibliothèques dont la compilation est trop complexe pour le modèle de build standard.</p>
+<p>La proposition permet d'utiliser des <code>binaryTarget</code> pour consommer des artefacts précompilés, garantissant l'intégrité via un <code>checksum</code> et simplifiant l'intégration des SDK propriétaires.</p>
 
   </div>
 </article>

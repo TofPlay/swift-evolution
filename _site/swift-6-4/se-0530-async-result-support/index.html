@@ -81,14 +81,16 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0530-async-result-support.md">SE-0530 - Async Result Support</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit un nouvel initialiseur asynchrone pour le type <code>Result</code>. Actuellement, l'initialiseur <code>Result(catching:)</code> ne prend en charge que les fermetures synchrones, obligeant les développeurs à dupliquer manuellement la logique de capture d'erreurs pour le code asynchrone. Le nouvel initialiseur permet de transformer directement une tâche asynchrone susceptible de lever une erreur en un type <code>Result</code> via un simple appel <code>await</code>.</p>
+<p>La proposition introduit un nouvel <code>init</code> asynchrone pour le type <code>Result</code>. Ce nouvel initialiseur permet de capturer le résultat d'une <code>closure</code> asynchrone qui peut aussi lancer une erreur (<code>throws</code>). Le mécanisme fonctionne en évaluant la <code>closure</code> avec <code>await</code>. Si l'exécution se termine avec succès, une instance <code>.success</code> est créée avec la valeur retournée. Si une erreur est lancée, l'erreur est capturée et encapsulée dans une instance <code>.failure</code>. Cette modification est purement additive et n'affecte pas la compatibilité avec le code existant.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0530" tabindex="-1"><a href="#avant-se-0530" class="header-anchor">Avant SE-0530</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">asyncWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">String</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Simule un travail asynchrone</span>
     <span class="token keyword">return</span> <span class="token string-literal"><span class="token string">"Success"</span></span>
 <span class="token punctuation">}</span>
 
-<span class="token comment">// Manuel : on doit gérer l'erreur manuellement pour obtenir un Result</span>
+<span class="token comment">// Pour obtenir un Result à partir d'un code asynchrone, </span>
+<span class="token comment">// il faut écrire manuellement le bloc do-catch.</span>
 <span class="token keyword">let</span> result<span class="token punctuation">:</span> <span class="token class-name">Result</span><span class="token operator">&lt;</span><span class="token class-name">String</span><span class="token punctuation">,</span> <span class="token class-name">Error</span><span class="token operator">&gt;</span>
 <span class="token keyword">do</span> <span class="token punctuation">{</span>
     <span class="token keyword">let</span> value <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token keyword">await</span> <span class="token function">asyncWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -97,16 +99,19 @@
     result <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token function">failure</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'utilisation de <code>Result</code> avec du code asynchrone nécessite une structure <code>do-catch</code> verbeuse pour capturer l'erreur et l'encapsuler manuellement.</p>
+<p>L'absence d'initialiseur asynchrone oblige le développeur à écrire manuellement un bloc <code>do-catch</code> pour convertir un appel <code>async throws</code> en un type <code>Result</code>. Cela entraîne une duplication de code répétitive dans de nombreuses bases de code.</p>
 <h3 id="apr%C3%A8s-se-0530" tabindex="-1"><a href="#apr%C3%A8s-se-0530" class="header-anchor">Après SE-0530</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">asyncWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">String</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Simule un travail asynchrone</span>
     <span class="token keyword">return</span> <span class="token string-literal"><span class="token string">"Success"</span></span>
 <span class="token punctuation">}</span>
 
-<span class="token comment">// Utilisation simplifiée du nouvel initialiseur asynchrone</span>
-<span class="token keyword">let</span> result <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token class-name">Result</span> <span class="token punctuation">{</span> <span class="token keyword">try</span> <span class="token keyword">await</span> <span class="token function">asyncWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+<span class="token comment">// Utilisation directe de l'initialiseur asynchrone</span>
+<span class="token keyword">let</span> result <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token class-name">Result</span> <span class="token punctuation">{</span>
+    <span class="token keyword">try</span> <span class="token keyword">await</span> <span class="token function">asyncWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
 </code></pre>
-<p>La proposition permet de condenser la gestion d'erreur asynchrone en une seule ligne de code élégante et lisable.</p>
+<p>La proposition introduit un <code>init(catching:)</code> qui accepte une <code>closure</code> asynchrone. Cela permet de transformer directement un appel <code>async throws</code> en un type <code>Result</code> de manière concise et élégante en une seule ligne de code.</p>
 
   </div>
 </article>

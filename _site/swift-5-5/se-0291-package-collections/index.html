@@ -81,33 +81,27 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0291-package-collections.md">SE-0291 - Package Collections</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit le concept de "Package Collections" dans Swift Package Manager (SwiftPM) pour faciliter la découverte de dépendances via des listes de packages curatées par des tiers (éducateurs, entreprises, etc.).</p>
-<p>Le système repose sur trois piliers :</p>
-<ol>
-<li><strong>Collections (Sujet de la proposition) :</strong> Fichiers JSON statiques contenant une liste de packages et leurs métadonnées, diffusables via un serveur ou un CDN.</li>
-<li><strong>Interface en ligne de commande :</strong> Introduction de la commande <code>swift package-collection</code> pour gérer (<code>add</code>, <code>remove</code>, <code>list</code>, <code>refresh</code>), rechercher (<code>search</code>) et inspecter (<code>describe</code>) les collections.</li>
-<li><strong>Configuration utilisateur :</strong> Utilisation d'un fichier de configuration global (<code>~/.swiftpm/config</code>) pour stocker les collections souscrites.</li>
-</ol>
-<p>La proposition prévoit également un mécanisme de signature pour garantir l'authenticité et l'intégrité des collections, protégeant ainsi les utilisateurs contre les modifications malveillantes.</p>
+<p>Cette proposition introduit le concept de <strong>Package Collections</strong> au sein de Swift Package Manager (SwiftPM). Une collection est un document JSON statique regroupant une liste de packages avec leurs métadonnées associées, permettant de créer des listes de dépendances curatées (par exemple pour des cours pédagogiques ou des environnements d'entreprise). La proposition définit une interface en ligne de commande <code>swift package-collection</code> pour gérer ces collections (ajouter, supprimer, lister, rafraîchir), rechercher des packages via des mots-clés ou des noms de modules, et consulter les métadonnées détaillées. Elle inclut également un mécanisme de signature pour garantir l'intégrité et l'authenticité des collections.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0291" tabindex="-1"><a href="#avant-se-0291" class="header-anchor">Avant SE-0291</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Il n'existe pas de moyen standardisé pour découvrir un ensemble </span>
-<span class="token comment">// de packages validés pour un cas d'usage spécifique via SwiftPM.</span>
-<span class="token comment">// La recherche se limite généralement à l'exploration manuelle </span>
-<span class="token comment">// sur des plateformes comme GitHub ou Swift Package Index.</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Il n'existe pas de moyen standardisé pour regrouper </span>
+<span class="token comment">// des packages selon un cas d'usage spécifique.</span>
+<span class="token comment">// Pour utiliser un ensemble de packages pour un cours, </span>
+<span class="token comment">// un instructeur doit fournir une liste manuelle de URLs,</span>
+<span class="token comment">// augmentant la charge cognitive et le risque d'erreur.</span>
 </code></pre>
-<p>La découverte de packages pertinents pour un usage spécifique (ex: un cours ou un framework interne d'entreprise) est laborieuse et nécessite une recherche manuelle et incertaine.</p>
+<p>La difficulté de découvrir des packages adaptés à un besoin spécifique et l'absence de méthode standard pour accéder à des métadonnées qui ne sont pas dans le <code>Package.swift</code> créent une friction pour les développeurs.</p>
 <h3 id="apr%C3%A8s-se-0291" tabindex="-1"><a href="#apr%C3%A8s-se-0291" class="header-anchor">Après SE-0291</a></h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Ajouter une collection depuis une URL
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Ajouter une collection via une URL
 $ swift package-collection add https://www.example.com/packages.json
 
-# Rechercher des packages par mots-clés dans les collections
+# Rechercher un package par mot-clé dans les collections
 $ swift package-collection search --keywords yaml https://github.com/jpsim/yams
 
-# Décrire une collection ou un package
-$ swift package-collection describe https://www.example.com/packages.json
+# Consulter les détails d'un package
+$ swift package-collection describe https://github.com/jpsim/yams
 </code></pre>
-<p>L'utilisateur peut désormais souscrire à des listes de packages de confiance en une commande, permettant une intégration rapide et sécurisée de dépendances pré-approuvées.</p>
+<p>La proposition résout le problème en offrant une méthode centralisée et automatisée pour découvrir des ensembles de packages de confiance, simplifiant l'intégration de dépendances pour des cas d'usage précis.</p>
 
   </div>
 </article>

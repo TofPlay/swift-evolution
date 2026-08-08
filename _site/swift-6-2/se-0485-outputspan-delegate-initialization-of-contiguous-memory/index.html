@@ -81,34 +81,34 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0485-outputspan.md">SE-0485 - OutputSpan: delegate initialization of contiguous memory</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit <code>OutputSpan</code> et <code>OutputRawSpan</code>, deux nouveaux types non-copiables et non-échappables conçus pour déléguer l'initialisation de la mémoire d'un conteneur à un code utilisateur de manière sûre.</p>
-<p>Actuellement, l'initialisation personnalisée de la mémoire (comme pour <code>Array.init(unsafeUninitializedCapacity:...)</code>) repose sur des fonctions <code>unsafe</code>, ce qui est risqué et peu adapté aux environnements soucieux de la sécurité.</p>
-<p>Les points clés incluent :</p>
-<ul>
-<li><strong>OutputSpan<element></element></strong> : Gère une région de mémoire contiguë composée d'un préfixe d'éléments déjà initialisés et d'un suffixe de mémoire non initialisée. Sa taille peut varier au fur et à mesure que des éléments sont ajoutés.</li>
-<li><strong>OutputRawSpan</strong> : Version équivalente pour la mémoire non typée (bytes), utile pour les encodeurs.</li>
-<li><strong>Sécurité</strong> : Utilise les garanties d'accès exclusif et de durée de vie pour prévenir les fuites de mémoire et les accès non sécurisés.</li>
-<li><strong>Extensions de la bibliothèque standard</strong> : Introduction de nouveaux initialisateurs pour <code>Array</code>, <code>String</code>, <code>ContiguousArray</code>, etc., prenant un <code>OutputSpan</code> en paramètre via une closure.</li>
-</ul>
+<p>La proposition introduit deux nouveaux types : <code>OutputSpan&lt;Element&gt;</code> et <code>OutputRawSpan</code>. Ces types sont conçus pour déléguer l'initialisation de la mémoire d'un conteneur (comme <code>Array</code> ou <code>String</code>) à un code utilisateur via une closure.</p>
+<p><code>OutputSpan</code> représente une région de mémoire contiguë composée d'un préfixe d'éléments déjà initialisés suivi d'un suffixe de mémoire non initialisée. Il est conçu pour être <code>non-copyable</code> afin de garantir un accès exclusif à la mémoire et pour gérer l'état d'initialisation (le nombre d'éléments valides) en temps réel. <code>OutputRawSpan</code> offre une fonctionnalité similaire mais pour de la mémoire non typée (<code>untyped memory</code>), utile pour des opérations de bas niveau comme l'encodage. La proposition prévoit également l'ajout de nouveaux initialisateurs dans la bibliothèque standard permettant d'utiliser ces spans pour construire des conteneurs de manière sécurisée.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0485" tabindex="-1"><a href="#avant-se-0485" class="header-anchor">Avant SE-0485</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de fonctions unsafe, sujettes aux erreurs de gestion de capacité et de durée de vie</span>
-<span class="token keyword">var</span> array <span class="token operator">=</span> <span class="token class-name">Array</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>unsafeUninitializedCapacity<span class="token punctuation">:</span> <span class="token number">5</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> buffer<span class="token punctuation">,</span> initializedCount <span class="token keyword">in</span>
-    buffer<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">10</span>
-    buffer<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">20</span>
-    <span class="token keyword">return</span> <span class="token number">2</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// L'initialisation de conteneurs avec une capacité prédéfinie </span>
+<span class="token comment">// nécessite souvent des fonctions unsafe et risquées.</span>
+<span class="token keyword">let</span> capacity <span class="token operator">=</span> <span class="token number">10</span>
+<span class="token keyword">var</span> array <span class="token operator">=</span> <span class="token class-name">Array</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>unsafeUninitializedCapacity<span class="token punctuation">:</span> capacity<span class="token punctuation">)</span> <span class="token punctuation">{</span> buffer<span class="token punctuation">,</span> initializedCount <span class="token keyword">in</span>
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token number">0</span><span class="token operator">..&lt;</span>capacity <span class="token punctuation">{</span>
+        buffer<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> i
+    <span class="token punctuation">}</span>
+    initializedCount <span class="token operator">=</span> capacity
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'utilisation de fonctions <code>unsafe</code> oblige le développeur à gérer manuellement le nombre d'éléments initialisés et la gestion de la mémoire, ce qui peut conduire à des comportements indéfinis si le <code>initializedCount</code> est incorrect.</p>
+<p>L'utilisation de <code>unsafeUninitializedCapacity</code> est potentiellement dangereuse car elle repose sur des types <code>unsafe</code> et nécessite de gérer manuellement le nombre d'éléments initialisés via un paramètre <code>inout</code>, ce qui est sujet à l'erreur humaine et peut compromettre la sécurité mémoire si l'invariant n'est pas respecté.</p>
 <h3 id="apr%C3%A8s-se-0485" tabindex="-1"><a href="#apr%C3%A8s-se-0485" class="header-anchor">Après SE-0485</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation sécurisée avec OutputSpan</span>
-<span class="token keyword">let</span> array <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token class-name">Array</span><span class="token punctuation">(</span>capacity<span class="token punctuation">:</span> <span class="token number">5</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">(</span>span<span class="token punctuation">:</span> <span class="token keyword">inout</span> <span class="token class-name">OutputSpan</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token keyword">in</span>
-    span<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>
-    span<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">20</span><span class="token punctuation">)</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de OutputSpan via un nouvel initialisateur sécurisé</span>
+<span class="token keyword">let</span> array <span class="token operator">=</span> <span class="token class-name">Array</span><span class="token punctuation">(</span>capacity<span class="token punctuation">:</span> <span class="token number">10</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">(</span>span<span class="token punctuation">:</span> <span class="token keyword">inout</span> <span class="token class-name">OutputSpan</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token keyword">in</span>
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token number">0</span><span class="token operator">..&lt;</span><span class="token number">10</span> <span class="token punctuation">{</span>
+        <span class="token keyword">try</span> span<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
-<span class="token comment">// span.count est maintenant 2, et la mémoire est gérée de manière sûre.</span>
+
+<span class="token comment">// Utilisation de OutputRawSpan pour de la mémoire brute</span>
+<span class="token keyword">var</span> rawSpan <span class="token operator">=</span> <span class="token class-name">OutputRawSpan</span><span class="token punctuation">(</span>capacity<span class="token punctuation">:</span> <span class="token number">64</span><span class="token punctuation">)</span>
+rawSpan<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
 </code></pre>
-<p>La proposition permet de passer un <code>OutputSpan</code> à une closure. Le développeur utilise simplement <code>append(_:)</code> pour ajouter des éléments. Le type <code>OutputSpan</code> gère l'état de l'initialisation de la mémoire et garantit que le conteneur final est correctement configuré.</p>
+<p>La proposition résout le problème en fournissant une abstraction sécurisée (<code>OutputSpan</code>) qui gère elle-même l'état d'initialisation. Le développeur interagit avec un type qui garantit l'exclusivité de l'accès et vérifie les limites de mémoire, tout en éliminant le besoin de manipuler directement des pointeurs non sécurisés dans la plupart des cas d'usage.</p>
 
   </div>
 </article>

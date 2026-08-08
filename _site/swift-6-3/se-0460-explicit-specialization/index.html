@@ -76,33 +76,24 @@
     <h1>SE-0460 - Explicit Specialization</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
-<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<h2 id="disponible-%C3%A0-partir" tabindex="-1"><a href="#disponible-%C3%A0-partir" class="header-anchor">Disponible à partir</a></h2>
 <p>Swift 6.3</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0460-specialized.md">SE-0460 - Explicit Specialization</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit l'attribut <code>@specialized</code>, permettant aux développeurs de forcer la génération de versions pré-spécialisées d'une fonction générique pour des types spécifiques.</p>
-<p>Actuellement, le compilateur peut spécialiser une fonction lors de l'appel (si l'implémentation est visible), mais perd cette capacité lorsqu'un "mur d'optimisation" est présent (comme l'utilisation de types existantiels <code>any</code> ou l'appel via un framework binaire ABI-stable sans <code>@inlinable</code>). L'attribut <code>@specialized</code> permet de :</p>
-<ol>
-<li>Créer des implémentations optimisées pour des types concrets (ex: <code>[Int]</code>).</li>
-<li>Insérer une logique de "redispatch" dans la fonction générique pour vérifier si le type au runtime correspond à une spécialisation disponible.</li>
-<li>Améliorer radicalement les performances dans les cas où le compilateur ne peut pas déduire les types au point d'appel.</li>
-</ol>
+<p>Le compilateur Swift possède la capacité de "spécialiser" une <code>generic function</code> au moment de la compilation. Cela crée une implémentation personnalisée où les placeholders génériques sont remplacés par des types concrets, permettant des optimisations majeures (comme l'utilisation d'instructions processeur spécifiques ou l'accès direct à la mémoire).</p>
+<p>Cependant, cette optimisation échoue souvent lorsque l'information sur le type est masquée par une éраse de type (type erasure), comme l'utilisation de <code>any</code> ou de protocoles. La proposition introduit l'attribut <code>@specialized</code> qui permet à l'auteur d'une fonction générique de demander au compilateur de générer manuellement des versions pré-spécialisées pour des types spécifiques. Lorsqu'une version non-spécialisée est appelée avec l'un de ces types, le mécanisme de "redispatch" redirige l'exécution vers la version optimisée.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0460" tabindex="-1"><a href="#avant-se-0460" class="header-anchor">Avant SE-0460</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">extension</span> <span class="token class-name">Sequence</span> <span class="token keyword">where</span> <span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token class-name">BinaryInteger</span> <span class="token punctuation">{</span>
-    <span class="token keyword">func</span> <span class="token function-definition function">sum</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Double</span> <span class="token punctuation">{</span>
-        <span class="token function">reduce</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token short-argument">$0</span> <span class="token operator">+</span> <span class="token class-name">Double</span><span class="token punctuation">(</span><span class="token short-argument">$1</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">protocol</span> <span class="token class-name">Summable</span><span class="token punctuation">:</span> <span class="token class-name">Sequence</span> <span class="token keyword">where</span> <span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token class-name">BinaryInteger</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
+<span class="token keyword">extension</span> <span class="token class-name">Array</span><span class="token punctuation">:</span> <span class="token class-name">Summable</span> <span class="token keyword">where</span> <span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token class-name">BinaryInteger</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
 
-<span class="token keyword">protocol</span> <span class="token class-name">Summable</span><span class="token punctuation">:</span> <span class="token class-name">Sequence</span> <span class="token keyword">where</span> <span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token class-name">BinaryInteger</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
-<span class="token keyword">extension</span> <span class="token class-name">Array</span><span class="token punctuation">:</span> <span class="token class-name">Summable</span> <span class="token keyword">where</span> <span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token class-name">BinaryInteger</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token keyword">var</span> summable<span class="token punctuation">:</span> any <span class="token class-name">Summable</span> 
+<span class="token comment">// ... remplissage de summable avec [Int] ...</span>
 
-<span class="token keyword">var</span> summable<span class="token punctuation">:</span> any <span class="token class-name">Summable</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">]</span>
-<span class="token keyword">let</span> result <span class="token operator">=</span> summable<span class="token punctuation">.</span><span class="token function">sum</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
+<span class="token keyword">let</span> result <span class="token operator">=</span> summable<span class="token punctuation">.</span><span class="token function">sum</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 </code></pre>
-<p>Lorsque <code>summable</code> est passé via un protocole ou un framework binaire, le compilateur utilise la version générique lente (itération via protocol witness tables) car il ne peut pas voir le type concret au moment de la compilation.</p>
+<p>Le compilateur ne connaît pas le type concret de <code>summable</code> au moment de l'appel (à cause de <code>any</code>). Il est obligé d'utiliser la version non-spécialisée de la fonction, ce qui nécessite de passer par des appels de méthode via des protocol witness tables et d'itérer la séquence de manière générique, ce qui est beaucoup plus lent.</p>
 <h3 id="apr%C3%A8s-se-0460" tabindex="-1"><a href="#apr%C3%A8s-se-0460" class="header-anchor">Après SE-0460</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">extension</span> <span class="token class-name">Sequence</span> <span class="token keyword">where</span> <span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token class-name">BinaryInteger</span> <span class="token punctuation">{</span>
     <span class="token attribute atrule">@specialized</span><span class="token punctuation">(</span><span class="token keyword">where</span> <span class="token keyword">Self</span> <span class="token operator">==</span> <span class="token punctuation">[</span><span class="token class-name">Int</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
@@ -111,13 +102,12 @@
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 
-<span class="token keyword">protocol</span> <span class="token class-name">Summable</span><span class="token punctuation">:</span> <span class="token class-name">Sequence</span> <span class="token keyword">where</span> <span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token class-name">BinaryInteger</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
-<span class="token keyword">extension</span> <span class="token class-name">Array</span><span class="token punctuation">:</span> <span class="token class-name">Summable</span> <span class="token keyword">where</span> <span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token class-name">BinaryInteger</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
-
-<span class="token keyword">var</span> summable<span class="token punctuation">:</span> any <span class="token class-name">Summable</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">]</span>
-<span class="token keyword">let</span> result <span class="token operator">=</span> summable<span class="token punctuation">.</span><span class="token function">sum</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token comment">// Utilisation</span>
+<span class="token keyword">var</span> summable<span class="token punctuation">:</span> any <span class="token class-name">Summable</span>
+<span class="token comment">// ...</span>
+<span class="token keyword">let</span> result <span class="token operator">=</span> summable<span class="token punctuation">.</span><span class="token function">sum</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Le runtime détecte que le type est [Int] et redirige vers la version optimisée.</span>
 </code></pre>
-<p>Avec <code>@specialized</code>, le compilateur génère une version ultra-rapide pour <code>[Int]</code>. À l'exécution, la fonction générique vérifie si <code>Self</code> est <code>[Int]</code> et redirige immédiatement vers l'implémentation optimisée, retrouvant ainsi des performances proches du code non-générique.</p>
+<p>L'utilisation de <code>@specialized</code> permet de restaurer des performances proches de la version spécialisée native, même lorsque le type est masqué par un type existantiel (<code>any</code>), en ajoutant une vérification du type et un redirection vers la version optimisée au début de la fonction.</p>
 
   </div>
 </article>

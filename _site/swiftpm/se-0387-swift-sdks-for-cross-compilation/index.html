@@ -81,35 +81,33 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0387-cross-compilation-destinations.md">SE-0387 - Swift SDKs for Cross-Compilation</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit les "Swift SDKs" pour faciliter la compilation croisée (cross-compilation) en utilisant le format <code>.artifactbundle</code> (introduit par SE-0305). L'objectif est de permettre aux développeurs de distribuer et d'installer des ensembles complets d'outils (compilateurs, linkers, headers, librairies) sous forme d'archives, évitant ainsi la configuration ad-hoc de variables d'environnement ou de fichiers de destination manuels.</p>
-<p>La proposition introduit :</p>
-<ul>
-<li>Un nouveau format de bundle <code>.artifactbundle</code> adapté aux SDK Swift, incluant des fichiers <code>swift-sdk.json</code> et <code>toolset.json</code>.</li>
-<li>Une commande CLI <code>swift sdk</code> (subcommandes <code>install</code>, <code>list</code>, <code>configure</code>, <code>remove</code>) pour gérer l'installation et la configuration de ces SDKs.</li>
-<li>Un mécanisme de "toolset" permettant de surcharger les outils de la chaîne de compilation (compiler, linker, etc.) via des fichiers JSON, permettant une configuration propre et partageable.</li>
-<li>La possibilité d'utiliser un SDK spécifique via l'option <code>--swift-sdk</code> lors de l'exécution des commandes <code>swift build</code>, <code>swift test</code> ou <code>swift run</code>.</li>
-</ul>
+<p>La proposition introduit le concept de <code>Swift SDK</code> pour faciliter la cross-compilation. Un <code>Swift SDK</code> est un ensemble de binaires (libraries, headers, ressources) encapsulé dans un format <code>.artifactbundle</code> (extension introduite en SE-0305). Le système utilise des fichiers <code>toolset.json</code> pour configurer les chemins des outils (<code>swiftc</code>, <code>clang</code>, <code>linker</code>, etc.) et des fichiers <code>swift-sdk.json</code> pour définir les métadonnées de la cible (<code>targetTriples</code>). La gestion de ces bundles est assurée par une nouvelle interface en ligne de commande : <code>swift sdk</code>. Les commandes incluent <code>install</code>, <code>list</code>, <code>configure</code> et <code>remove</code>. L'utilisation d'un SDK se fait via l'option <code>--swift-sdk</code> lors de l'exécution de <code>swift build</code>, <code>swift test</code> ou <code>swift run</code>.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0387" tabindex="-1"><a href="#avant-se-0387" class="header-anchor">Avant SE-0387</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Avant cette proposition, la compilation croisée nécessitait de configurer </span>
-<span class="token comment">// manuellement des fichiers de destination ou des variables d'environnement </span>
-<span class="token comment">// de manière ad-hoc pour chaque combinaison host/target.</span>
-<span class="token comment">// Exemple théorique via environnement :</span>
-<span class="token comment">// export CC=/path/to/clang</span>
-<span class="token comment">// export SDK_PATH=/path/to/custom/sdk</span>
-</code></pre>
-<p>La gestion de la compilation croisée était laborieuse, reposait sur des chemins absolides hardcodés dans des scripts, et la distribution des assets nécessaires était complexe et peu standardisée.</p>
-<h3 id="apr%C3%A8s-se-0387" tabindex="-1"><a href="#apr%C3%A8s-se-0387" class="header-anchor">Après SE-0387</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Installation d'un SDK Ubuntu pour l'architecture ARM64 depuis macOS</span>
-swift sdk install <span class="token operator">/</span>path<span class="token operator">/</span>to<span class="token operator">/</span>swift<span class="token operator">-</span><span class="token number">5</span><span class="token punctuation">.</span>9_ubuntu<span class="token punctuation">.</span>artifactbundle <span class="token operator">--</span>checksum <span class="token operator">&lt;</span>hash<span class="token operator">&gt;</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// La cross-compilation nécessite la création manuelle de "destination files"</span>
+<span class="token comment">// ou l'utilisation de scripts ad-hoc pour lier les chemins des outils.</span>
+<span class="token comment">// Les chemins dans les métadonnées sont souvent des chemins absolus.</span>
 
-<span class="token comment">// Utilisation du SDK installé pour compiler un projet vers Ubuntu</span>
+swift build <span class="token operator">--</span>swift<span class="token operator">-</span>platform linux <span class="token operator">--</span>swift<span class="token operator">-</span>platform arm64<span class="token operator">-</span>apple<span class="token operator">-</span>darwin
+<span class="token comment">// La gestion des dépendances système (C/C++) pour la cible est complexe</span>
+<span class="token comment">// et nécessite souvent l'utilisation de conteneurs Docker ou de configurations </span>
+<span class="token comment">// environnementales manuelles (SWIFT_EXEC, CC).</span>
+</code></pre>
+<p>La distribution des assets pour la cross-compilation est laborieuse. La dépendance à des chemins absols dans les fichiers de métadonnées rend le partage des configurations difficile entre différentes machines ou environnements.</p>
+<h3 id="apr%C3%A8s-se-0387" tabindex="-1"><a href="#apr%C3%A8s-se-0387" class="header-anchor">Après SE-0387</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Installation d'un SDK pour Ubuntu</span>
+swift sdk install <span class="token operator">./</span>swift<span class="token operator">-</span><span class="token number">5</span><span class="token punctuation">.</span>9_ubuntu<span class="token punctuation">.</span>artifactbundle
+
+<span class="token comment">// Utilisation du SDK pour la compilation</span>
 swift build <span class="token operator">--</span>swift<span class="token operator">-</span>sdk ubuntu_jammy
 
-<span class="token comment">// Configuration d'outils spécifiques via un fichier toolset</span>
-swift build <span class="token operator">--</span>toolset custom_tools<span class="token punctuation">.</span>json
+<span class="token comment">// Configuration personnalisée d'un SDK existant</span>
+swift sdk configure ubuntu_jammy <span class="token operator">--</span>include<span class="token operator">-</span>search<span class="token operator">-</span>path <span class="token operator">/</span>custom<span class="token operator">/</span>include
+
+<span class="token comment">// Utilisation d'un toolset spécifique pour ajouter des flags</span>
+swift build <span class="token operator">--</span>swift<span class="token operator">-</span>sdk ubuntu_jammy <span class="token operator">--</span>toolset my_custom_flags<span class="token punctuation">.</span>json
 </code></pre>
-<p>La proposition standardise la distribution des SDKs sous forme de bundles. Elle permet de compiler pour une cible différente de la machine hôte de manière reproductible, en utilisant des outils isolés contenus dans le bundle, tout en simplifiant grandement le flux de travail grâce à une interface CLI dédiée.</p>
+<p>La proposition introduit une méthode standardisée pour distribuer des environnements de compilation complets sous forme d'archives. L'utilisation de chemins relatifs dans les fichiers <code>swift-sdk.json</code> et <code>toolset.json</code> permet une portabilité totale. Le système permet de surcharger les outils du <code>toolchain</code> par défaut par ceux fournis dans le bundle, garantissant que les outils de compilation et les bibliothèques système sont parfaitement alignés avec la cible.</p>
 
   </div>
 </article>

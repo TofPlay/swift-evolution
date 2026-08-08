@@ -81,49 +81,42 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0430-transferring-parameters-and-results.md">SE-0430 - sending parameter and result values</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit le mot-clé <code>sending</code> pour permettre le transfert sécurisé de valeurs non-<code>Sendable</code> à travers les frontières d'isolation (par exemple, entre une tâche et un acteur).</p>
-<p>Actuellement, le système d'isolation par région (introduit par SE-0414) est trop restrictif pour les paramètres et les résultats de fonction : une valeur non-<code>Sendable</code> passée en argument ne peut pas être envoyée vers un acteur car le compilateur craint que le chiamant ne l'utilise encore après l'appel.</p>
-<p>La proposition permet de marquer explicitement qu'un paramètre ou un résultat est dans une "région déconnectée", garantissant qu'il peut être transféré vers un autre domaine d'isolation sans risque de compétition de données.</p>
+<p>La proposition introduit le mot-clé <code>sending</code> pour les paramètres et les résultats de fonction. Cette fonctionnalité permet de marquer explicitement qu'une valeur (même de type non <code>Sendable</code>) possède la capacité d'être transférée entre différents domaines d'isolation (comme d'un contexte <code>nonisolated</code> vers un <code>actor</code>).</p>
+<p>Techniquement, l'utilisation de <code>sending</code> garantit que la valeur est dans une "région déconnectée" au moment de la transition. Cela signifie que le langage s'assure que la valeur ne sera plus utilisée dans le contexte d'origine avant d'être utilisée dans le nouveau contexte, évitant ainsi les violations de l'isolation et les data races.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0430" tabindex="-1"><a href="#avant-se-0430" class="header-anchor">Avant SE-0430</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code illustrant l'état AVANT la proposition</span>
-<span class="token keyword">class</span> <span class="token class-name">NonSendable</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">class</span> <span class="token class-name">NonSendable</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
 
 <span class="token attribute atrule">@MainActor</span> 
 <span class="token keyword">func</span> <span class="token function-definition function">main</span><span class="token punctuation">(</span>ns<span class="token punctuation">:</span> <span class="token class-name">NonSendable</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
 
 <span class="token keyword">func</span> <span class="token function-definition function">trySend</span><span class="token punctuation">(</span>ns<span class="token punctuation">:</span> <span class="token class-name">NonSendable</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span> 
-    <span class="token comment">// erreur : envoyer 'ns' peut causer une course de données.</span>
-    <span class="token comment">// 'ns' est isolé à la tâche, l'envoyer vers l'acteur Main est risqué.</span>
+    <span class="token comment">// error: sending 'ns' can result in data races.</span>
+    <span class="token comment">// On ne peut pas envoyer un type non-Sendable vers un acteur</span>
+    <span class="token comment">// car le compilateur craint que 'ns' soit utilisé après l'appel.</span>
     <span class="token keyword">await</span> <span class="token function">main</span><span class="token punctuation">(</span>ns<span class="token punctuation">:</span> ns<span class="token punctuation">)</span> 
 <span class="token punctuation">}</span>
-
-<span class="token keyword">func</span> <span class="token function-definition function">callSend</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">let</span> ns <span class="token operator">=</span> <span class="token class-name">NonSendable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-    <span class="token function">trySend</span><span class="token punctuation">(</span>ns<span class="token punctuation">:</span> ns<span class="token punctuation">)</span>
-    <span class="token function">print</span><span class="token punctuation">(</span>ns<span class="token punctuation">)</span> <span class="token comment">// L'utilisation ici pourrait entrer en compétition avec l'acteur</span>
-<span class="token punctuation">}</span>
 </code></pre>
-<p>Sans le mot-clé <code>sending</code>, le compilateur ne peut pas garantir que la valeur ne sera pas réutilisée par l'appelant, empêchant ainsi le passage de types non-<code>Sendable</code> vers des acteurs ou des contextes isolés.</p>
+<p>Le comportement par défaut de Swift est de protéger l'isolation. Si vous essayez de passer un type qui n'est pas <code>Sendable</code> (un type qui ne peut pas être partagé en toute sécurité entre plusieurs threads) à travers une frontière d'isolation (comme un <code>actor</code>), le compilateur génère une erreur. Cela empêche de passer un objet qui pourrait être modifié simultanément par le thread d'origine et le thread de l'acteur.</p>
 <h3 id="apr%C3%A8s-se-0430" tabindex="-1"><a href="#apr%C3%A8s-se-0430" class="header-anchor">Après SE-0430</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code illustrant l'état APRÈS la proposition</span>
-<span class="token keyword">class</span> <span class="token class-name">NonSendable</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">class</span> <span class="token class-name">NonSendable</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
 
 <span class="token attribute atrule">@MainActor</span> 
 <span class="token keyword">func</span> <span class="token function-definition function">main</span><span class="token punctuation">(</span>ns<span class="token punctuation">:</span> <span class="token class-name">NonSendable</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
 
+<span class="token comment">// Le mot-clé 'sending' indique que le paramètre 'ns' </span>
+<span class="token comment">// est transféré et ne sera plus utilisé dans le contexte appelant.</span>
 <span class="token keyword">func</span> <span class="token function-definition function">trySend</span><span class="token punctuation">(</span>ns<span class="token punctuation">:</span> sending <span class="token class-name">NonSendable</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span> 
-    <span class="token comment">// L'annotation 'sending' indique que 'ns' est déconnecté</span>
     <span class="token keyword">await</span> <span class="token function">main</span><span class="token punctuation">(</span>ns<span class="token punctuation">:</span> ns<span class="token punctuation">)</span> 
 <span class="token punctuation">}</span>
 
-<span class="token keyword">func</span> <span class="token function-definition function">callSend</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<span class="token keyword">func</span> <span class="token function-definition function">call</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
     <span class="token keyword">let</span> ns <span class="token operator">=</span> <span class="token class-name">NonSendable</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
     <span class="token keyword">await</span> <span class="token function">trySend</span><span class="token punctuation">(</span>ns<span class="token punctuation">:</span> ns<span class="token punctuation">)</span>
-    <span class="token comment">// print(ns) // Erreur : 'ns' a été transféré (consumé) par l'appel</span>
+    <span class="token comment">// Ici, l'utilisation de 'ns' serait interdite car elle a été "envoyée"</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'utilisation de <code>sending</code> sur un paramètre garantit au compilateur que la valeur est dans une région déconnectée. Cela permet de transférer la valeur vers un autre domaine d'isolation (comme <code>main</code> sur le <code>@MainActor</code>) tout en s'assurant que le chiamant ne réutilise pas la valeur, éliminant ainsi les risques de compétition de données.</p>
+<p>La proposition résout ce problème en permettant de déclarer l'intention du développeur. Avec <code>sending</code>, le développeur certifie au compilateur que la valeur sera "déconnectée" de son contexte actuel. Le compilateur vérifie alors que le développeur ne tente pas d'utiliser la valeur après l'avoir envoyée, permettant ainsi un transfert sécurisé de types non <code>Sendable</code> entre des domaines d'isolation différents sans risque de data race.</p>
 
   </div>
 </article>

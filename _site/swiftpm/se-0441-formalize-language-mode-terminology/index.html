@@ -81,40 +81,44 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0441-formalize-language-mode-terminology.md">SE-0441 - Formalize ‘language mode’ terminology</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition formalise l'utilisation du terme <strong>"language mode"</strong> (mode de langage) pour éliminer l'ambiguïté causée par le terme "Swift version", qui peut désigner soit la version du compilateur/toolchain, soit le mode de langage.</p>
-<p>Les changements principaux incluent :</p>
+<p>Cette proposition formalise l'utilisation du terme <code>language mode</code> pour remplacer l'ambiguïté causée par l'usage du terme <code>Swift version</code>, lequel peut désigner soit la version du toolchain/compiler, soit le mode de langage. Le changement implique une modification de la terminologie dans les options du compilateur Swift et dans les APIs de Swift Package Manager.</p>
+<p>Les modifications incluent :</p>
 <ul>
-<li><strong>Compilateur :</strong> Introduction de l'option <code>-language-mode</code> (équivalente à <code>-swift-version</code>) et dépriorisation de cette dernière dans la documentation.</li>
-<li><strong>Swift Package Manager :</strong>
-<ul>
-<li>Renommage de <code>swiftLanguageVersions</code> en <code>swiftLanguageModes</code>.</li>
-<li>Renommage de l'énumération <code>SwiftVersion</code> en <code>SwiftLanguageMode</code>.</li>
-<li>Mise à jour de l'initialiseur <code>Package</code> pour utiliser la nouvelle terminologie.</li>
-<li>Ajout de la méthode <code>swiftLanguageMode()</code> dans <code>SwiftSetting</code>.</li>
-</ul>
-</li>
-<li><strong>Compatibilité :</strong> Utilisation de types alias et de propriétés calculées pour assurer une transition fluide via des "fix-it" automatiques lors du passage à Swift 6.</li>
+<li>L'introduction de l'option de compilation <code>-language-mode</code> (équivalente à l'existante <code>-swift-version</code>).</li>
+<li>La renommation de <code>SwiftVersion</code> en <code>SwiftLanguageMode</code>.</li>
+<li>La renommation de la propriété <code>swiftLanguageVersions</code> en <code>swiftLanguageModes</code> dans l'initialiseur et les propriétés de <code>Package</code> pour Swift Package Manager (manifestes &gt;= 6.0).</li>
+<li>L'ajout de la méthode <code>swiftLanguageMode()</code> dans <code>SwiftSetting</code>.</li>
 </ul>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0441" tabindex="-1"><a href="#avant-se-0441" class="header-anchor">Avant SE-0441</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans un Package.swift</span>
 <span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
-    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"ExamplePackage"</span></span><span class="token punctuation">,</span>
     swiftLanguageVersions<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">.</span>v5<span class="token punctuation">]</span>
 <span class="token punctuation">)</span>
 </code></pre>
-<p>L'utilisation de <code>swiftLanguageVersions</code> et <code>SwiftVersion</code> crée une confusion sémantique entre la version du langage et la version de l'outil de compilation.</p>
+<p>L'utilisation du terme <code>swiftLanguageVersions</code> crée une confusion sémantique avec la version du compilateur ou de l'outil.</p>
 <h3 id="apr%C3%A8s-se-0441" tabindex="-1"><a href="#apr%C3%A8s-se-0441" class="header-anchor">Après SE-0441</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans un Package.swift (Swift 6.0+)</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans un Package.swift</span>
 <span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
-    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"ExamplePackage"</span></span><span class="token punctuation">,</span>
     swiftLanguageModes<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">.</span>v5<span class="token punctuation">]</span>
 <span class="token punctuation">)</span>
-
-<span class="token comment">// Accès via SwiftSetting</span>
-<span class="token keyword">let</span> setting <span class="token operator">=</span> <span class="token class-name">SwiftSetting</span><span class="token punctuation">.</span><span class="token function">swiftLanguageMode</span><span class="token punctuation">(</span><span class="token punctuation">.</span>v6<span class="token punctuation">)</span>
 </code></pre>
-<p>La terminologie est désormais explicite : <code>swiftLanguageModes</code> et <code>SwiftLanguageMode</code> indiquent clairement qu'il s'agit du comportement du langage et non de la version du compilateur.</p>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de SwiftSetting</span>
+<span class="token class-name">SwiftSetting</span><span class="token punctuation">.</span><span class="token function">swiftLanguageMode</span><span class="token punctuation">(</span><span class="token punctuation">.</span>v5<span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Évolution du type</span>
+<span class="token keyword">enum</span> <span class="token class-name">SwiftLanguageMode</span> <span class="token punctuation">{</span>
+    <span class="token keyword">case</span> v5
+    <span class="token keyword">case</span> v6
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le code résultant de l'expansion (Conceptuel)</span>
+<span class="token comment">// Le compilateur utilise désormais la terminologie :</span>
+<span class="token comment">// -language-mode &lt;mode&gt;</span>
+</code></pre>
+<p>La proposition résout l'ambiguïté en isolant la notion de "mode de langage" de celle de "version de l'outil". Le passage à <code>swiftLanguageModes</code> et <code>SwiftLanguageMode</code> permet une distinction claire entre la version du compilateur et le comportement syntaxique du langage utilisé pour la compilation.</p>
 
   </div>
 </article>

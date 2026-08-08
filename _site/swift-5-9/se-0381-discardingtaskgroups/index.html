@@ -81,35 +81,35 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0381-task-group-discard-results.md">SE-0381 - DiscardingTaskGroups</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit deux nouveaux types de groupes de tâches pour la concurrence structurée : <code>DiscardingTaskGroup</code> et <code>ThrowingDiscardingTaskGroup</code>.</p>
-<p>Actuellement, les <code>TaskGroup</code> classiques conservent les résultats (ou les objets <code>Task</code> eux-mêmes) de chaque tâche enfant jusqu'à ce qu'ils soient explicitement consommés via <code>next()</code> ou une itération. Dans des scénarios de services à longue durée (comme des serveurs HTTP acceptant des connexions en boucle), cela provoque une fuite de mémoire car les objets <code>Task</code> s'accumulent indéfiniment dans le groupe.</p>
-<p>Les nouveaux groupes de "discarding" résolvent ce problème en :</p>
+<p>La proposition introduit deux nouveaux types de <code>TaskGroup</code> pour la concurrence structurée : <code>DiscardingTaskGroup</code> et <code>ThrowingDiscardingTaskGroup</code>. Ces types sont conçus pour des scénarios où les résultats des <code>child task</code> ne sont pas nécessaires et doivent être ignorés immédiatement.</p>
+<p>Contrairement à un <code>TaskGroup</code> standard, ces nouveaux types :</p>
 <ol>
-<li>Déchargeant et libérant immédiatement les ressources de la tâche enfant dès sa complétion.</li>
-<li>Ne proposant pas de méthode <code>next()</code> ni de conformité à <code>AsyncSequence</code>, car le résultat est intentionnellement ignoré.</li>
-<li>Gérant l'erreur de manière "tout ou rien" : pour les versions <code>Throwing</code>, la première erreur rencontrée annule automatiquement le groupe et toutes les tâches sœurs, puis est propagée.</li>
+<li>Nettoient automatiquement les <code>child task</code> dès qu'elles se terminent, libérant ainsi les ressources et la mémoire.</li>
+<li>Ne possèdent pas de méthode <code>next()</code> et ne sont pas conformes à <code>AsyncSequence</code>, car ils n'ont pas besoin de retourner des valeurs.</li>
+<li>Pour <code>ThrowingDiscardingTaskGroup</code>, le premier <code>error</code> rencontré par une <code>child task</code> provoque automatiquement l'annulation immédiate du groupe et de toutes les autres <code>child task</code> (comportement "one for all, all for one").</li>
+<li>Garantissent que toutes les <code>child task</code> sont terminées avant que la closure du groupe ne se termine.</li>
 </ol>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0381" tabindex="-1"><a href="#avant-se-0381" class="header-anchor">Avant SE-0381</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">try</span> <span class="token keyword">await</span> <span class="token function">withThrowingTaskGroup</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> <span class="token class-name">Void</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> group <span class="token keyword">in</span>
     <span class="token keyword">while</span> <span class="token keyword">let</span> newConnection <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token keyword">await</span> listeningSocket<span class="token punctuation">.</span><span class="token function">accept</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
         group<span class="token punctuation">.</span>addTask <span class="token punctuation">{</span> 
-            <span class="token keyword">await</span> <span class="token function">handleConnection</span><span class="token punctuation">(</span>newConnection<span class="token punctuation">)</span> 
+            <span class="token function">handleConnection</span><span class="token punctuation">(</span>newConnection<span class="token punctuation">)</span> 
         <span class="token punctuation">}</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>Dans ce code, chaque tâche enfant terminée est conservée en mémoire par le groupe de tâches en attendant que l'utilisateur appelle <code>group.next()</code>. Pour un serveur tournant pendant des jours, cela entraîne une consommation de mémoire croissante (fuite de mémoire) car les milliers de tâches terminées ne sont jamais "nettoyées".</p>
+<p>L'utilisation d'un <code>TaskGroup</code> standard pour gérer des connexions peut entraîner une fuite de mémoire. Le <code>TaskGroup</code> conserve le <code>Result</code> (et donc l'objet <code>Task</code>) de chaque <code>child task</code> jusqu'à ce qu'elles soient explicitement consommées via <code>next()</code>. Dans une boucle infinie (comme un serveur), cela accumule des milliers d'objets en mémoire, risquant l'épuisement des ressources système.</p>
 <h3 id="apr%C3%A8s-se-0381" tabindex="-1"><a href="#apr%C3%A8s-se-0381" class="header-anchor">Après SE-0381</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">try</span> <span class="token keyword">await</span> withThrowingDiscardingTaskGroup <span class="token punctuation">{</span> group <span class="token keyword">in</span>
     <span class="token keyword">while</span> <span class="token keyword">let</span> newConnection <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token keyword">await</span> listeningSocket<span class="token punctuation">.</span><span class="token function">accept</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
         group<span class="token punctuation">.</span>addTask <span class="token punctuation">{</span> 
-            <span class="token keyword">await</span> <span class="token function">handleConnection</span><span class="token punctuation">(</span>newConnection<span class="token punctuation">)</span> 
+            <span class="token keyword">try</span> <span class="token keyword">await</span> <span class="token function">handleConnection</span><span class="token punctuation">(</span>newConnection<span class="token punctuation">)</span> 
         <span class="token punctuation">}</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>Avec <code>withThrowingDiscardingTaskGroup</code>, les ressources de chaque tâche <code>handleConnection</code> sont libérées immédiatement après la fin de l'exécution de la tâche, sans attendre une consommation manuelle. Cela permet de faire tourner des boucles de serveur indéfiniment sans fuite de mémoire.</p>
+<p>La proposition résout le problème de consommation mémoire en utilisant <code>withThrowingDiscardingTaskGroup</code>. Les résultats sont ignorés et les <code>child task</code> sont libérées immédiatement après leur exécution, permettant au groupe de fonctionner indéfiniment sans fuite de mémoire.</p>
 
   </div>
 </article>

@@ -76,34 +76,39 @@
     <h1>SE-0294 - Declaring executable targets in Package Manifests</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
-<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<h2 id="disponible-%C3%A0-partir" tabindex="-1"><a href="#disponible-%C3%A0-partir" class="header-anchor">Disponible à partir</a></h2>
 <p>Swift 5.4</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0294-package-executable-targets.md">SE-0294 - Declaring executable targets in Package Manifests</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit la possibilité de déclarer explicitement des cibles comme étant exécutables au sein du manifeste de Swift Package Manager (SPM) via l'utilisation de <code>executableTarget</code>.</p>
-<p>Avant cette modification, l'exécutabilité d'une cible était déduite par l'existence d'un fichier source nommé <code>main.swift</code> (ou <code>main.c</code>, etc.) à la racine du répertoire de la cible. Cette approche présentait plusieurs inconvénients :</p>
-<ul>
-<li>Impossibilité d'utiliser l'attribut <code>@main</code> pour définir le point d'entrée.</li>
-<li>Diagnostics de compilation imprécis ou ambigus si les fichiers sources étaient renommés.</li>
-<li>Difficulté à distinguer clairement l'intention du développeur entre une bibliothèque et un exécutable directement dans le manifeste.</li>
-</ul>
-<p>L'introduction de <code>executableTarget</code> permet une déclaration explicite, améliorant la clarté du manifeste, permettant l'usage de <code>@main</code>, et offrant de meilleurs diagnostics de compilation en supprimant l'ambiguïté de l'inférence par le nom de fichier.</p>
+<p>La proposition introduit la fonction <code>executableTarget</code> dans l'API <code>PackageDescription</code>. Cette modification permet de déclarer explicitement qu'un <code>target</code> est destiné à produire un binaire exécutable. L'introduction de ce nouveau type de <code>target</code> permet au Swift Package Manager de distinguer clairement les modules destinés à être exécutés de ceux destinés à être utilisés comme bibliothèques. Cette modification supporte l'utilisation de l'attribut <code>@main</code> pour définir le point d'entrée de l'exécution et améliore la précision des diagnostics lors de la configuration des <code>product</code>.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0294" tabindex="-1"><a href="#avant-se-0294" class="header-anchor">Avant SE-0294</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans le Package.swift</span>
-targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyTool"</span></span><span class="token punctuation">)</span>
-<span class="token punctuation">]</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans Package.swift</span>
+<span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
+    targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyExecutable"</span></span><span class="token punctuation">,</span>
+            dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+        <span class="token punctuation">)</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">)</span>
 </code></pre>
-<p>La cible est considérée comme exécutable uniquement si un fichier <code>main.swift</code> est présent à la racine du dossier <code>Sources/MyTool</code>.</p>
+<p>Le système détermine le caractère exécutable d'un <code>target</code> par l'inférence, en recherchant un fichier source nommé <code>main.swift</code>, <code>main.c</code>, <code>main.m</code> ou <code>main.cpp</code> à la racine du dossier des sources. Cette méthode empêche l'utilisation de l'attribut <code>@main</code> pour définir le point d'entrée et limite la flexibilité du nommage des fichiers sources.</p>
 <h3 id="apr%C3%A8s-se-0294" tabindex="-1"><a href="#apr%C3%A8s-se-0294" class="header-anchor">Après SE-0294</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans le Package.swift</span>
-targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">.</span><span class="token function">executableTarget</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyTool"</span></span><span class="token punctuation">)</span>
-<span class="token punctuation">]</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans Package.swift</span>
+<span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
+    targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">executableTarget</span><span class="token punctuation">(</span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyExecutable"</span></span><span class="token punctuation">,</span>
+            dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+        <span class="token punctuation">)</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">)</span>
 </code></pre>
-<p>L'exécutabilité est désormais explicitement définie par le type de cible, permettant d'utiliser n'importe quel fichier comme point d'entrée via <code>@main</code>.</p>
+<p>La syntaxe <code>executableTarget</code> permet de spécifier explicitement la nature du <code>target</code>. Cela autorise l'utilisation de l'attribut <code>@main</code> dans n'importe quel fichier source du <code>target</code> et assure que les flags de compilation appropriés sont transmis au compilateur de manière déterministe, indépendamment du nommage des fichiers.</p>
 
   </div>
 </article>

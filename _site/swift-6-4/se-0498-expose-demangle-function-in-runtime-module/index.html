@@ -81,46 +81,52 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0498-runtime-demangle.md">SE-0498 - Expose demangle function in Runtime module</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit une API officielle dans le module <code>Runtime</code> pour permettre le démaquillage (demangling) des symboles Swift directement depuis un processus en cours. Actuellement, les outils de profilage et de débogage doivent soit exécuter un processus externe (<code>swift-demangle</code>), soit utiliser des APIs internes non officielles, ce qui est coûteux en performance ou risqué pour la stabilité.</p>
-<p>L'API propose deux méthodes :</p>
+<p>La proposition introduit une API officielle au sein du module <code>Runtime</code> pour permettre le demangling des symboles Swift directement depuis un processus en cours d'exécution. Le demangling est l'opération consistant à convertir un nom de symbole "mangled" (un identifiant complexe et illisible généré par le compilateur) en une représentation textuelle compréhensible par l'humain.</p>
+<p>Deux nouvelles fonctions sont introduites :</p>
 <ol>
-<li>Une version simple retournant un <code>String</code>.</li>
-<li>Une version optimisée acceptant un <code>UTF8Span</code> pour une utilisation dans des contextes sensibles à la performance, permettant d'écrire le résultat dans un buffer pré-alloué.</li>
+<li><code>demangle(_: String) throws(DemanglingError) -&gt; String</code> : Une méthode simple qui retourne une <code>String</code> lisible.</li>
+<li><code>demangle(_: UTF8Span, into: inout OutputSpan&lt;UTF8.CodeUnit&gt;) throws(DemanglingError)</code> : Une méthode optimisée pour les cas sensibles à la performance, utilisant des spans pour éviter des allocations inutiles.</li>
 </ol>
+<p>Le mécanisme gère les erreurs via un type <code>DemanglingError</code>, permettant notamment de détecter si un buffer est trop petit via le cas <code>.truncated(requiredBufferSize: Int)</code> ou si le symbole est invalide via <code>.invalidSymbol</code>.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0498" tabindex="-1"><a href="#avant-se-0498" class="header-anchor">Avant SE-0498</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Les symboles sont stockés sous forme de noms "mangled" illisibles</span>
-<span class="token keyword">let</span> mangledName <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"$sSS7cStringSSSPys4Int8VG_tcfC"</span></span>
-<span class="token function">print</span><span class="token punctuation">(</span>mangledName<span class="token punctuation">)</span> 
-<span class="token comment">// Résultat : $sSS7cStringSSSPys4Int8VG_tcfC</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Pour transformer un symbole illisible en texte compréhensible, </span>
+<span class="token comment">// les outils doivent soit :</span>
+<span class="token comment">// 1. Créer un nouveau processus pour exécuter l'outil en ligne de commande 'swift-demangle'.</span>
+<span class="token comment">// 2. Utiliser des API internes non officielles du runtime (risqué et instable).</span>
+
+<span class="token keyword">let</span> mangledSymbol <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"$sSS7cStringSSSPys4Int8VG_tcfC"</span></span>
+<span class="token comment">// Impossible d'appeler une fonction de demangling officielle et sûre ici.</span>
 </code></pre>
-<p>L'absence d'API officielle oblige les développeurs à manipuler des chaînes de caractères cryptiques ou à dépendre de fonctions internes comme <code>swift_demangle</code>, qui sont réservées au runtime et peuvent changer sans préavis.</p>
+<p>Le processus de conversion des noms de fonctions et de variables (mangling) produit des chaînes de caractères comme <code>$sSS7cStringSSSPys4Int8VG_tcfC</code>. Pour un développeur, ces symboles sont inutilisables lors de l'analyse d'un crash ou d'un profilage. Jusqu'à présent, il n'existait pas de moyen officiel et stable de traduire ces symboles en texte clair (comme <code>Swift.String.init(cString:)</code>) sans passer par des méthodes externes coûteuses ou instables.</p>
 <h3 id="apr%C3%A8s-se-0498" tabindex="-1"><a href="#apr%C3%A8s-se-0498" class="header-anchor">Après SE-0498</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de l'API officielle du module Runtime</span>
-<span class="token keyword">import</span> <span class="token class-name">Runtime</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">Runtime</span>
 
-<span class="token keyword">let</span> mangledName <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"$sSS7cStringSSSPys4Int8VG_tcfC"</span></span>
+<span class="token keyword">let</span> mangledSymbol <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"$sSS7cStringSSSPys4Int8VG_tcfC"</span></span>
 
+<span class="token comment">// Utilisation de la version simple</span>
 <span class="token keyword">do</span> <span class="token punctuation">{</span>
-    <span class="token keyword">let</span> demangled <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token function">demangle</span><span class="token punctuation">(</span>mangledName<span class="token punctuation">)</span>
-    <span class="token function">print</span><span class="token punctuation">(</span>demangled<span class="token punctuation">)</span>
+    <span class="token keyword">let</span> readableName <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token function">demangle</span><span class="token punctuation">(</span>mangledSymbol<span class="token punctuation">)</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>readableName<span class="token punctuation">)</span> 
+    <span class="token comment">// Affiche : Swift.String.init(cString: Swift.UnsafePointer&lt;Swift.Int8&gt;) -&gt; Swift.String</span>
 <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">{</span>
-    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Erreur de démaquillage : </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">error</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Erreur de demangling : </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">error</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 
-<span class="token comment">// Approche haute performance avec Span</span>
-<span class="token keyword">var</span> outputSpan<span class="token punctuation">:</span> <span class="token class-name">OutputSpan</span><span class="token operator">&lt;</span>UTF8<span class="token punctuation">.</span><span class="token class-name">CodeUnit</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token operator">...</span> 
+<span class="token comment">// Utilisation de la version haute performance (Span)</span>
+<span class="token keyword">var</span> outputSpan<span class="token punctuation">:</span> <span class="token class-name">OutputSpan</span><span class="token operator">&lt;</span>UTF8<span class="token punctuation">.</span><span class="token class-name">CodeUnit</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token operator">...</span> <span class="token comment">// buffer pré-alloué</span>
 <span class="token keyword">do</span> <span class="token punctuation">{</span>
-    <span class="token keyword">try</span> <span class="token function">demangle</span><span class="token punctuation">(</span>mangledName<span class="token punctuation">,</span> into<span class="token punctuation">:</span> <span class="token operator">&amp;</span>outputSpan<span class="token punctuation">)</span>
+    <span class="token keyword">try</span> <span class="token function">demangle</span><span class="token punctuation">(</span>mangledSymbol<span class="token punctuation">,</span> into<span class="token punctuation">:</span> <span class="token operator">&amp;</span>outputSpan<span class="token punctuation">)</span>
     <span class="token keyword">let</span> utf8 <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token class-name">UTF8Span</span><span class="token punctuation">(</span>validating<span class="token punctuation">:</span> outputSpan<span class="token punctuation">.</span>span<span class="token punctuation">)</span>
-    <span class="token function">print</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">(</span>copying<span class="token punctuation">:</span> utf8<span class="token punctuation">)</span><span class="token punctuation">)</span>
-<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token class-name">DemanglingError</span><span class="token punctuation">.</span><span class="token function">truncated</span><span class="token punctuation">(</span><span class="token keyword">let</span> <span class="token keyword">required</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Buffer insuffisant, nécessite </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation"><span class="token keyword">required</span></span><span class="token interpolation-punctuation punctuation">)</span><span class="token string"> octets"</span></span><span class="token punctuation">)</span>
+    <span class="token keyword">let</span> demangledString <span class="token operator">=</span> <span class="token class-name">String</span><span class="token punctuation">(</span>copying<span class="token punctuation">:</span> utf8<span class="token punctuation">)</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>demangledString<span class="token punctuation">)</span>
+<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token class-name">DemanglingError</span><span class="token punctuation">.</span><span class="token function">truncated</span><span class="token punctuation">(</span><span class="token keyword">let</span> requiredSize<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Le buffer était trop petit, il aurait fallu </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">requiredSize</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string"> octets"</span></span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">{</span>
     <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Erreur : </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">error</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>La proposition permet désormais de convertir de manière sûre et performante des symboles complexes en formats lisibles par l'humain (ex: <code>Swift.String.init(cString: Swift.UnsafePointer&lt;Swift.Int8&gt;) -&gt; Swift.String</code>) directement au sein de l'application.</p>
+<p>La proposition résout le problème en fournissant une interface officielle et maintenue par l'équipe Swift. Cela permet aux outils de profiling, de debug et de gestion des crashs de convertir les symboles de manière performante et sécurisée, sans dépendre de fonctions internes (<code>swift_...</code>) qui pourraient changer dans le futur. La version utilisant <code>UTF8Span</code> permet d'optimiser les performances en évitant des allocations de mémoire répétées lors du traitement de grands volumes de symboles.</p>
 
   </div>
 </article>

@@ -81,27 +81,28 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0345-if-let-shorthand.md">SE-0345 - if let shorthand for shadowing an existing optional variable</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit une syntaxe raccourcie pour le "shadowing" (masquage) des variables optionnelles lors de l'utilisation de <code>if let</code> ou <code>guard let</code>. Actuellement, pour extraire la valeur d'une variable optionnelle et la renommer avec le même nom (pour éviter de gérer deux noms différents), il est nécessaire de répéter l'identifiant : <code>if let foo = foo</code>. La nouvelle syntaxe permet d'omettre la partie droite, simplifiant la lecture et l'écriture du code, particulièrement pour les noms de variables longs.</p>
+<p>La proposition introduit une syntaxe simplifiée pour le "shadowing" (masquage) lors du déballage d'un <code>optional</code>. Au lieu de répéter deux fois l'identifiant pour extraire la valeur (ex: <code>if let foo = foo</code>), le développeur peut désormais omettre l'expression de droite (ex: <code>if let foo</code>). Cette syntaxe est applicable aux structures de contrôle <code>if let</code>, <code>if var</code>, <code>else if let</code>, <code>guard let</code>, <code>guard var</code>, <code>while let</code> et <code>while var</code>. Le compilateur synthétise automatiquement l'expression pour référencer la variable existante, permettant ainsi une lecture plus fluide et une réduction de la verbosité, particulièrement pour les noms de variables longs.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0345" tabindex="-1"><a href="#avant-se-0345" class="header-anchor">Avant SE-0345</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> someLengthyVariableName<span class="token punctuation">:</span> <span class="token class-name">Foo</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token operator">...</span>
 <span class="token keyword">let</span> anotherImportantVariable<span class="token punctuation">:</span> <span class="token class-name">Bar</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token operator">...</span>
 
-<span class="token keyword">if</span> <span class="token keyword">let</span> someLengthyVariableName <span class="token operator">=</span> someLengthyVariableName<span class="token punctuation">,</span> 
-     <span class="token keyword">let</span> anotherImportantVariable <span class="token operator">=</span> anotherImportantVariable <span class="token punctuation">{</span>
+<span class="token keyword">if</span> <span class="token keyword">let</span> someLengthyVariableName <span class="token operator">=</span> someLengthyVariableName<span class="token punctuation">,</span> <span class="token keyword">let</span> anotherImportantVariable <span class="token operator">=</span> anotherImportantVariable <span class="token punctuation">{</span>
     <span class="token comment">// Utilisation des variables non-optionnelles</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>someLengthyVariableName<span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>La répétition de l'identifiant (<code>foo = foo</code>) rend la syntaxe verbeuse et difficile à lire lorsque les noms de variables sont longs ou complexes.</p>
+<p>Le code nécessite de répéter le nom de la variable une fois pour la déclaration du nouveau <code>let</code> et une seconde fois pour l'expression de valeur. Cela rend les lignes de code encombrées et fastidieuses à écrire lorsque les noms de variables sont longs.</p>
 <h3 id="apr%C3%A8s-se-0345" tabindex="-1"><a href="#apr%C3%A8s-se-0345" class="header-anchor">Après SE-0345</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> someLengthyVariableName<span class="token punctuation">:</span> <span class="token class-name">Foo</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token operator">...</span>
 <span class="token keyword">let</span> anotherImportantVariable<span class="token punctuation">:</span> <span class="token class-name">Bar</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token operator">...</span>
 
 <span class="token keyword">if</span> <span class="token keyword">let</span> someLengthyVariableName<span class="token punctuation">,</span> <span class="token keyword">let</span> anotherImportantVariable <span class="token punctuation">{</span>
     <span class="token comment">// Utilisation des variables non-optionnelles</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>someLengthyVariableName<span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>La syntaxe est nettement plus concise. Le compilateur comprend automatiquement que l'identifiant après <code>let</code> est celui de la variable optionnelle à déballer, créant ainsi une nouvelle variable locale non-optionnelle avec le même nom.</p>
+<p>La syntaxe permet d'omettre la partie <code>= variable</code> car le compilateur comprend que l'identifiant après le mot-clé <code>let</code> est le même que celui qui est déballé. Cela rend le code plus concis et plus facile à lire tout en conservant des noms de variables descriptifs.</p>
 
   </div>
 </article>

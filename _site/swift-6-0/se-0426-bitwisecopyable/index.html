@@ -81,53 +81,44 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0426-bitwise-copyable.md">SE-0426 - BitwiseCopyable</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>La proposition introduit le protocole <code>BitwiseCopyable</code> pour identifier les types dont la copie ou le déplacement peut être effectué via des opérations mémoires directes (comme <code>memcpy</code>), sans nécessiter d'opérations de destruction spéciales ou de gestion complexe de la référence.</p>
-<p>Actuellement, le code générique Swift utilise des "value witness functions" pour gérer les types, ce qui impose un surcoût (overhead) lors de la manipulation de buffers contenant de nombreuses valeurs, car chaque copie nécessite un appel de fonction. Le protocole <code>BitwiseCopyable</code> permet au compilateur d'optimiser ces opérations en utilisant des instructions mémoires de masse hautement efficaces.</p>
-<p>Le protocole est un "marker protocol" (via <code>@_marker</code>) :</p>
-<ul>
-<li>Il peut être auto-inféré pour les structures et énumérations dont tous les membres sont <code>BitwiseCopyable</code>.</li>
-<li>Il peut être déclaré explicitement par l'utilisateur.</li>
-<li>Il ne peut pas être étendu.</li>
-<li>La conformité est permanente pour garantir la stabilité de l'ABI, contrairement à la propriété transitoire <code>_isPOD</code> du runtime.</li>
-</ul>
+<p>La proposition introduit le protocole <code>BitwiseCopyable</code> pour identifier les types qui peuvent être copiés ou déplacés par de simples opérations mémoires directes (comme <code>memcpy</code>), sans nécessiter d'opérations de destruction spéciales. Ce protocole permet au compilateur d'optimiser le code générique en émettant des instructions mémoires à haute performance au lieu de passer par des appels de fonctions via des tables de "value witness functions". Le protocole est un <code>@_marker</code> protocole, ce qui signifie qu'il sert de contrainte de type pour l'optimisation sans modifier le comportement de runtime des types eux-mêmes. La conformité peut être automatique pour les <code>struct</code> et <code>enum</code> dont tous les membres sont eux-mêmes <code>BitwiseCopyable</code>, ou explicite via une déclaration de conformité.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0426" tabindex="-1"><a href="#avant-se-0426" class="header-anchor">Avant SE-0426</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">MyData</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> id<span class="token punctuation">:</span> <span class="token class-name">Int</span>
-    <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">Double</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Un type contenant un type de référence (classe)</span>
+<span class="token keyword">class</span> <span class="token class-name">MyClass</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">Container</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">T</span>
 <span class="token punctuation">}</span>
 
-<span class="token comment">// Limitation : Dans un contexte générique, le compilateur doit </span>
-<span class="token comment">// utiliser des fonctions témoins (value witness functions) pour </span>
-<span class="token comment">// chaque copie, empêchant l'utilisation de memcpy direct.</span>
-<span class="token keyword">func</span> <span class="token function-definition function">copyBuffer</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>data<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">T</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">T</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> result <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token class-name">T</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-    <span class="token keyword">for</span> item <span class="token keyword">in</span> data <span class="token punctuation">{</span>
-        result<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>item<span class="token punctuation">)</span> <span class="token comment">// Appel de fonction de copie pour chaque élément</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> result
+<span class="token keyword">func</span> <span class="token function-definition function">copyBuffer</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>elements<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">T</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Pour copier des éléments de type T, le compilateur doit utiliser</span>
+    <span class="token comment">// des "value witness functions" pour gérer la logique de chaque type,</span>
+    <span class="token comment">// ce qui inclut un overhead pour les types simples.</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>Le comportement actuel oblige le compilateur à traiter chaque élément individuellement pour respecter le cycle de vie (lifecycle) de Swift, ce qui est inefficace pour les types simples qui ne possèdent aucun compteur de référence ou logique de destruction complexe.</p>
+<p>Le langage doit gérer chaque élément individuellement pour s'assurer que les références sont correctement incrémentées ou décrémentées (ARC). Pour un type simple comme un <code>Int</code>, appeler une fonction pour chaque copie est inefficace car cela nécessite de vérifier la logique de gestion mémoire alors qu'une simple copie mémoire suffirait.</p>
 <h3 id="apr%C3%A8s-se-0426" tabindex="-1"><a href="#apr%C3%A8s-se-0426" class="header-anchor">Après SE-0426</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">MyData</span><span class="token punctuation">:</span> <span class="token class-name">BitwiseCopyable</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> id<span class="token punctuation">:</span> <span class="token class-name">Int</span>
-    <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">Double</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">class</span> <span class="token class-name">MyClass</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+<span class="token comment">// Un type qui ne peut pas être BitwiseCopyable (contient une classe)</span>
+<span class="token keyword">struct</span> <span class="token class-name">NonBitwiseContainer</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> ref<span class="token punctuation">:</span> <span class="token class-name">MyClass</span>
 <span class="token punctuation">}</span>
 
-<span class="token comment">// La contrainte BitwiseCopyable permet au compilateur d'utiliser</span>
-<span class="token comment">// des opérations mémoires directes et rapides.</span>
-<span class="token keyword">func</span> <span class="token function-definition function">copyBuffer</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token punctuation">:</span> <span class="token class-name">BitwiseCopyable</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>data<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">T</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">T</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> result <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token class-name">T</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-    <span class="token comment">// Le compilateur peut désormais optimiser cette boucle</span>
-    <span class="token comment">// via des appels à memcpy ou des instructions vectorielles.</span>
-    <span class="token keyword">for</span> item <span class="token keyword">in</span> data <span class="token punctuation">{</span>
-        result<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>item<span class="token punctuation">)</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> result
+<span class="token comment">// Un type qui peut être BitwiseCopyable</span>
+<span class="token keyword">struct</span> <span class="token class-name">BitwiseContainer</span><span class="token punctuation">:</span> <span class="token class-name">BitwiseCopyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> x<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+    <span class="token keyword">var</span> y<span class="token punctuation">:</span> <span class="token class-name">Double</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Utilisation de la contrainte pour l'optimisation</span>
+<span class="token keyword">func</span> <span class="token function-definition function">fastCopy</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token punctuation">:</span> <span class="token class-name">BitwiseCopyable</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>elements<span class="token punctuation">:</span> <span class="token keyword">inout</span> <span class="token punctuation">[</span><span class="token class-name">T</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Le compilateur peut utiliser des fonctions de copie mémoire directes (memcpy)</span>
+    <span class="token comment">// car il a la garantie que T ne nécessite pas de logique spéciale de destruction ou de gestion de référence.</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>La conformité à <code>BitwiseCopyable</code> permet au compilateur de savoir qu'il peut ignorer la logique complexe de gestion de cycle de vie pour ce type, en utilisant des copies binaires brutes, ce qui améliore considérablement les performances des fonctions génériques manipulant des collections de données.</p>
+<p>La proposition permet de restreindre les fonctions génériques aux types <code>BitwiseCopyable</code>. Cela permet au compilateur de générer un code spécialisé extrêmement rapide (bulk memory operations) pour les types simples, tout en garantissant la sécurité pour les types complexes qui ne satisfont pas cette contrainte.</p>
 
   </div>
 </article>

@@ -81,37 +81,31 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0504-task-cancellation-shields.md">SE-0504 - Task Cancellation Shields</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit les "task cancellation shields" (boucliers d'annulation de tâche), un mécanisme permettant de masquer temporairement l'état d'annulation d'une tâche au sein d'un bloc de code spécifique.</p>
-<p><strong>Points clés :</strong></p>
-<ul>
-<li><strong>Mécanisme :</strong> Utilisation de <code>withTaskCancellationShield</code> pour exécuter du code (comme le nettoyage de ressources) sans qu'il puisse observer le statut d'annulation de la tâche parente via <code>Task.isCancelled</code> ou <code>Task.checkCancellation</code>.</li>
-<li><strong>Propagation :</strong> Le bouclier empêche la propagation automatique de l'annulation vers les tâches enfants structurées (<code>async let</code>, <code>TaskGroup</code>) tant que le bloc est actif, bien que la tâche parente reste techniquement annulée.</li>
-<li><strong>Limites :</strong> Le bouclier ne s'applique qu'au contexte actuel (méthodes statiques de <code>Task</code>). L'accès via une instance de <code>Task</code> (<code>task.isCancelled</code>) continuera de renvoyer le véritable état d'annulation.</li>
-<li><strong>Outil de débogage :</strong> Introduction de <code>hasActiveCancellationShield</code> pour vérifier si une tâche est actuellement protégée par un bouclier.</li>
-</ul>
+<p>La proposition introduit les <code>task cancellation shields</code> via la méthode <code>withTaskCancellationShield</code>. Ce mécanisme permet de protéger temporairement un bloc de code contre l'observation de l'état de cancellation de la <code>task</code> parente. Lorsqu'un code est exécuté à l'intérieur d'un shield, les appels à <code>Task.isCancelled</code> ou <code>Task.checkCancellation</code> renverront <code>false</code> (ou ne lèveront pas d'erreur), même si la <code>task</code> a été annulée. Ce mécanisme empêche également la propagation automatique de la cancellation vers les <code>child tasks</code> (comme celles créées avec <code>async let</code> ou <code>TaskGroup</code>) tant que le code est dans le scope du shield.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0504" tabindex="-1"><a href="#avant-se-0504" class="header-anchor">Avant SE-0504</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">extension</span> <span class="token class-name">Resource</span> <span class="token punctuation">{</span>
     <span class="token keyword">func</span> <span class="token function-definition function">cleanup</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment">// Si cette méthode vérifie Task.isCancelled, </span>
-        <span class="token comment">// le nettoyage échouera si la tâche est annulée.</span>
+        <span class="token comment">// L'implémentation peut vérifier l'état de la task</span>
+        <span class="token keyword">guard</span> <span class="token operator">!</span><span class="token class-name">Task</span><span class="token punctuation">.</span>isCancelled <span class="token keyword">else</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token punctuation">}</span>
         system<span class="token punctuation">.</span><span class="token function">performAction</span><span class="token punctuation">(</span><span class="token class-name">CleanupAction</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 
 <span class="token keyword">func</span> <span class="token function-definition function">example</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
     <span class="token keyword">let</span> resource <span class="token operator">=</span> <span class="token function">makeResource</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-    <span class="token comment">// WORKAROUND : Utilisation d'une tâche non structurée pour éviter l'annulation</span>
+    <span class="token comment">// WORKAROUND : Utilisation d'une unstructured task pour éviter que </span>
+    <span class="token comment">// la cleanup ne s'arrête si la task parente est annulée.</span>
     <span class="token keyword">await</span> <span class="token class-name">Task</span> <span class="token punctuation">{</span>
-        <span class="token function">assert</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token class-name">Task</span><span class="token punctuation">.</span>isCancelled<span class="token punctuation">)</span>
         resource<span class="token punctuation">.</span><span class="token function">cleanup</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
     <span class="token punctuation">}</span><span class="token punctuation">.</span>value
 <span class="token punctuation">}</span>
 </code></pre>
-<p>Actuellement, pour garantir l'exécution d'un code de nettoyage, les développeurs doivent créer des tâches non structurées (<code>Task { ... }</code>), ce qui introduit un overhead de planification (scheduling) et peut poser des problèmes de correction ou de performance.</p>
+<p>Le code de nettoyage (<code>cleanup</code>) peut être interrompu prématurément si la <code>task</code> est annulée, car il observe l'état de cancellation de la <code>task</code> dans laquelle il s'exécute. Pour contourner cela, le développeur doit créer une <code>unstructured task</code>, ce qui ajoute une surcharge de programmation (scheduling) inutile et peut poser des problèmes de performance ou de gestion de cycle de vie.</p>
 <h3 id="apr%C3%A8s-se-0504" tabindex="-1"><a href="#apr%C3%A8s-se-0504" class="header-anchor">Après SE-0504</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">extension</span> <span class="token class-name">Resource</span> <span class="token punctuation">{</span>
     <span class="token keyword">func</span> <span class="token function-definition function">cleanup</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">guard</span> <span class="token operator">!</span><span class="token class-name">Task</span><span class="token punctuation">.</span>isCancelled <span class="token keyword">else</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token punctuation">}</span>
         system<span class="token punctuation">.</span><span class="token function">performAction</span><span class="token punctuation">(</span><span class="token class-name">CleanupAction</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
@@ -120,20 +114,11 @@
     <span class="token keyword">let</span> resource <span class="token operator">=</span> <span class="token function">makeResource</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
     
     <span class="token keyword">await</span> withTaskCancellationShield <span class="token punctuation">{</span>
-        <span class="token comment">// Le code de nettoyage s'exécutera même si la tâche est annulée</span>
         resource<span class="token punctuation">.</span><span class="token function">cleanup</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
-
-<span class="token comment">// Utilisation avec une tâche enfant</span>
-<span class="token class-name">Task</span> <span class="token punctuation">{</span>
-    <span class="token keyword">await</span> withTaskCancellationShield <span class="token punctuation">{</span>
-        <span class="token keyword">async</span> <span class="token keyword">let</span> result <span class="token operator">=</span> <span class="token function">compute</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// La tâche enfant n'est pas annulée immédiatement</span>
-        <span class="token keyword">await</span> result
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
 </code></pre>
-<p>La proposition permet d'encapsuler les opérations critiques dans un bloc <code>withTaskCancellationShield</code>, garantissant que l'état d'annulation n'est pas observé, éliminant ainsi le besoin de tâches non structurées pour le nettoyage de ressources.</p>
+<p>L'utilisation de <code>withTaskCancellationShield</code> permet d'exécuter le code de nettoyage en toute sécurité. Même si la <code>task</code> est annulée, le code à l'intérieur du shield verra <code>Task.isCancelled</code> comme étant <code>false</code>, garantissant que les ressources sont correctement libérées sans avoir besoin de créer des <code>unstructured tasks</code>.</p>
 
   </div>
 </article>

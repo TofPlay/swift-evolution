@@ -81,26 +81,33 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0438-metatype-keypath.md">SE-0438 - Metatype Keypaths</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit la capacité d'utiliser des expressions <code>KeyPath</code> pour accéder directement aux propriétés statiques d'un type, ce qui permet de créer des chemins vers le métatype lui-même.</p>
+<p>La proposition introduit le support des <code>keypath</code> sur les propriétés statiques (metatypes). Jusqu'à présent, les <code>keypath</code> étaient limités aux membres d'instance. La syntaxe permet désormais d'accéder aux propriétés statiques d'un <code>type</code> en utilisant la notation <code>.Type</code> (ex: <code>\Bee.Type.name</code>).</p>
+<p>Le mécanisme suit ces règles :</p>
+<ul>
+<li>Pour un accès direct via un <code>type</code> littéral, la syntaxe exige l'utilisation de <code>.Type</code> (ex: <code>\Bee.Type.property</code>).</li>
+<li>Si le <code>keypath</code> est utilisé dans un contexte où le type racine est déjà un metatype, le <code>.Type</code> peut être omis.</li>
+<li>Les propriétés statiques immuables (<code>let</code>) génèrent des <code>KeyPath</code> en lecture seule.</li>
+<li>Les propriétés statiques mutables (<code>var</code>) génèrent des <code>ReferenceWritableKeyPath</code>, car les metatypes se comportent comme des types de référence dans ce contexte.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0438" tabindex="-1"><a href="#avant-se-0438" class="header-anchor">Avant SE-0438</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">Bee</span> <span class="token punctuation">{</span>
     <span class="token keyword">static</span> <span class="token keyword">let</span> name <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"honeybee"</span></span>
 <span class="token punctuation">}</span>
 
-<span class="token comment">// Erreur : le membre statique 'name' ne peut pas être utilisé sur une instance de type 'Bee'</span>
+<span class="token comment">// Erreur de compilation : le membre statique 'name' ne peut pas être utilisé sur une instance de 'Bee'</span>
 <span class="token keyword">let</span> kp <span class="token operator">=</span> <span class="token punctuation">\</span><span class="token class-name">Bee</span><span class="token punctuation">.</span>name 
 </code></pre>
-<p>Actuellement, les <code>KeyPath</code> sont limités aux membres d'instance. Pour accéder à une propriété statique via un <code>KeyPath</code>, il faudrait utiliser des solutions contournées (hacks) ou passer par des propriétés calculées.</p>
+<p>L'utilisation des <code>keypath</code> est restreinte aux membres d'instance. Pour accéder à une propriété <code>static</code>, le développeur est contraint d'utiliser des solutions contournées (hacks), comme créer une <code>property</code> calculée d'instance qui renvoie le type lui-même, ce qui alourdit inutilement le code.</p>
 <h3 id="apr%C3%A8s-se-0438" tabindex="-1"><a href="#apr%C3%A8s-se-0438" class="header-anchor">Après SE-0438</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">Bee</span> <span class="token punctuation">{</span>
     <span class="token keyword">static</span> <span class="token keyword">let</span> name <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"honeybee"</span></span>
 <span class="token punctuation">}</span>
 
-<span class="token comment">// Accès valide via le métatype</span>
+<span class="token comment">// Syntaxe correcte pour accéder à la propriété statique via le metatype</span>
 <span class="token keyword">let</span> kp <span class="token operator">=</span> <span class="token punctuation">\</span><span class="token class-name">Bee</span><span class="token punctuation">.</span><span class="token keyword">Type</span><span class="token punctuation">.</span>name
-<span class="token keyword">let</span> kpContextuel<span class="token punctuation">:</span> <span class="token class-name">KeyPath</span><span class="token operator">&lt;</span><span class="token class-name">Bee</span><span class="token punctuation">.</span><span class="token keyword">Type</span><span class="token punctuation">,</span> <span class="token class-name">String</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token punctuation">\</span><span class="token punctuation">.</span>name
 </code></pre>
-<p>La syntaxe permet désormais d'inclure <code>.Type</code> dans le chemin ou d'utiliser le type contextuel. De plus, les propriétés statiques mutables sont désormais accessibles via <code>ReferenceWritableKeyPath</code> car les métatypes se comportent comme des types références.</p>
+<p>La proposition permet d'accéder directement aux propriétés statiques. En utilisant <code>.Type</code> dans le <code>keypath</code>, le langage comprend que la cible est le metatype et non une instance, offrant une syntaxe propre et directe pour manipuler les métadonnées d'un type.</p>
 
   </div>
 </article>

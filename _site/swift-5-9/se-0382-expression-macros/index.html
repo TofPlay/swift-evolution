@@ -81,53 +81,34 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0382-expression-macros.md">SE-0382 - Expression Macros</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit les <strong>macros d'expression</strong> dans Swift, permettant d'étendre le langage par des transformations syntaxiques arbitraires sur des expressions. Contrairement aux fonctions classiques, ces macros utilisent le symbole <code>#</code> et peuvent manipuler le code source pour générer de nouvelles expressions.</p>
-<p>Le mécanisme repose sur une traduction syntaxique (source-to-source) où une macro reçoit l'arbre syntaxique de son argument et retourne un nouvel arbre syntaxique. L'avantage majeur est que le résultat est vérifié par le compilateur (type-checking) par rapport au type de retour défini dans la signature de la macro, garantissant ainsi la sécurité du code généré.</p>
-<p>Les points clés incluent :</p>
+<p>La proposition introduit les <code>expression macros</code>, une nouvelle catégorie de macros qui s'utilisent comme des expressions dans le code source (identifiées par le symbole <code>#</code>). Contrairement aux fonctions classiques, ces macros effectuent une transformation syntaxique sur leurs arguments pour générer de nouveaux morceaux de code au moment de la compilation.</p>
+<p>Les points clés techniques sont :</p>
 <ul>
-<li><strong>Signature typée</strong> : Les macros ressemblent à des fonctions (paramètres et type de retour optionnel).</li>
-<li><strong>Sécurité</strong> : Les arguments sont vérifiés avant l'expansion.</li>
-<li><strong>Développement</strong> : Les définitions de macros sont des programmes séparés utilisant <code>swift-syntax</code>.</li>
-<li><strong>Standard Library</strong> : Intégration de macros natives pour remplacer des expressions spéciales (comme <code>#line</code>, <code>#file</code>, <code>#selector</code>).</li>
+<li><strong>Syntaxe :</strong> Utilisation du préfixe <code>#</code> (ex: <code>#stringify(x)</code>).</li>
+<li><strong>Type-checking :</strong> Les arguments de la macro sont vérifiés par le compilateur avant l'expansion. Le type de retour de la macro est également vérifié par rapport au contexte de l'expression résultante.</li>
+<li><strong>Transformation :</strong> L'expansion est une opération syntaxique qui prend un arbre de syntaxe (<code>Syntax Tree</code>) en entrée et retourne un nouvel arbre de syntaxe transformé.</li>
+<li><strong>Définition :</strong> Les macros d'expression doivent conformer au protocole <code>ExpressionMacro</code> et implémenter la méthode <code>expansion(of:in:)</code>.</li>
+<li><strong>Sécurité :</strong> Les implémentations de macros s'exécutent dans un bac à sable (<code>sandbox</code>) pour empêcher tout accès non autorisé au système de fichiers ou au réseau.</li>
 </ul>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0382" tabindex="-1"><a href="#avant-se-0382" class="header-anchor">Avant SE-0382</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> x <span class="token operator">=</span> <span class="token number">10</span>
-<span class="token keyword">let</span> y <span class="token operator">=</span> <span class="token number">20</span>
-<span class="token keyword">let</span> tuple <span class="token operator">=</span> <span class="token punctuation">(</span>x <span class="token operator">+</span> y<span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"x + y"</span></span><span class="token punctuation">)</span>
-</code></pre>
-<p>Actuellement, pour obtenir à la fois la valeur calculée et sa représentation sous forme de chaîne de caractères (le code source), un développeur doit écrire manuellement la répétition de l'expression ou utiliser des outils externes de génération de code non intégrés au langage.</p>
-<h3 id="apr%C3%A8s-se-0382" tabindex="-1"><a href="#apr%C3%A8s-se-0382" class="header-anchor">Après SE-0382</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@freestanding</span><span class="token punctuation">(</span>expression<span class="token punctuation">)</span> macro stringify<span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> value<span class="token punctuation">:</span> <span class="token class-name">T</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token punctuation">(</span><span class="token class-name">T</span><span class="token punctuation">,</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"ExampleMacros"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"StringifyMacro"</span></span><span class="token punctuation">)</span>
-
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Pour obtenir la valeur d'une expression et sa représentation sous forme de chaîne de caractères,</span>
+<span class="token comment">// il faut écrire manuellement la valeur et sa chaîne correspondante.</span>
 <span class="token keyword">let</span> x <span class="token operator">=</span> <span class="token number">10</span>
-<span class="token keyword">let</span> y <span class="token operator">=</span> <span class="token number">20</span>
-<span class="token keyword">let</span> result <span class="token operator">=</span> <span class="token other-directive property">#stringify</span><span class="token punctuation">(</span>x <span class="token operator">+</span> y<span class="token punctuation">)</span>
+<span class="token keyword">let</span> info <span class="token operator">=</span> <span class="token punctuation">(</span>x<span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"x"</span></span><span class="token punctuation">)</span> <span class="token comment">// Redondance manuelle et risque d'erreur de saisie</span>
 </code></pre>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro</span>
-<span class="token keyword">import</span> <span class="token class-name">SwiftSyntax</span>
-<span class="token keyword">import</span> <span class="token class-name">SwiftSyntaxBuilder</span>
-<span class="token keyword">import</span> <span class="token class-name">SwiftSyntaxMacros</span>
+<p>Le code nécessite une répétition manuelle de l'expression pour obtenir sa version textuelle, ce qui est source d'erreurs et de maintenance.</p>
+<h3 id="apr%C3%A8s-se-0382" tabindex="-1"><a href="#apr%C3%A8s-se-0382" class="header-anchor">Après SE-0382</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition de la macro</span>
+<span class="token attribute atrule">@freestanding</span><span class="token punctuation">(</span>expression<span class="token punctuation">)</span>
+macro stringify<span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> value<span class="token punctuation">:</span> <span class="token class-name">T</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token punctuation">(</span><span class="token class-name">T</span><span class="token punctuation">,</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"ExampleMacros"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"StringifyMacro"</span></span><span class="token punctuation">)</span>
 
-<span class="token keyword">public</span> <span class="token keyword">struct</span> <span class="token class-name">StringifyMacro</span><span class="token punctuation">:</span> <span class="token class-name">ExpressionMacro</span> <span class="token punctuation">{</span>
-    <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">func</span> <span class="token function-definition function">expansion</span><span class="token punctuation">(</span>
-        of node<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">FreestandingMacroExpansionSyntax</span><span class="token punctuation">,</span>
-        <span class="token keyword">in</span> context<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">MacroExpansionContext</span>
-    <span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">ExprSyntax</span> <span class="token punctuation">{</span>
-        <span class="token keyword">guard</span> <span class="token keyword">let</span> argument <span class="token operator">=</span> node<span class="token punctuation">.</span>argumentList<span class="token punctuation">.</span>first<span class="token operator">?</span><span class="token punctuation">.</span>expression <span class="token keyword">else</span> <span class="token punctuation">{</span>
-            <span class="token function">fatalError</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"compiler bug: the macro does not have any arguments"</span></span><span class="token punctuation">)</span>
-        <span class="token punctuation">}</span>
-        <span class="token keyword">return</span> <span class="token string-literal"><span class="token string">"(</span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">argument</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">, </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">literal<span class="token punctuation">:</span> argument<span class="token punctuation">.</span>description</span><span class="token interpolation-punctuation punctuation">)</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+<span class="token comment">// Utilisation</span>
+<span class="token keyword">let</span> x <span class="token operator">=</span> <span class="token number">10</span>
+<span class="token keyword">let</span> info <span class="token operator">=</span> <span class="token other-directive property">#stringify</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span> 
+<span class="token comment">// L'expansion générera : (x, "x")</span>
 </code></pre>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation du macro</span>
-<span class="token keyword">let</span> result <span class="token operator">=</span> <span class="token other-directive property">#stringify</span><span class="token punctuation">(</span>x <span class="token operator">+</span> y<span class="token punctuation">)</span>
-</code></pre>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code généré par la macro (Expansion)</span>
-<span class="token punctuation">(</span>x <span class="token operator">+</span> y<span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"x + y"</span></span><span class="token punctuation">)</span>
-</code></pre>
-<p>La macro <code>#stringify</code> capture l'expression passée en argument (<code>x + y</code>), l'évalue et génère un tuple contenant la valeur calculée ainsi qu'une chaîne de caractères contenant le texte source de l'expression originale.</p>
+<p>La macro résout le problème en extrayant automatiquement la syntaxe de l'argument pour la transformer en une <code>String</code>, garantissant que la valeur et sa représentation textuelle sont toujours synchronisées sans effort manuel.</p>
 
   </div>
 </article>

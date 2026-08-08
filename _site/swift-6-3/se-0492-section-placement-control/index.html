@@ -2,7 +2,7 @@
 <html lang="fr"><head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TofPlay - SE-0492 - Section Placement Control</title>
+    <title>TofPlay - SE-0492 - Section Placement Control Proposal</title>
 
     <meta name="supported-color-schemes" content="light dark">
     <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
@@ -40,7 +40,7 @@
               </a>
           </li>
           <li>
-              <span aria-current="page">SE-0492 - Section Placement Control</span>
+              <span aria-current="page">SE-0492 - Section Placement Control Proposal</span>
           </li>
       </ol>
 
@@ -73,54 +73,46 @@
     <main class="body-tag">
       <article class="post" data-pagefind-body="">
   <div class="post-body">
-    <h1>SE-0492 - Section Placement Control</h1>
+    <h1>SE-0492 - Section Placement Control Proposal</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
 <h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
 <p>Swift 6.3</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
-<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0492-section-control.md">SE-0492 - Section Placement Control</a></p>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0492-section-control.md">SE-0492 - Section Placement Control Proposal</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit deux nouveaux attributs pour les variables globales et statiques afin de donner aux développeurs un contrôle précis sur la génération des binaires, particulièrement pour les systèmes embarqués et les frameworks de test.</p>
-<p>L'ajout se compose de :</p>
-<ul>
-<li><code>@section("nom_de_la_section")</code> : Permet de placer la variable dans une section spécifique du fichier objet (ex: Mach-O, ELF). Pour être utilisé, l'expression d'initialisation doit être une expression constante garantissant une initialisation statique (non décalée au runtime).</li>
-<li><code>@used</code> : Empêche l'élimination du code mort (Dead Code Elimination - DCE) par le linker, garantissant que la variable ne sera pas supprimée même si elle n'est pas explicitement référencée dans le code.</li>
-</ul>
-<p>Ces mécanismes permettent de créer des "linker sets" (collecte de métadonnées via des sections) et facilitent la découverte de plugins ou de tests à l'exécution sans dépendre lourdement du runtime Swift.</p>
+<p>La proposition introduit deux nouveaux <code>attribute</code> : <code>@section</code> et <code>@used</code>, applicables aux variables <code>global</code> ou <code>static</code>.</p>
+<p>L'attribut <code>@section</code> permet de spécifier le nom d'une section spécifique dans le fichier objet (par exemple pour ELF, Mach-O ou COFF) où la variable doit être placée. Pour garantir que la donnée soit lisible sans initialisation complexe au runtime, l'expression d'initialisation doit être une expression constante (constant expression), forçant ainsi une initialisation statique.</p>
+<p>L'attribut <code>@used</code> permet d'empêcher le "dead-stripping" (l'élimination par le linker des symboles non utilisés). Cela garantit que la variable reste présente dans le binaire même si elle n'est pas explicitement référencée par le code Swift, ce qui est crucial pour les systèmes de découverte de métadonnées ou les plugins.</p>
+<p>L'utilisation de ces attributs est restreinte aux variables stockées (<code>stored properties</code>) avec une initialisation constante, et est interdite dans les contextes <code>generic</code> ou sur des propriétés calculées (<code>computed properties</code>).</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0492" tabindex="-1"><a href="#avant-se-0492" class="header-anchor">Avant SE-0492</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// La variable est placée dans une section standard</span>
-<span class="token comment">// et peut être supprimée par le linker si elle n'est pas utilisée</span>
-<span class="token keyword">let</span> myData <span class="token operator">=</span> <span class="token number">42</span> 
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Une variable globale standard</span>
+<span class="token keyword">let</span> myData <span class="token operator">=</span> <span class="token number">42</span>
+
+<span class="token comment">// Le compilateur peut décider de supprimer 'myData' si elle n'est jamais utilisée</span>
+<span class="token comment">// Elle est placée dans la section par défaut du binaire</span>
 </code></pre>
-<p>Actuellement, il est impossible de forcer une variable globale à résider dans une section spécifique du binaire ou d'empêcher le linker de la supprimer sans utiliser des hacks en C/C++.</p>
+<p>Le langage ne permet pas de contrôler précisément l'emplacement physique de la donnée dans le binaire. Si un développeur a besoin que certaines données soient regroupées dans une section spécifique pour que un outil externe (comme un debugger ou un loader de plugin) puisse les trouver, il n'existe pas de moyen direct en Swift. De plus, si la variable n'est pas utilisée par le code, le linker risque de la supprimer.</p>
 <h3 id="apr%C3%A8s-se-0492" tabindex="-1"><a href="#apr%C3%A8s-se-0492" class="header-anchor">Après SE-0492</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// La variable est placée dans une section personnalisée et ne sera pas supprimée</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// On place la variable dans une section spécifique nommée "mysection"</span>
+<span class="token comment">// On utilise @used pour éviter que le linker ne supprime la variable</span>
 <span class="token attribute atrule">@section</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"__DATA,mysection"</span></span><span class="token punctuation">)</span>
 <span class="token attribute atrule">@used</span>
-<span class="token keyword">let</span> myLinkerSetEntry<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token operator">=</span> <span class="token number">42</span>
+<span class="token keyword">let</span> myData<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token operator">=</span> <span class="token number">42</span>
 
-<span class="token comment">// Utilisation de la compilation conditionnelle pour la portabilité</span>
+<span class="token comment">// Pour gérer la portabilité entre plateformes (ex: Linux vs macOS)</span>
 <span class="token directive property"><span class="token directive-name">#if</span> objectFormat<span class="token punctuation">(</span>ELF<span class="token punctuation">)</span></span>
-<span class="token attribute atrule">@section</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"mysection"</span></span><span class="token punctuation">)</span>
+<span class="token attribute atrule">@section</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"my_elf_section"</span></span><span class="token punctuation">)</span>
 <span class="token attribute atrule">@used</span>
-<span class="token keyword">let</span> elfVariable <span class="token operator">=</span> <span class="token number">100</span>
+<span class="token keyword">let</span> data<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token operator">=</span> <span class="token number">10</span>
 <span class="token directive property"><span class="token directive-name">#elseif</span> objectFormat<span class="token punctuation">(</span>MachO<span class="token punctuation">)</span></span>
-<span class="token attribute atrule">@section</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"__DATA,mysection"</span></span><span class="token punctuation">)</span>
+<span class="token attribute atrule">@section</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"__DATA,my_macho_section"</span></span><span class="token punctuation">)</span>
 <span class="token attribute atrule">@used</span>
-<span class="token keyword">let</span> machoVariable <span class="token operator">=</span> <span class="token number">100</span>
+<span class="token keyword">let</span> data<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token operator">=</span> <span class="token number">10</span>
 <span class="token directive property"><span class="token directive-name">#endif</span></span>
-
-<span class="token comment">// ✅ L'initialisation doit être constante pour @section</span>
-<span class="token attribute atrule">@section</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"__DATA,mysection"</span></span><span class="token punctuation">)</span>
-<span class="token keyword">let</span> valid <span class="token operator">=</span> <span class="token number">42</span>
-
-<span class="token comment">// ❌ Erreur : L'expression n'est pas une constante compile</span>
-<span class="token attribute atrule">@section</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"__DATA,mysection"</span></span><span class="token punctuation">)</span>
-<span class="token keyword">let</span> invalid <span class="token operator">=</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token keyword">in</span><span class="token punctuation">:</span> <span class="token number">0</span><span class="token operator">...</span><span class="token number">100</span><span class="token punctuation">)</span>
 </code></pre>
-<p>La proposition résout le problème en permettant de définir précisément l'emplacement mémoire des données et en garantissant leur présence dans le binaire final via <code>@used</code>, facilitant ainsi l'inspection binaire et la découverte dynamique de métadonnées.</p>
+<p>La proposition résout le problème en offrant un contrôle direct sur le positionnement mémoire des symboles. <code>@section</code> permet de regrouper des métadonnées dans des zones prévisibles du binaire, facilitant l'inspection par des outils hors-ligne ou par le runtime. L'attribut <code>@used</code> assure la persistance de ces données dans le binaire final, même si elles ne sont pas appelées par le flux d'exécution principal.</p>
 
   </div>
 </article>

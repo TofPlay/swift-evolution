@@ -81,8 +81,7 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0444-member-import-visibility.md">SE-0444 - Member import visibility</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Actuellement, Swift applique des règles de visibilité différentes pour les déclarations de haut niveau (top-level) et pour les membres (méthodes, propriétés) de structures ou d'extensions. Les membres d'un module importé de manière transitive sont considérés comme étant "dans la portée" (in scope), ce qui peut provoquer des erreurs d'ambiguïté si un autre module importé directement possède également un membre portant le même nom.</p>
-<p>La proposition SE-0444 unifie ces règles pour assurer une cohérence dans la recherche de noms (name lookup). Désormais, un membre n'est considéré comme étant dans la portée que si le module qui le déclare est explicitement importé (ou re-exporté) dans le fichier source. Cela empêche l'apparition soudaine d'ambiguïtés lors de l'ajout de nouvelles dépendances et améliore la prévisibilité du code. Une exception est maintenue pour les implémentations par défaut des protocoles afin de préserver la compatibilité ABI lors de l'évolution des bibliothèques.</p>
+<p>La proposition unifie les règles de visibilité des noms en Swift. Jusqu'à présent, les déclarations de haut niveau (top-level) suivaient des règles de visibilité strictes (nécessitant un <code>import</code> direct), tandis que les membres (comme les méthodes dans une <code>extension</code>) pouvaient être visibles même si le module source était seulement importé de manière transitive. Cette proposition harmonise le comportement : un membre n'est désormais considéré comme étant dans le scope que si le module qui le déclare est explicitement importé ou re-exporté dans le fichier source. Cela résout les problèmes d'ambiguïté imprévisibles causés par la visibilité "fuyante" des membres.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0444" tabindex="-1"><a href="#avant-se-0444" class="header-anchor">Avant SE-0444</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// main.swift</span>
@@ -90,14 +89,18 @@
 
 <span class="token keyword">let</span> recipe <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"2 slices of bread, 1.5 tbs peanut butter"</span></span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 </code></pre>
-<p>L'appel à <code>parse()</code> est ambigu car un nouveau module ajouté (ex: <code>GroceryKit</code>) peut contenir une extension sur <code>String</code> avec une méthode <code>parse()</code>, même si <code>GroceryKit</code> n'est pas importé dans <code>main.swift</code>, car son membre est visible par transitivité.</p>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Groceries.swift (un autre fichier du projet)</span>
+<span class="token keyword">import</span> <span class="token class-name">GroceryKit</span> <span class="token comment">// GroceryKit est une dépendance de l'app</span>
+</code></pre>
+<p>Le développeur peut subir une erreur d'ambiguïté dans <code>main.swift</code> si <code>GroceryKit</code> (importé ailleurs dans le projet) contient également une méthode <code>parse()</code> sur <code>String</code>. Le compilateur voit la méthode de <code>GroceryKit</code> dans <code>main.swift</code> alors que le développeur n'a jamais écrit <code>import GroceryKit</code> dans ce fichier, créant une confusion sur la portée réelle des membres.</p>
 <h3 id="apr%C3%A8s-se-0444" tabindex="-1"><a href="#apr%C3%A8s-se-0444" class="header-anchor">Après SE-0444</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// main.swift</span>
 <span class="token keyword">import</span> <span class="token class-name">RecipeKit</span>
 
 <span class="token keyword">let</span> recipe <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"2 slices of bread, 1.5 tbs peanut butter"</span></span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 </code></pre>
-<p>L'erreur d'ambiguïté est évitée car le compilateur ne cherchera les membres de <code>GroceryKit</code> que si <code>import GroceryKit</code> est explicitement présent. Si une ambiguïté persiste avec un autre module, le développeur devra importer explicitement le module souhaité ou typer la variable pour lever l'ambiguïté.</p>
+<p>La méthode <code>parse()</code> appartenant à <code>GroceryKit</code> n'est plus visible dans <code>main.swift</code> car <code>GroceryKit</code> n'est pas importé directement dans ce fichier. Le comportement devient prévisible et cohérent avec les règles des déclarations de haut niveau.</p>
+<p>Si une ambiguïté survient réellement entre deux modules, le développeur doit désormais ajouter l'importation explicite du module concerné pour l'utiliser, ou utiliser une annotation de type pour lever l'ambiguïté. Cette approche préventive empêche les erreurs de compilation soudaines qui apparaissent lorsqu'une nouvelle dépendance transitive est ajoutée au projet.</p>
 
   </div>
 </article>

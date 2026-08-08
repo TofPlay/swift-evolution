@@ -79,26 +79,50 @@
 <h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
 <p>Swift 6.1</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
-<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0449-nonisolated-for-global-actor-cutoff.md">SE-0449 - Allow nonisolated to prevent global actor inference</a></p>
+<p><a href="https://github.com/swiftlang/proposals/blob/main/0449-nonisolated-for-global-actor-cutoff.md">SE-0449 - Allow nonisolated to prevent global actor inference</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit le mot-clé <code>nonisolated</code> sur les types (classes, structures, énumérations), les protocoles et les extensions afin de stopper l'inférence automatique d'un <code>global actor</code> (comme <code>@MainActor</code>) lorsqu'un type conforme à un protocole déjà isolé. Actuellement, la conformité à un protocole marqué d'un acteur global force l'isolement du type conforme, ce qui peut être indésirable. La proposition étend également l'utilisation de <code>nonisolated</code> pour permettre l'accès synchrone aux propriétés stockées de types <code>Sendable</code> et l'annotation explicite des propriétés de types non-<code>Sendable</code>.</p>
+<p>Cette proposition introduit le mot-clé <code>nonisolated</code> pour plusieurs structures de données (type, protocol, extension) afin d'interrompre l'inférence automatique d'isolation par un <code>global actor</code>. Par défaut, si un <code>type</code> ou un <code>protocol</code> est marqué avec un <code>global actor</code> (comme <code>@MainActor</code>), tous les membres qui le conforment héritent de cette isolation. La proposition permet d'utiliser <code>nonisolated</code> au niveau de la déclaration du <code>type</code> pour "couper" cette chaîne d'héritage.</p>
+<p>De plus, elle étend l'usage de <code>nonisolated</code> aux propriétés stockées pour améliorer l'ergonomie :</p>
+<ol>
+<li><strong>Sur les types non-<code>Sendable</code></strong> : permet d'écrire explicitement <code>nonisolated</code> sur des propriétés dont le type n'est pas <code>Sendable</code>.</li>
+<li><strong>Sur les types <code>Sendable</code> (value types)</strong> : permet l'accès synchrone et <code>nonisolated</code> aux propriétés mutables (<code>var</code>) à l'intérieur d'un module, tant que le type de la propriété est lui-même <code>Sendable</code>.</li>
+</ol>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0449" tabindex="-1"><a href="#avant-se-0449" class="header-anchor">Avant SE-0449</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@MainActor</span> <span class="token keyword">protocol</span> <span class="token class-name">GloballyIsolated</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@MainActor</span> 
+<span class="token keyword">protocol</span> <span class="token class-name">GloballyIsolated</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
 
-<span class="token keyword">struct</span> <span class="token class-name">S</span><span class="token punctuation">:</span> <span class="token class-name">GloballyIsolated</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token comment">// S est implicitement isolé au MainActor via le protocole</span>
-</code></pre>
-<p>Le type <code>S</code> hérite automatiquement de l'isolement de l'acteur global défini par le protocole <code>GloballyIsolated</code>, rendant ses membres également isolés, même si le développeur souhaitait qu'il soit <code>nonisolated</code>.</p>
-<h3 id="apr%C3%A8s-se-0449" tabindex="-1"><a href="#apr%C3%A8s-se-0449" class="header-anchor">Après SE-0449</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@MainActor</span> <span class="token keyword">protocol</span> <span class="token class-name">GloballyIsolated</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
-
-<span class="token keyword">nonisolated</span> <span class="token keyword">struct</span> <span class="token class-name">S</span><span class="token punctuation">:</span> <span class="token class-name">GloballyIsolated</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> x<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token operator">=</span> <span class="token number">1</span>
+<span class="token keyword">struct</span> <span class="token class-name">S</span><span class="token punctuation">:</span> <span class="token class-name">GloballyIsolated</span> <span class="token punctuation">{</span>
+    <span class="token comment">// S hérite implicitement de l'isolation @MainActor</span>
+    <span class="token comment">// On ne peut pas empêcher l'héritage au niveau du struct</span>
 <span class="token punctuation">}</span>
 
-<span class="token keyword">nonisolated</span> <span class="token keyword">protocol</span> <span class="token class-name">P</span><span class="token punctuation">:</span> <span class="token class-name">GloballyIsolated</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token keyword">extension</span> <span class="token class-name">S</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Pour éviter l'isolation, il faut marquer chaque membre individuellement</span>
+    <span class="token keyword">nonisolated</span> <span class="token keyword">func</span> <span class="token function-definition function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Hello"</span></span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+    <span class="token keyword">nonisolated</span> <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token punctuation">{</span> <span class="token number">1</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
 </code></pre>
-<p>L'utilisation de <code>nonisolated</code> sur la déclaration du type (struct, classe, enum, protocole) ou de l'extension "coupe" l'inférence de l'acteur global, permettant au type de rester dans un contexte non-isolée tout en conservant la conformité au protocole.</p>
+<p>L'inférence du <code>global actor</code> via le protocole est automatique. Pour éviter qu'un <code>struct</code> ou un <code>class</code> entier ne soit isolé sur le <code>@MainActor</code> à cause d'un protocole, le développeur est obligé de marquer manuellement chaque propriété et chaque méthode avec <code>nonisolated</code>, ce qui est fastidieux et source d'erreurs.</p>
+<h3 id="apr%C3%A8s-se-0449" tabindex="-1"><a href="#apr%C3%A8s-se-0449" class="header-anchor">Après SE-0449</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@MainActor</span> 
+<span class="token keyword">protocol</span> <span class="token class-name">GloballyIsolated</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+<span class="token comment">// On coupe l'inférence d'isolation directement sur la déclaration du struct</span>
+<span class="token keyword">nonisolated</span> <span class="token keyword">struct</span> <span class="token class-name">S</span><span class="token punctuation">:</span> <span class="token class-name">GloballyIsolated</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> x<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token operator">=</span> <span class="token number">0</span> <span class="token comment">// S est maintenant non-isolée, pas besoin de marquer chaque membre</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">nonisolated</span> <span class="token keyword">protocol</span> <span class="token class-name">P</span><span class="token punctuation">:</span> <span class="token class-name">GloballyIsolated</span> <span class="token punctuation">{</span>
+    <span class="token comment">// P ne sera pas isolée au MainActor malgré la restriction du protocole parent</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">nonisolated</span> <span class="token keyword">extension</span> <span class="token class-name">GloballyIsolated</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Tous les membres de l'extension sont automatiquement non-isolated</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">hello</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Hi"</span></span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition permet de bloquer l'isolation au niveau le plus haut possible (le <code>type</code>, le <code>protocol</code> ou l' <code>extension</code>). Cela évite que l'isolation d'un protocole ne se propage de manière indésirable à tous les types qui le conforment, tout en permettant une syntaxe beaucoup plus concise et lisible.</p>
 
   </div>
 </article>

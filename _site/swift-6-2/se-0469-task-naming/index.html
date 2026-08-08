@@ -2,7 +2,7 @@
 <html lang="fr"><head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TofPlay - SE-0469 - Task Naming Proposal</title>
+    <title>TofPlay - SE-0469 - Task Naming</title>
 
     <meta name="supported-color-schemes" content="light dark">
     <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
@@ -40,7 +40,7 @@
               </a>
           </li>
           <li>
-              <span aria-current="page">SE-0469 - Task Naming Proposal</span>
+              <span aria-current="page">SE-0469 - Task Naming</span>
           </li>
       </ol>
 
@@ -73,37 +73,41 @@
     <main class="body-tag">
       <article class="post" data-pagefind-body="">
   <div class="post-body">
-    <h1>SE-0469 - Task Naming Proposal</h1>
+    <h1>SE-0469 - Task Naming</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
-<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<h2 id="disponible-%C3%A0-partir" tabindex="-1"><a href="#disponible-%C3%A0-partir" class="header-anchor">Disponible à partir</a></h2>
 <p>Swift 6.2</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
-<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0469-task-names.md">SE-0469 - Task Naming Proposal</a></p>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0469-task-names.md">SE-0469 - Task Naming</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit de nouvelles API permettant d'attribuer un nom lisible par l'humain aux <code>Task</code> de Swift. L'objectif est de faciliter le débogage et le profilage en permettant aux outils (débogueurs, <code>swift-inspect</code>) d'identifier précisément quelle tâche effectue quel travail, remplaçant ainsi le manque de contexte actuel dans Swift Concurrency.</p>
-<p>Les changements incluent :</p>
-<ul>
-<li>L'ajout d'un paramètre <code>name: String?</code> aux initialisateurs de <code>Task</code> et <code>Task.detached</code>.</li>
-<li>L'ajout du paramètre <code>name: String?</code> aux méthodes d'ajout de tâches dans les groupes de tâches (<code>addTask</code>, <code>addTaskUnlessCancelled</code>).</li>
-<li>L'introduction d'une propriété <code>name</code> sur <code>Task</code> et <code>UnsafeCurrentTask</code> pour permettre la lecture du nom de la tâche en cours d'exécution.</li>
-</ul>
+<p>La proposition introduit des APIs pour permettre aux développeurs d'attribuer un nom de type <code>String</code> aux <code>Task</code>. Ces noms sont définis lors de la création de la <code>Task</code> (unstructured ou via un <code>TaskGroup</code>) et ne peuvent pas être modifiés par la suite. Ces identifiants textuels sont destinés à faciliter le débogage et le profilage, permettant aux outils externes (débugueurs, inspecteurs de tâches) d'afficher un nom explicite plutôt qu'un identifiant générique. La proposition ajoute également une propriété <code>name</code> sur l'objet <code>Task</code> et <code>UnsafeCurrentTask</code> pour permettre la lecture de ce nom au moment de l'exécution.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0469" tabindex="-1"><a href="#avant-se-0469" class="header-anchor">Avant SE-0469</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code illustrant l'état AVANT la proposition</span>
-<span class="token keyword">let</span> task <span class="token operator">=</span> <span class="token class-name">Task</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Travail asynchrone</span>
-    <span class="token keyword">await</span> <span class="token function">performWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// La création d'une task ne permet pas d'ajouter de contexte textuel</span>
+<span class="token keyword">let</span> fetchUser <span class="token operator">=</span> <span class="token class-name">Task</span> <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> users<span class="token punctuation">.</span><span class="token function">fetch</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"123"</span></span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>Actuellement, il est impossible de nommer une tâche lors de sa création. En cas de crash ou de ralentissement, les outils de débogage ne peuvent pas afficher un nom explicite pour identifier cette tâche spécifique parmi toutes les autres tâches asynchrones en cours.</p>
+<p>Lors de l'utilisation d'un débugueur ou d'un outil de profiling, il est difficile de distinguer précisément cette <code>Task</code> d'autres processus asynchronynchrones similaires, car elle ne possède qu'un identifiant système interne.</p>
 <h3 id="apr%C3%A8s-se-0469" tabindex="-1"><a href="#apr%C3%A8s-se-0469" class="header-anchor">Après SE-0469</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code illustrant l'état APRÈS la proposition</span>
-<span class="token keyword">let</span> task <span class="token operator">=</span> <span class="token class-name">Task</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Get Users for </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">accountID</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">await</span> <span class="token function">performWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// On peut maintenant nommer la Task avec une chaîne de caractères</span>
+<span class="token comment">// ou une interpolation de chaîne</span>
+<span class="token keyword">let</span> fetchUser <span class="token operator">=</span> <span class="token class-name">Task</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Fetch User for </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">userID</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> users<span class="token punctuation">.</span><span class="token function">fetch</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> userID<span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
+
+<span class="token comment">// Il est aussi possible de nommer les tâches dans un TaskGroup</span>
+<span class="token keyword">await</span> <span class="token function">withTaskGroup</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> <span class="token class-name">Void</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> group <span class="token keyword">in</span>
+    group<span class="token punctuation">.</span><span class="token function">addTask</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Background Sync"</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">await</span> <span class="token function">syncData</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Lecture du nom de la tâche actuelle</span>
+<span class="token keyword">let</span> currentTaskName <span class="token operator">=</span> <span class="token class-name">Task</span><span class="token punctuation">.</span>name
 </code></pre>
-<p>L'introduction du paramètre <code>name</code> lors de l'initialisation de la tâche permet de fournir un contexte immédiat (comme un identifiant d'utilisateur ou une action spécifique) qui peut être lu par le programme ou par des outils d'inspection externes.</p>
+<p>La proposition permet de rendre le code asynchrone intelligible pour l'humain. En utilisant une <code>String</code> personnalisée, le développeur fournit un contexte immédiat (comme l'ID de l'utilisateur concerné) qui apparaîtra directement dans les outils de diagnostic, simplifiant ainsi l'identification des tâches gourmandes en ressources ou problématiques.</p>
 
   </div>
 </article>

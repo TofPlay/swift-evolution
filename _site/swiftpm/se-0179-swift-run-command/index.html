@@ -2,7 +2,7 @@
 <html lang="fr"><head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TofPlay - SE-0179 - Swift run Command</title>
+    <title>TofPlay - SE-0179 - swift run Command</title>
 
     <meta name="supported-color-schemes" content="light dark">
     <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
@@ -40,7 +40,7 @@
               </a>
           </li>
           <li>
-              <span aria-current="page">SE-0179 - Swift run Command</span>
+              <span aria-current="page">SE-0179 - swift run Command</span>
           </li>
       </ol>
 
@@ -73,25 +73,26 @@
     <main class="body-tag">
       <article class="post" data-pagefind-body="">
   <div class="post-body">
-    <h1>SE-0179 - Swift run Command</h1>
+    <h1>SE-0179 - swift run Command</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
 <h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
 <p>Swift 4.0</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
-<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0179-swift-run-command.md">SE-0179 - Swift run Command</a></p>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0179-swift-run-command.md">SE-0179 - swift run Command</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>La proposition introduit la commande <code>swift run</code> pour simplifier le flux de travail des développeurs utilisant le Swift Package Manager. Cette commande permet de compiler et d'exécuter directement un produit exécutable défini dans le manifeste <code>Package.swift</code> en une seule étape, évitant ainsi de devoir localiser manuellement le binaire dans les sous-dossiers de build (qui deviennent plus complexes avec les changements de structure de dossiers selon la plateforme).</p>
+<p>La proposition introduit une commande <code>swift run</code> au sein de l'interface de ligne de commande de Swift Package Manager. Cette commande automatise le processus de développement en combinant la compilation et l'exécution d'un produit exécutable défini dans le manifeste <code>Package.swift</code>. La commande effectue un build si nécessaire avant de lancer l'exécutable. Elle supporte plusieurs options de configuration, telles que <code>--configuration</code> pour choisir entre <code>debug</code> et <code>release</code>, <code>--chdir</code> pour changer le répertoire de travail, et permet de passer des arguments directement à l'exécutable. Si un seul produit exécutable est défini dans le package, la commande l'exécute par défaut sans nécessiter de spécification explicite.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0179" tabindex="-1"><a href="#avant-se-0179" class="header-anchor">Avant SE-0179</a></h3>
 <pre class="language-bash" tabindex="0"><code class="language-bash">$ swift build
 $ .build/debug/myexecutable
 </code></pre>
-<p>L'utilisateur doit exécuter manuellement la commande de compilation, puis localiser et exécuter le binaire produit, ce qui devient complexe lorsque le chemin de build inclut des informations sur la plateforme (ex: <code>.build/macosx-x86_64/debug/</code>).</p>
+<p>L'exécution d'un programme nécessite une commande distincte pour la compilation, suivie d'une invocation manuelle du binaire situé dans un répertoire de build spécifique. La gestion des chemins de sortie complexes rend l'usage de la ligne de commande peu pratique pour le cycle de développement.</p>
 <h3 id="apr%C3%A8s-se-0179" tabindex="-1"><a href="#apr%C3%A8s-se-0179" class="header-anchor">Après SE-0179</a></h3>
 <pre class="language-bash" tabindex="0"><code class="language-bash">$ swift run
+$ swift run myexecutable arg1 arg2
 </code></pre>
-<p>La commande <code>swift run</code> compile automatiquement le projet si nécessaire et lance l'exécutable par défaut défini dans le <code>Package.swift</code>. Il est également possible de spécifier un exécutable particulier et de lui passer des arguments : <code>swift run myexecutable arg1 arg2</code>.</p>
+<p>La commande <code>swift run</code> simplifie le workflow en intégrant la phase de compilation et de lancement en une seule étape. Elle permet de cibler un exécutable spécifique ou d'utiliser l'unique exécutable disponible dans le package, tout en transmettant les arguments nécessaires de manière transparente.</p>
 
   </div>
 </article>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0386 - New access modifier: package</title>
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-5-9/se-0386-new-access-modifier-package/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-5-9/se-0386-new-access-modifier-package/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-5-9/">
+                  Swift 5.9
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0386 - New access modifier: package</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+        <li class="lang-selector">
+          <div id="google_translate_element"></div>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="">
+  <div class="post-body">
+    <h1>SE-0386 - New access modifier: package</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.9</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0386-package-access-modifier.md">SE-0386 - New access modifier: package</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit le mot-clé contextuel <code>package</code> comme nouvel access modifier. Ce modifier permet de définir une visibilité pour les symboles (fonctions, types, variables, etc.) qui les limite à l'usage au sein d'un même package. Un symbole marqué <code>package</code> est accessible par tous les modules appartenant au même package (identifié par le build system via le nom du package), mais il est strictement invisible pour tout module situé en dehors de ce package. Cela permet de créer des interfaces de modules utilitaires qui servent au sein d'un package sans exposer ces détails d'implémentation aux utilisateurs finaux du package, évitant ainsi les dépendances accidentelles sur des APIs internes et améliorant la stabilité de l'interface publique.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0386" tabindex="-1"><a href="#avant-se-0386" class="header-anchor">Avant SE-0386</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Module Engine (dans le package gamePkg)</span>
+<span class="token keyword">public</span> <span class="token keyword">struct</span> <span class="token class-name">MainEngine</span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token keyword">public</span> <span class="token keyword">var</span> stats<span class="token punctuation">:</span> <span class="token class-name">String</span> <span class="token punctuation">{</span> <span class="token string-literal"><span class="token string">"High Score"</span></span> <span class="token punctuation">}</span>
+    <span class="token comment">// Cette fonction est publique uniquement pour être utilisée par le module Game</span>
+    <span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Running engine..."</span></span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Module Game (dans le même package gamePkg)</span>
+<span class="token keyword">import</span> <span class="token class-name">Engine</span>
+<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">play</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token class-name">MainEngine</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Accès autorisé car dans le même package</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Client App (en dehors du package gamePkg)</span>
+<span class="token keyword">import</span> <span class="token class-name">Game</span>
+<span class="token keyword">import</span> <span class="token class-name">Engine</span>
+<span class="token keyword">let</span> engine <span class="token operator">=</span> <span class="token class-name">MainEngine</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+engine<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Erreur : l'API run() est visible par l'App car elle est 'public'</span>
+</code></pre>
+<p>Le développeur est contraint de déclarer les fonctions d'aide comme <code>public</code> pour qu'elles soient accessibles par les autres modules du même package. Cela expose par erreur ces fonctions aux utilisateurs externes du package, créant une dépendance sur une API qui n'est pas censée être stable ou publique.</p>
+<h3 id="apr%C3%A8s-se-0386" tabindex="-1"><a href="#apr%C3%A8s-se-0386" class="header-anchor">Après SE-0386</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Module Engine (dans le package gamePkg)</span>
+<span class="token keyword">public</span> <span class="token keyword">struct</span> <span class="token class-name">MainEngine</span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token keyword">public</span> <span class="token keyword">var</span> stats<span class="token punctuation">:</span> <span class="token class-name">String</span> <span class="token punctuation">{</span> <span class="token string-literal"><span class="token string">"High Score"</span></span> <span class="token punctuation">}</span>
+    <span class="token comment">// La fonction est maintenant limitée au package</span>
+    package <span class="token keyword">func</span> <span class="token function-definition function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Running engine..."</span></span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Module Game (dans le même package gamePkg)</span>
+<span class="token keyword">import</span> <span class="token class-name">Engine</span>
+<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">play</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token class-name">MainEngine</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Accès autorisé : même package</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Client App (en dehors du package gamePkg)</span>
+<span class="token keyword">import</span> <span class="token class-name">Game</span>
+<span class="token keyword">import</span> <span class="token class-name">Engine</span>
+<span class="token keyword">let</span> engine <span class="token operator">=</span> <span class="token class-name">MainEngine</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+engine<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Erreur : 'run' est introuvable (package scope)</span>
+</code></pre>
+<p>La proposition résout le problème en introduisant le niveau d'accès <code>package</code>. Le développeur peut désormais marquer les fonctions de support comme <code>package</code>, ce qui permet leur partage entre modules appartenant au même package tout en les cachant totalement aux modules externes.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

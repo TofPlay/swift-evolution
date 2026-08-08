@@ -81,54 +81,47 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0499-support-non-copyable-simple-protocols.md">SE-0499 - Support ~Copyable, ~Escapable in simple standard library protocols</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition vise à rendre les protocoles de la bibliothèque standard compatibles avec les types non-copiables (<code>~Copyable</code>) et non-échappables (<code>~Escapable</code>).</p>
-<p>Actuellement, l'implication de protocoles ubiquitaires comme <code>Equatable</code>, <code>Comparable</code> ou <code>Hashable</code> dans la gestion des types non-copiables est limitée, ce qui empêche l'utilisation de structures de données optimisées (ex: <code>UniqueArray</code>) avec le code existant qui attend une conformité à <code>Hashable</code>.</p>
-<p>La solution consiste à :</p>
+<p>La proposition introduit la capacité pour plusieurs protocoles essentiels de la bibliothèque standard de s'adapter aux types non-copyable (<code>~Copyable</code>) et non-escapable (<code>~Escapable</code>).</p>
+<p>Les changements majeurs incluent :</p>
 <ul>
-<li>Modifier les signatures des protocoles (ex: <code>Equatable</code>, <code>Comparable</code>) pour utiliser les paramètres de type <code>borrowing</code>.</li>
-<li>Ajouter des extensions conditionnelles pour permettre la conformité aux types <code>~Copyable</code> et <code>~Escapable</code>.</li>
-<li>Mettre à jour <code>Hasher</code>, <code>Optional</code> et <code>Result</code> pour supporter ces nouveaux types.</li>
+<li><strong>Equatable, Comparable, Hashable</strong> : Ces protocoles sont marqués comme raffinant <code>~Copyable</code> et <code>~Escapable</code>. Leurs méthodes (comme <code>==</code> ou <code>&lt;</code>) utilisent désormais le mot-clé <code>borrowing</code> au lieu de prendre les instances par valeur, permettant ainsi de comparer des types qui ne peuvent pas être copiés.</li>
+<li><strong>CustomStringConvertible, CustomDebugStringConvertible, TextOutputStream, TextOutputStreamable</strong> : Marqués comme raffinant <code>~Copyable</code> et <code>~Escapable</code>.</li>
+<li><strong>LosslessStringConvertible</strong> : Marqué comme raffinant <code>~Copyable</code> (mais pas <code>~Escapable</code>).</li>
+<li><strong>Mises à jour de l'implémentation standard</strong> : Les types <code>Optional</code> et <code>Result</code> voient leurs conformités <code>Equatable</code> et <code>Hashable</code> mises à jour pour supporter des éléments <code>~Copyable</code> et <code>~Escapable</code>.</li>
 </ul>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0499" tabindex="-1"><a href="#avant-se-0499" class="header-anchor">Avant SE-0499</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Supposons un type non-copiable (non supporté par Equatable actuellement)</span>
-<span class="token keyword">struct</span> <span class="token class-name">NonCopyableType</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Un type non-copyable ne peut pas conformer aux protocoles standards</span>
+<span class="token keyword">struct</span> <span class="token class-name">MyNonCopyable</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
     <span class="token keyword">let</span> value<span class="token punctuation">:</span> <span class="token class-name">Int</span>
 <span class="token punctuation">}</span>
 
-<span class="token keyword">let</span> a <span class="token operator">=</span> <span class="token class-name">NonCopyableType</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> <span class="token number">42</span><span class="token punctuation">)</span>
-<span class="token keyword">let</span> b <span class="token operator">=</span> <span class="token class-name">NonCopyableType</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> <span class="token number">42</span><span class="token punctuation">)</span>
-
-<span class="token comment">// Erreur : NonCopyableType ne respecte pas Equatable car </span>
-<span class="token comment">// Equatable nécessite normalement la capacité de copier ou de gérer des types copiables.</span>
-<span class="token keyword">if</span> a <span class="token operator">==</span> b <span class="token punctuation">{</span> 
-    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Égalité"</span></span><span class="token punctuation">)</span>
-<span class="token punctuation">}</span>
+<span class="token comment">// Ceci poserait une erreur de compilation car Equatable </span>
+<span class="token comment">// exige que l'instance soit copiable par défaut</span>
+<span class="token comment">// func compare(a: MyNonCopyable, b: MyNonCopyable) -&gt; Bool {</span>
+<span class="token comment">//     return a == b </span>
+<span class="token comment">// }</span>
 </code></pre>
-<p>L'incapacité des protocoles standard à accepter des types non-copiables empêche l'utilisation de types performants (sans comptage de référence ou COW) dans des algorithmes de tri ou des dictionnaires existants.</p>
+<p>L'impossibilité pour les types <code>~Copyable</code> de conformer aux protocoles <code>Equatable</code> ou <code>Hashable</code> empêche l'utilisation de structures de données optimisées (comme des tableaux non-copyable) dans des algorithmes de recherche ou de comparaison qui dépendent de ces protocoles.</p>
 <h3 id="apr%C3%A8s-se-0499" tabindex="-1"><a href="#apr%C3%A8s-se-0499" class="header-anchor">Après SE-0499</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition d'un type non-copiable</span>
-<span class="token keyword">struct</span> <span class="token class-name">NonCopyableType</span><span class="token punctuation">:</span> <span class="token class-name">Equatable</span><span class="token punctuation">,</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">MyNonCopyable</span><span class="token punctuation">:</span> <span class="token class-name">Equatable</span><span class="token punctuation">,</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
     <span class="token keyword">let</span> value<span class="token punctuation">:</span> <span class="token class-name">Int</span>
 
-    <span class="token comment">// La conformité est désormais possible grâce à l'usage de 'borrowing'</span>
-    <span class="token keyword">static</span> <span class="token keyword">func</span> <span class="token operator">==</span> <span class="token punctuation">(</span>lhs<span class="token punctuation">:</span> borrowing <span class="token class-name">NonCopyableType</span><span class="token punctuation">,</span> rhs<span class="token punctuation">:</span> borrowing <span class="token class-name">NonCopyableType</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Bool</span> <span class="token punctuation">{</span>
+    <span class="token comment">// La conformité est possible car le protocole utilise 'borrowing'</span>
+    <span class="token keyword">static</span> <span class="token keyword">func</span> <span class="token operator">==</span> <span class="token punctuation">(</span>lhs<span class="token punctuation">:</span> borrowing <span class="token class-name">MyNonCopyable</span><span class="token punctuation">,</span> rhs<span class="token punctuation">:</span> borrowing <span class="token class-name">MyNonCopyable</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Bool</span> <span class="token punctuation">{</span>
         lhs<span class="token punctuation">.</span>value <span class="token operator">==</span> rhs<span class="token punctuation">.</span>value
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 
-<span class="token keyword">let</span> a <span class="token operator">=</span> <span class="token class-name">NonCopyableType</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> <span class="token number">42</span><span class="token punctuation">)</span>
-<span class="token keyword">let</span> b <span class="token operator">=</span> <span class="token class-name">NonCopyableType</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> <span class="token number">42</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> x <span class="token operator">=</span> <span class="token class-name">MyNonCopyable</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> <span class="token number">42</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> y <span class="token operator">=</span> <span class="token class-name">MyNonCopyable</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> <span class="token number">42</span><span class="token punctuation">)</span>
 
-<span class="token comment">// Fonctionne parfaitement sans copier le type</span>
-<span class="token keyword">if</span> a <span class="token operator">==</span> b <span class="token punctuation">{</span>
-    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Égalité"</span></span><span class="token punctuation">)</span>
+<span class="token comment">// Le fonctionnement est fluide même si le type ne peut pas être copié</span>
+<span class="token keyword">if</span> x <span class="token operator">==</span> y <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Identiques"</span></span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
-
-<span class="token comment">// Fonctionne aussi avec Hashable</span>
-<span class="token keyword">let</span> <span class="token keyword">set</span><span class="token punctuation">:</span> <span class="token class-name">Set</span><span class="token operator">&lt;</span><span class="token class-name">NonCopyableType</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token comment">// (Via extension de conformité)</span>
 </code></pre>
-<p>La proposition permet aux types non-copiables de participer aux opérations de comparaison et de hachage via l'utilisation de la sémantique <code>borrowing</code>, garantissant que l'égalité et le hachage ne nécessitent pas la duplication de la valeur.</p>
+<p>La proposition résout le problème en modifiant les signatures des protocoles dans la bibliothèque standard pour utiliser le mode <code>borrowing</code>. Cela permet de comparer ou de hasher des valeurs sans exiger que ces valeurs puissent être dupliquées en mémoire, ce qui est essentiel pour la performance et la gestion rigoureuse des ressources.</p>
 
   </div>
 </article>

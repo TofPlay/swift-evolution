@@ -76,47 +76,39 @@
     <h1>SE-0522 - Source-Level Control Over Compiler Warnings</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
-<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<h2 id="disponible-%C3%A0-partir." tabindex="-1"><a href="#disponible-%C3%A0-partir." class="header-anchor">Disponible à partir.</a></h2>
 <p>Swift 6.4</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
-<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0522-source-level-warning-control.md">SE-0522 - Source-Level Control Over Compiler Warnings</a></p>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0522-source-level-control-over-compiler-warnings.md">SE-0522 - Source-Level Control Over Compiler Warnings</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit l'attribut de déclaration <code>@diagnose</code> pour offrir un contrôle granulaire sur le comportement des avertissements du compilateur au sein d'un scope lexical spécifique.</p>
-<p>Actuellement, le contrôle des avertissements se fait principalement via des drapeaux de ligne de commande (ex: <code>-Werror</code>), ce qui est une méthode "grossière" s'appliquant à tout un module. <code>@diagnose</code> permet de raffiner ce comportement pour des groupes de diagnostics précis avec trois modes : <code>error</code> (escalade en erreur), <code>warning</code> (comportement par défaut) et <code>ignored</code> (suppression du diagnostic).</p>
-<p>L'attribut peut être appliqué sur :</p>
-<ul>
-<li>Les déclarations (fonctions, types, propriétés, etc.) pour affecter leur signature et leur corps.</li>
-<li>Les déclarations de macros pour contrôler le code généré lors de l'expansion.</li>
-<li>Les instructions d'importation.</li>
-</ul>
-<p>L'attribut respecte les règles de priorité : l'attribut le plus imbriqué (ou le dernier dans l'ordre de lecture pour un même scope) l'emporte sur les réglages du scope parent ou les réglages globaux du compilateur.</p>
+<p>La proposition introduit l'attribut de déclaration <code>@diagnose</code> pour permettre un contrôle précis du comportement des avertissements (warnings) du compilateur au sein d'une portée lexicale spécifique. Cet attribut permet de modifier la sévérité d'un groupe de diagnostics pour une déclaration donnée en choisissant l'un des trois modes : <code>error</code> (escalade en erreur), <code>warning</code> (maintien en avertissement) ou <code>ignored</code> (suppression totale du diagnostic).</p>
+<p>L'attribut peut prendre un paramètre optionnel <code>reason:</code> pour documenter la raison de l'exception directement dans le code source. Il s'applique aux déclarations telles que <code>func</code>, <code>struct</code>, <code>class</code>, <code>enum</code>, <code>actor</code>, <code>protocol</code>, ainsi qu'aux <code>init</code>, <code>deinit</code>, <code>subscript</code> et aux <code>import</code>. Le comportement est hiérarchique : un attribut appliqué à une déclaration imbriquée (comme une méthode dans une <code>struct</code>) peut surcharger le comportement défini par l'attribut de la déclaration parente ou par les options de compilation globales (comme <code>-Werror</code>).</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0522" tabindex="-1"><a href="#avant-se-0522" class="header-anchor">Avant SE-0522</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Un appel à une API obsolète provoque une erreur si -Werror est activé au niveau du module</span>
-<span class="token comment">// On est obligé de modifier la politique de tout le module pour autoriser cet appel</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Configuration globale via commande : -Werror DeprecatedDeclaration</span>
+<span class="token comment">// Cela transforme tous les avertissements de dépréciation en erreurs.</span>
+
 <span class="token keyword">func</span> <span class="token function-definition function">bridgeToLegacySystem</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token function">oldAPI</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// error: 'oldAPI()' is deprecated [#Deprecated]</span>
+    <span class="token function">oldAPI</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// 🟥 error: 'oldAPI()' is deprecated [#Deprecated]</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>Actuellement, il est impossible d'ignorer ou d'escalader un avertissement spécifique pour une seule fonction sans affecter l'ensemble du module ou passer par des drapeaux de compilation globaux.</p>
+<p>Le développeur est contraint par la politique globale du module. S'il souhaite maintenir une compatibilité temporaire avec une API dépréciée dans une fonction spécifique, il ne peut pas le faire sans modifier la configuration de tout le module, ce qui est risqué pour le reste de la codebase.</p>
 <h3 id="apr%C3%A8s-se-0522" tabindex="-1"><a href="#apr%C3%A8s-se-0522" class="header-anchor">Après SE-0522</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// On peut transformer un avertissement en erreur pour forcer l'adoption</span>
-<span class="token attribute atrule">@diagnose</span><span class="token punctuation">(</span><span class="token class-name">UnsafeImportedAPI</span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> error<span class="token punctuation">)</span>
-<span class="token keyword">func</span> <span class="token function-definition function">strictFunction</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token function">unsafeCall</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// error: UnsafeImportedAPI</span>
-<span class="token punctuation">}</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Configuration globale via commande : -Werror DeprecatedDeclaration</span>
 
-<span class="token comment">// Ou ignorer un avertissement spécifique pour maintenir la compatibilité</span>
-<span class="token attribute atrule">@diagnose</span><span class="token punctuation">(</span><span class="token class-name">DeprecatedDeclaration</span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> ignored<span class="token punctuation">,</span> reason<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Migration en cours"</span></span><span class="token punctuation">)</span>
+<span class="token comment">// L'attribut permet de réduire la sévérité localement</span>
+<span class="token attribute atrule">@diagnose</span><span class="token punctuation">(</span><span class="token class-name">DeprecatedDeclaration</span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> warning<span class="token punctuation">,</span> reason<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Must maintain compatibility until end of release cycle"</span></span><span class="token punctuation">)</span>
 <span class="token keyword">func</span> <span class="token function-definition function">bridgeToLegacySystem</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token function">oldAPI</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Aucun diagnostic n'est émis pour ce groupe</span>
+    <span class="token function">oldAPI</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// 🟨 warning: 'oldAPI()' is deprecated [#Deprecated]</span>
 <span class="token punctuation">}</span>
 
-<span class="token comment">// Une macro peut aussi générer des @diagnose dans son expansion</span>
-<span class="token attribute atrule">@diagnose</span><span class="token punctuation">(</span><span class="token class-name">DeprecatedDeclaration</span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> error<span class="token punctuation">)</span>
-<span class="token other-directive property">#generateLegacyBindings</span><span class="token punctuation">(</span><span class="token keyword">for</span><span class="token punctuation">:</span> <span class="token class-name">OldFramework</span><span class="token punctuation">)</span>
+<span class="token comment">// L'attribut peut aussi supprimer totalement le diagnostic</span>
+<span class="token attribute atrule">@diagnose</span><span class="token punctuation">(</span><span class="token class-name">UnsafeImportedAPI</span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> ignored<span class="token punctuation">)</span>
+<span class="token keyword">func</span> <span class="token function-definition function">readTrustedInput</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> data<span class="token punctuation">:</span> <span class="token class-name">UnsafeRawPointer</span><span class="token punctuation">,</span> <span class="token omit keyword">_</span> count<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">ParsedResult</span> <span class="token punctuation">{</span>
+    <span class="token function">c_parse_buffer</span><span class="token punctuation">(</span>data<span class="token punctuation">,</span> count<span class="token punctuation">)</span> <span class="token comment">// Aucun diagnostic n'est émis</span>
+<span class="token punctuation">}</span>
 </code></pre>
-<p>L'attribut <code>@diagnose</code> permet de cibler précisément un groupe de diagnostics pour modifier sa sévérité (escalade en erreur ou suppression) uniquement dans le scope de la déclaration annotée, facilitant ainsi la migration progressive des bases de code vers des modes de langage plus stricts.</p>
+<p>La proposition résout le problème en offrant une granularité fine. Le développeur peut désormais documenter une exception technique (comme une nécessité de compatibilité) exactement là où elle se produit, sans compromettre la rigueur des règles de diagnostic appliquées au reste du module.</p>
 
   </div>
 </article>

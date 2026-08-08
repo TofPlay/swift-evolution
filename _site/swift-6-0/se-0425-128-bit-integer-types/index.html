@@ -81,28 +81,31 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0425-int128.md">SE-0425 - 128-bit Integer Types</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit deux nouveaux types entiers à largeur fixe : <code>Int128</code> et <code>UInt128</code>. Bien que moins fréquents que les types 64 bits, les entiers 128 bits sont essentiels pour de nombreux calculs de précision et sont déjà utilisés en interne par la bibliothèque standard (par exemple pour <code>Duration</code>).</p>
-<p>Les nouveaux types :</p>
-<ul>
-<li>Conforment à tous les protocoles standards des entiers (<code>FixedWidthInteger</code>, <code>Numeric</code>, <code>Hashable</code>, <code>Codable</code>, etc.).</li>
-<li>Sont alignés sur 16 octets sur les cibles 64 bits.</li>
-<li>Bénéficient d'un pont (bridge) avec les types C <code>__int128_t</code> et <code>__uint128_t</code> via le compilateur Clang.</li>
-<li>Incluent des extensions pour <code>Codable</code> afin de permettre aux encodeurs/décodeurs personnalisés de gérer ces types, tout en fournissant des implémentations par défaut qui lèvent des erreurs si non supportées.</li>
-</ul>
+<p>La proposition introduit deux nouveaux types d'entiers à taille fixe dans la bibliothèque standard : <code>Int128</code> (signé) et <code>UInt128</code> (non signé). Ces types sont alignés sur 16 octets sur les cibles 64 bits et partagent la même alignement que <code>Int64</code> sur les cibles 32 bits. Ils sont conçus pour être compatibles avec l'endianness des autres types entiers.</p>
+<p>Les nouveaux types se conforment à une vaste gamme de protocoles, notamment <code>Hashable</code>, <code>Equatable</code>, <code>Comparable</code>, <code>Codable</code>, <code>Sendable</code>, <code>LosslessStringConvertible</code>, <code>ExpressibleByIntegerLiteral</code>, <code>AdditiveArithmetic</code>, <code>Signed</code>, <code>Numeric</code>, <code>BinaryInteger</code>, <code>FixedWidthInteger</code>, ainsi que <code>SignedInteger</code> et <code>UnsignedInteger</code>. La proposition inclut également des extensions du protocole <code>Codable</code> pour permettre aux encodeurs et décodeurs de gérer ces types, tout en offrant des implémentations par défaut qui lèvent des erreurs en cas de non-support.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0425" tabindex="-1"><a href="#avant-se-0425" class="header-anchor">Avant SE-0425</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Limitation : Absence de type entier natif de 128 bits</span>
-<span class="token keyword">let</span> largeValue<span class="token punctuation">:</span> <span class="token class-name">UInt64</span> <span class="token operator">=</span> <span class="token number">18446744073709551615</span>
-<span class="token keyword">let</span> overflow <span class="token operator">=</span> largeValue <span class="token operator">+</span> <span class="token number">1</span> <span class="token comment">// Erreur de débordement (runtime error)</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Les développeurs doivent souvent utiliser des bibliothèques tierces </span>
+<span class="token comment">// ou des structures complexes pour gérer des nombres de 128 bits.</span>
+<span class="token keyword">struct</span> <span class="token class-name">MyLargeNumber</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> high<span class="token punctuation">:</span> <span class="token class-name">Int64</span>
+    <span class="token keyword">let</span> low<span class="token punctuation">:</span> <span class="token class-name">UInt64</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// La manipulation de ces valeurs nécessite une logique manuelle </span>
+<span class="token comment">// pour gérer les débordements et les signes.</span>
 </code></pre>
-<p>Actuellement, pour manipuler des valeurs dépassant la capacité de <code>UInt64</code>, les développeurs doivent utiliser des structures personnalisées complexes ou des types non natifs, ce qui nuit à la lisibilité et aux performances.</p>
+<p>Le langage ne possède pas de type natif de 128 bits, ce qui oblige les développeurs à simuler ce comportement avec des combinaisons de <code>Int64</code> ou <code>UInt64</code>. Cela rend le code complexe, verbeux et sujet aux erreurs lors des calculs mathématiques ou des comparaisons.</p>
 <h3 id="apr%C3%A8s-se-0425" tabindex="-1"><a href="#apr%C3%A8s-se-0425" class="header-anchor">Après SE-0425</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de Int128 et UInt128</span>
-<span class="token keyword">let</span> largeValue<span class="token punctuation">:</span> <span class="token class-name">UInt128</span> <span class="token operator">=</span> <span class="token class-name">UInt128</span><span class="token punctuation">(</span><span class="token number">18446744073709551615</span><span class="token punctuation">)</span>
-<span class="token keyword">let</span> nextValue <span class="token operator">=</span> largeValue <span class="token operator">+</span> <span class="token number">1</span>
-<span class="token function">print</span><span class="token punctuation">(</span>nextValue<span class="token punctuation">)</span> <span class="token comment">// 18446744073709551616</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation directe des nouveaux types natifs</span>
+<span class="token keyword">let</span> largeValue<span class="token punctuation">:</span> <span class="token class-name">Int128</span> <span class="token operator">=</span> <span class="token number">123456789012345678901234567890123456789</span>
+<span class="token keyword">let</span> unsignedValue<span class="token punctuation">:</span> <span class="token class-name">UInt128</span> <span class="token operator">=</span> <span class="token number">0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</span>
+
+<span class="token comment">// Conformité aux protocoles standards</span>
+<span class="token keyword">let</span> isEqual <span class="token operator">=</span> largeValue <span class="token operator">==</span> <span class="token number">123456789012345678901234567890123456789</span>
+<span class="token keyword">let</span> sum <span class="token operator">=</span> largeValue <span class="token operator">+</span> <span class="token class-name">Int128</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span>
 </code></pre>
-<p>La proposition introduit des types natifs (<code>Int128</code>, <code>UInt128</code>) qui permettent de gérer des valeurs extrêmement larges de manière intuitive et performante, tout en respectant l'alignement mémoire et les protocoles mathématiques standards de Swift.</p>
+<p>La proposition résout le problème en intégrant directement <code>Int128</code> et <code>UInt128</code> dans le langage. Cela permet d'utiliser la syntaxe et les opérations standards (comme <code>+</code>, <code>==</code>, <code>&lt;</code>) de la même manière que pour les types <code>Int</code> ou <code>UInt</code> classiques, simplifiant ainsi drastiquement le développement pour les applications nécessitant une très grande précision numérique.</p>
 
   </div>
 </article>

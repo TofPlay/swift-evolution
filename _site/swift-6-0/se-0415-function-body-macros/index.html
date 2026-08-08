@@ -81,25 +81,21 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0415-function-body-macros.md">SE-0415 - Function Body Macros</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit les <strong>macros de corps de fonction</strong> (<code>body macros</code>), un nouveau rôle de macro attachée capable de synthétiser, d'augmenter ou de remplacer intégralement le corps d'une fonction, d'un initialiseur, d'un désinitialiseur ou d'un accesseur.</p>
-<p>Auparavant, le système de macros ne permettait que de générer de nouvelles déclarations, mais pas de modifier le contenu interne d'une fonction existante. Les macros de corps de fonction permettent notamment :</p>
-<ul>
-<li>La synthèse complète d'un corps (ex: transformer une déclaration en appel RPC distant).</li>
-<li>L'ajout de logique (ex: logging, traçage, vérification de préconditions).</li>
-<li>Le remplacement du corps (ex: encapsuler le code original dans une closure pour un traitement spécifique).</li>
-</ul>
-<p>Les macros de corps de fonction sont implémentées via le protocole <code>BodyMacro</code>. Contrairement aux macros classiques, elles reçoivent la déclaration syntaxique de la fonction et génèrent les items de bloc de code qui constitueront le nouveau corps.</p>
+<p>Cette proposition introduit le rôle <code>body</code> pour les macros attachées. Contrairement aux macros existantes qui pouvaient ajouter des membres (comme de nouvelles <code>func</code> ou <code>property</code>) à un <code>type</code>, les <code>body</code> macros permettent de manipuler le contenu interne d'une fonction. Elles permettent de synthétiser un corps de fonction, de l'augmenter (par exemple pour injecter du logging) ou de le remplacer totalement. Une macro qui conforme au protocole <code>BodyMacro</code> reçoit la syntaxe de la déclaration et retourne une liste de <code>CodeBlockItemSyntax</code> qui devient le nouveau corps de la fonction. Une seule <code>body</code> macro peut être appliquée à une même déclaration.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0415" tabindex="-1"><a href="#avant-se-0415" class="header-anchor">Avant SE-0415</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">fetchData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">Data</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Logique métier complexe ici</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le développeur doit écrire manuellement tout le code de log ou de gestion</span>
+<span class="token keyword">func</span> <span class="token function-definition function">fetchData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Data</span> <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Entering fetchData"</span></span><span class="token punctuation">)</span>
+    <span class="token keyword">defer</span> <span class="token punctuation">{</span> <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Exiting fetchData"</span></span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+    <span class="token comment">// Logique métier</span>
     <span class="token keyword">return</span> <span class="token class-name">Data</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>Actuellement, il est impossible d'ajouter automatiquement du code de logging ou de gestion d'erreurs au début et à la fin de chaque fonction sans dupliquer manuellement la logique dans chaque corps de fonction.</p>
+<p>Le développeur est contraint d'écrire manuellement du code répétitif (boilerplate) pour des tâches transversales comme le logging ou le tracing. Cela augmente la maintenance et la probabilité d'oublier une instruction cruciale dans certaines fonctions.</p>
 <h3 id="apr%C3%A8s-se-0415" tabindex="-1"><a href="#apr%C3%A8s-se-0415" class="header-anchor">Après SE-0415</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro</span>
-<span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>body<span class="token punctuation">)</span> macro <span class="token class-name">Logged</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span><span class="token operator">...</span><span class="token punctuation">)</span>
+<span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>body<span class="token punctuation">)</span> macro <span class="token class-name">Logged</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"LoggedMacro"</span></span><span class="token punctuation">)</span>
 </code></pre>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Implémentation du macro</span>
 <span class="token keyword">struct</span> <span class="token class-name">LoggedMacro</span><span class="token punctuation">:</span> <span class="token class-name">BodyMacro</span> <span class="token punctuation">{</span>
@@ -108,25 +104,28 @@
         providingBodyFor declaration<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">DeclSyntaxProtocol</span> <span class="token operator">&amp;</span> <span class="token class-name">WithOptionalCodeBlockSyntax</span><span class="token punctuation">,</span>
         <span class="token keyword">in</span> context<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">MacroExpansionContext</span>
     <span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">CodeBlockItemSyntax</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
-        <span class="token comment">// Logique pour injecter le code de logging autour du corps existant</span>
-        <span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token punctuation">]</span> 
+        <span class="token comment">// La macro génère des instructions de bloc de code à insérer</span>
+        <span class="token keyword">return</span> <span class="token punctuation">[</span>
+            <span class="token string-literal"><span class="token string">"print(\"Entering function\")"</span></span><span class="token punctuation">,</span>
+            <span class="token string-literal"><span class="token string">"defer { print(\"Exiting function\") }"</span></span>
+        <span class="token punctuation">]</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation du macro</span>
 <span class="token attribute atrule">@Logged</span>
-<span class="token keyword">func</span> <span class="token function-definition function">fetchData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">Data</span> <span class="token punctuation">{</span>
+<span class="token keyword">func</span> <span class="token function-definition function">fetchData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Data</span> <span class="token punctuation">{</span>
     <span class="token keyword">return</span> <span class="token class-name">Data</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code généré par la macro (Expansion)</span>
-<span class="token keyword">func</span> <span class="token function-definition function">fetchData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">Data</span> <span class="token punctuation">{</span>
-    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Entering fetchData"</span></span><span class="token punctuation">)</span>
-    <span class="token keyword">defer</span> <span class="token punctuation">{</span> <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Exiting fetchData"</span></span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+<span class="token keyword">func</span> <span class="token function-definition function">fetchData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Data</span> <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Entering function"</span></span><span class="token punctuation">)</span>
+    <span class="token keyword">defer</span> <span class="token punctuation">{</span> <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Exiting function"</span></span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
     <span class="token keyword">return</span> <span class="token class-name">Data</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>La macro <code>@Logged</code> intercepte le corps de la fonction et injecte des instructions de journalisation avant et après l'exécution du code original.</p>
+<p>L'expansion de la macro résout la limitation du système de macros actuel qui ne pouvait pas modifier le contenu interne des fonctions. Elle permet de transformer une déclaration simple en une implémentation complexe (comme l'injection de logs ou la conversion en appel réseau) de manière déclarative, en manipulant directement les instructions au sein du bloc de code sans que le développeur n'ait à répéter le code de surveillance.</p>
 
   </div>
 </article>

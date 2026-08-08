@@ -81,29 +81,49 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0463-sendable-completion-handlers.md">SE-0463 - Import Objective-C completion handler parameters as @Sendable</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition modifie les règles d'importation du code Objective-C vers Swift pour que les paramètres de type "completion handler" soient automatiquement importés avec l'annotation <code>@Sendable</code>.</p>
-<p>L'objectif est de renforcer la sécurité contre les situations de "data-race" (concurrence de données) sans multiplier les interventions manuelles lors de la migration vers Swift 6. Actuellement, l'absence de <code>@Sendable</code> sur les closures importées d'Objective-C peut entraîner des avertissements ou des plantages au runtime (via les assertions d'isolation dynamique d'acteurs) lorsqu'elles sont appelées depuis un contexte isolé. En automatisant cette annotation, Swift garantit que la closure est traitée comme capable de traverser les frontières d'isolation. Une exception est prévue pour les fonctions isolées sur un <code>@MainActor</code> afin d'éviter les faux positifs.</p>
+<p>Cette proposition modifie les règles d'importation du code Objective-C vers Swift pour que les paramètres de type <code>completion handler</code> soient automatiquement annotés avec <code>@Sendable</code>. Le mécanisme repose sur l'identification des méthodes Objective-C possédant un paramètre de closure pour traitement ultérieur. Si une méthode possède une variante <code>async</code> et qu'elle est (implicitement ou explicitement) <code>nonisolated</code>, la version originale importée en Swift recevra l'annotation <code>@Sendable</code> sur son paramètre de closure. Une exception est prévue pour les fonctions isolées à un <code>global actor</code>, afin d'éviter des avertissements erronés lorsque la closure est appelée sur ce même acteur.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0463" tabindex="-1"><a href="#avant-se-0463" class="header-anchor">Avant SE-0463</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code Objective-C</span>
-<span class="token comment">// - (void)performOperation:(NSString * _Nonnull)operation completionHandler:(void (^ _Nullable)(NSString * _Nullable, NSError * _Nullable))completionHandler;</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code Objective-C existant (Header)</span>
+<span class="token comment">// - (void)performOperation:(NSString * _Nonnull)operation </span>
+<span class="token comment">//                     completionHandler:(void (^)(NSString * _Nullable, NSError * _Nullable))completionHandler;</span>
 
-<span class="token comment">// Code Swift importé</span>
-<span class="token keyword">func</span> <span class="token function-definition function">perform</span><span class="token punctuation">(</span>operation<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">,</span> completionHandler<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token operator">?</span><span class="token punctuation">,</span> <span class="token class-name">Error</span><span class="token operator">?</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span><span class="token punctuation">)</span><span class="token operator">?</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<span class="token comment">// Importation actuelle en Swift (sans @Sendable automatique)</span>
+<span class="token keyword">func</span> <span class="token function-definition function">performOperation</span><span class="token punctuation">(</span>operation<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">,</span> completionHandler<span class="token punctuation">:</span> <span class="token attribute atrule">@escaping</span> <span class="token punctuation">(</span><span class="token class-name">String</span><span class="token operator">?</span><span class="token punctuation">,</span> <span class="token class-name">Error</span><span class="token operator">?</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token comment">// ...</span>
 <span class="token punctuation">}</span>
+
+<span class="token comment">// Utilisation dans un actor</span>
+<span class="token keyword">actor</span> <span class="token class-name">MyActor</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> value <span class="token operator">=</span> <span class="token number">0</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">performOperation</span><span class="token punctuation">(</span>operation<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"test"</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span> newValue<span class="token punctuation">,</span> error <span class="token keyword">in</span>
+            <span class="token keyword">self</span><span class="token punctuation">.</span>value <span class="token operator">+=</span> <span class="token number">1</span> <span class="token comment">// Risque de data race non détecté par le compilateur</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
 </code></pre>
-<p>L'absence de l'annotation <code>@Sendable</code> sur le paramètre <code>completionHandler</code> empêche le compilateur de vérifier correctement la sécurité des données lors de l'appel depuis un <code>actor</code>, ce qui peut mener à des avertissements de conformité ou des crashs au runtime.</p>
+<p>L'absence d'annotation <code>@Sendable</code> sur les closures importées d'Objective-C empêche le compilateur Swift de détecter si une closure tente d'accéder de manière non sécurisée à un état mutable depuis un autre contexte de concurrence, ce qui peut provoquer des plantages au runtime via des assertions d'isolation d'acteur.</p>
 <h3 id="apr%C3%A8s-se-0463" tabindex="-1"><a href="#apr%C3%A8s-se-0463" class="header-anchor">Après SE-0463</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code Objective-C</span>
-<span class="token comment">// - (void)performOperation:(NSString * _Nonnull)operation completionHandler:(void (^ _Nullable)(NSString * _Nullable, NSError * _Nullable))completionHandler;</span>
-
-<span class="token comment">// Code Swift importé</span>
-<span class="token keyword">func</span> <span class="token function-definition function">perform</span><span class="token punctuation">(</span>operation<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">,</span> completionHandler<span class="token punctuation">:</span> <span class="token attribute atrule">@Sendable</span> <span class="token attribute atrule">@escaping</span> <span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token class-name">String</span><span class="token operator">?</span><span class="token punctuation">,</span> <span class="token class-name">Error</span><span class="token operator">?</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span><span class="token punctuation">)</span><span class="token operator">?</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Importation automatique avec @Sendable</span>
+<span class="token keyword">func</span> <span class="token function-definition function">performOperation</span><span class="token punctuation">(</span>
+    operation<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">,</span> 
+    completionHandler<span class="token punctuation">:</span> <span class="token attribute atrule">@Sendable</span> <span class="token attribute atrule">@escaping</span> <span class="token punctuation">(</span><span class="token class-name">String</span><span class="token operator">?</span><span class="token punctuation">,</span> <span class="token class-name">Error</span><span class="token operator">?</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span>
+<span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token comment">// ...</span>
 <span class="token punctuation">}</span>
+
+<span class="token comment">// Utilisation dans un actor</span>
+<span class="token keyword">actor</span> <span class="token class-name">MyActor</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> value <span class="token operator">=</span> <span class="token number">0</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">performOperation</span><span class="token punctuation">(</span>operation<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"test"</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span> newValue<span class="token punctuation">,</span> error <span class="token keyword">in</span>
+            <span class="token keyword">self</span><span class="token punctuation">.</span>value <span class="token operator">+=</span> <span class="token number">1</span> <span class="token comment">// Le compilateur détecte maintenant une violation de sécurité</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
 </code></pre>
-<p>Le paramètre est désormais importé avec <code>@Sendable</code>, permettant au compilateur de vérifier rigoureusement que les données passées dans la closure respectent les règles de concurrence de Swift, assurant ainsi la sécurité des threads dès l'importation de l'API Objective-C.</p>
+<p>La proposition résout le problème en injectant automatiquement <code>@Sendable</code> sur les closures de type <code>completion handler</code> provenant d'Objective-C. Cela permet au compilateur Swift d'enforcer la sécurité contre les <code>data races</code> en vérifiant que la closure peut être transférée en toute sécurité entre les contextes d'exécution.</p>
 
   </div>
 </article>

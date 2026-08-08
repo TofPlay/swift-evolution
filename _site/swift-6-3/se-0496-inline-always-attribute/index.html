@@ -76,24 +76,25 @@
     <h1>SE-0496 - @inline(always) attribute</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
-<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<h2 id="disponible-%C3%A0-part-de" tabindex="-1"><a href="#disponible-%C3%A0-part-de" class="header-anchor">Disponible à part de</a></h2>
 <p>Swift 6.3</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0496-inline-always.md">SE-0496 - @inline(always) attribute</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit l'attribut <code>@inline(always)</code> pour donner un contrôle explicite aux développeurs sur le processus d'inlining du compilateur. Actuellement, le compilateur utilise des heuristiques pour décider d'inliner une fonction, ce qui peut être imprévisible entre différentes versions de Swift ou selon la complexité du code.</p>
-<p>L'attribut <code>@inline(always)</code> force l'inlining de la fonction annotée. Pour garantir l'efficacité de cette commande, le compilateur génère une erreur dans les cas suivants :</p>
+<p>La proposition introduit l'attribut <code>@inline(always)</code>, un contrôle d'optimisation permettant à l'auteur de forcer le compilateur à effectuer l'inlining (l'expansion du corps d'une fonction directement dans l'appelant) d'une fonction.</p>
+<p>Le mécanisme fonctionne ainsi :</p>
 <ul>
-<li>Si l'inlining est impossible en raison d'un cycle de récursion.</li>
-<li>Si la fonction est une méthode non-final d'une classe (impliquant un dispatch dynamique).</li>
+<li><strong>Contrôle explicite :</strong> L'attribut demande au compilateur d'inliner la fonction, même si les heuristiques habituelles de l'optimiseur décideraient de ne pas le faire (par exemple, à cause d'une taille de fonction trop importante).</li>
+<li><strong>Diagnostic d'erreur :</strong> Pour garantir la promesse de l'attribut, le compilateur émet une erreur si l'inlining est impossible (ex: récursion infinie ou méthode non-final dans une classe).</li>
+<li><strong>Interaction avec la visibilité :</strong> Pour les fonctions <code>public</code> ou <code>open</code>, l'utilisation de <code>@inline(always)</code> implique automatiquement l'attribut <code>@inlinable</code> afin que le corps de la fonction soit accessible hors du module.</li>
+<li><strong>Cas exceptionnels :</strong> L'inlining n'est pas garanti (et donc aucune erreur n'est levée) pour les appels via des valeurs de <code>protocol</code>, des <code>closures</code> ou des types non-final, car la résolution est dynamique.</li>
 </ul>
-<p>L'attribut interagit avec la visibilité : les fonctions publiques marquées <code>@inline(always)</code> doivent implicitement être marquées <code>@inlinable</code> pour que leur corps soit accessible hors du module.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0496" tabindex="-1"><a href="#avant-se-0496" class="header-anchor">Avant SE-0496</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">callee</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> result<span class="token punctuation">:</span> <span class="token keyword">inout</span> <span class="token class-name">SomeValue</span><span class="token punctuation">,</span> <span class="token omit keyword">_</span> cond<span class="token punctuation">:</span> <span class="token class-name">Bool</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     result <span class="token operator">=</span> <span class="token class-name">SomeValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
     <span class="token keyword">if</span> cond <span class="token punctuation">{</span>
-        <span class="token comment">// Code complexe...</span>
+        <span class="token comment">// Logique complexe...</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 
@@ -105,13 +106,13 @@
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>Le compilateur peut décider de ne pas inliner <code>callee</code> selon ses heuristiques (taille de la fonction, complexité), ce qui empêche des optimisations comme la propagation de constantes ou l'élimination du passage par référence <code>inout</code>.</p>
+<p>Le compilateur utilise des heuristiques pour décider s'il doit copier le code de <code>callee</code> dans <code>caller</code>. Si le compilateur juge que la fonction est trop complexe ou si la structure de boucle est trop éloignée, il ne fera pas l'inlining. Cela peut empêcher des optimisations cruciales comme l'élimination de la gestion de l'argument <code>inout</code> ou la propagation de constantes.</p>
 <h3 id="apr%C3%A8s-se-0496" tabindex="-1"><a href="#apr%C3%A8s-se-0496" class="header-anchor">Après SE-0496</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@inline</span><span class="token punctuation">(</span>always<span class="token punctuation">)</span>
 <span class="token keyword">func</span> <span class="token function-definition function">callee</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> result<span class="token punctuation">:</span> <span class="token keyword">inout</span> <span class="token class-name">SomeValue</span><span class="token punctuation">,</span> <span class="token omit keyword">_</span> cond<span class="token punctuation">:</span> <span class="token class-name">Bool</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     result <span class="token operator">=</span> <span class="token class-name">SomeValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
     <span class="token keyword">if</span> cond <span class="token punctuation">{</span>
-        <span class="token comment">// Code complexe...</span>
+        <span class="token comment">// Logique complexe...</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 
@@ -123,7 +124,7 @@
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'utilisation de <code>@inline(always)</code> garantit que le corps de <code>callee</code> est inséré directement dans <code>caller</code>. Cela permet au compilateur de voir que <code>x</code> ne nécessite plus d'adresse mémoire (grâce à l'inlining) et de supprimer des opérations inutiles, optimisant ainsi les performances de la boucle.</p>
+<p>L'ajout de <code>@inline(always)</code> force le compilateur à intégrer le code de <code>callee</code> dans <code>caller</code>. Cela permet à l'optimiseur de voir que <code>x</code> ne nécessite plus d'adresse mémoire spécifique (puisqu'il n'est plus passé via <code>inout</code> à une fonction externe) et peut optimiser la boucle en conséquence.</p>
 
   </div>
 </article>

@@ -76,30 +76,37 @@
     <h1>SE-0368 - StaticBigInt</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
-<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<h2 id="disponible-%C3%A0-partir" tabindex="-1"><a href="#disponible-%C3%A0-partir" class="header-anchor">Disponible à partir</a></h2>
 <p>Swift 5.8</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0368-staticbigint.md">SE-0368 - StaticBigInt</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Actuellement, les types personnalisés conformant au protocole <code>ExpressibleByIntegerLiteral</code> sont limités par le type de l'intrant passé à <code>init(integerLiteral:)</code>. Comme ce type doit être supporté par la bibliothèque standard, un type défini hors de celle-ci (comme un <code>UInt256</code>) ne peut pas être initialisé avec un littéral dépassant la taille du plus grand type entier standard (généralement <code>UInt64</code>), ce qui provoque une erreur de dépassement de capacité (overflow) lors de la compilation.</p>
-<p>La proposition introduit <code>StaticBigInt</code>, un type de la bibliothèque standard capable de représenter n'importe quelle valeur entière de manière arbitraire. En utilisant <code>StaticBigInt</code> comme type associé pour <code>ExpressibleByIntegerLiteral</code>, les développeurs peuvent implémenter des types entiers de taille arbitraire ou très grande sans être limités par les types natifs de la bibliothèque standard.</p>
+<p>La proposition introduit <code>StaticBigInt</code>, un type de la bibliothèque standard capable de représenter n'importe quelle valeur entière, quelle que soit sa taille. Ce type est conçu spécifiquement pour servir de type associé (<code>associatedtype</code>) pour le protocole <code>ExpressibleByIntegerLiteral</code>. Contrairement aux types numériques standards, <code>StaticBigInt</code> ne possède pas de méthodes arithmétiques mais fournit un API limité (comme <code>signum</code>, <code>bitWidth</code> et un <code>subscript</code> pour accéder aux mots binaires) afin d'extraire la valeur numérique. Son implémentation repose sur un modèle "à extension de signe infinie" pour assurer une compatibilité avec le compilateur.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0368" tabindex="-1"><a href="#avant-se-0368" class="header-anchor">Avant SE-0368</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Supposons un type UInt256 défini en dehors de la bibliothèque standard</span>
-<span class="token keyword">let</span> value<span class="token punctuation">:</span> <span class="token class-name">UInt256</span> <span class="token operator">=</span> <span class="token number">0x1_0000_0000_0000_0000_0000</span> <span class="token comment">// ^</span>
-<span class="token comment">// error: integer literal '18446744073709551616' overflows when stored into 'UInt256'</span>
-</code></pre>
-<p>Les types personnalisés sont contraints d'utiliser un type de littéral existant dans la bibliothèque standard (comme <code>UInt64</code>), ce qui empêche l'utilisation de littéraux dépassant cette capacité.</p>
-<h3 id="apr%C3%A8s-se-0368" tabindex="-1"><a href="#apr%C3%A8s-se-0368" class="header-anchor">Après SE-0368</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// extension UInt256: ExpressibleByIntegerLiteral {</span>
-<span class="token comment">//     public init(integerLiteral value: StaticBigInt) {</span>
-<span class="token comment">//         // Logique pour convertir le StaticBigInt en UInt256</span>
-<span class="token comment">//     }</span>
-<span class="token comment">// }</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Si l'on souhaite créer un type UInt256 en dehors de la bibliothèque standard</span>
+<span class="token keyword">struct</span> <span class="token class-name">UInt256</span><span class="token punctuation">:</span> <span class="token class-name">ExpressibleByIntegerLiteral</span> <span class="token punctuation">{</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>integerLiteral value<span class="token punctuation">:</span> <span class="token class-name">UInt64</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// On est limité à UInt64</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
 
-<span class="token keyword">let</span> value<span class="token punctuation">:</span> <span class="token class-name">UInt256</span> <span class="token operator">=</span> <span class="token number">0x1_0000_0000_0000_0000_0000</span>
+<span class="token keyword">let</span> value<span class="token punctuation">:</span> <span class="token class-name">UInt256</span> <span class="token operator">=</span> <span class="token number">0x1_0000_0000_0000_0000_0000</span> <span class="token comment">// Erreur : dépasse la capacité de UInt64</span>
 </code></pre>
-<p>L'utilisation de <code>StaticBigInt</code> comme type de littéral permet d'absorber n'importe quelle valeur entière sans limite de taille au moment de la compilation, permettant ainsi une conversion sécurisée vers le type de destination (comme un <code>UInt256</code>).</p>
+<p>Lorsqu'un développeur crée un nouveau type entier (comme un <code>UInt256</code>), il doit choisir un type existant de la bibliothèque standard (comme <code>UInt64</code>) pour satisfaire le protocole <code>ExpressibleByIntegerLiteral</code>. Si la valeur saisie dans le code source est plus grande que ce type supporté, le compilateur génère une erreur, même si le type personnalisé pourrait techniquement stocker cette valeur.</p>
+<h3 id="apr%C3%A8s-se-0368" tabindex="-1"><a href="#apr%C3%A8s-se-0368" class="header-anchor">Après SE-0368</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de StaticBigInt pour supporter n'importe quelle taille</span>
+<span class="token keyword">extension</span> <span class="token class-name">UInt256</span><span class="token punctuation">:</span> <span class="token class-name">ExpressibleByIntegerLiteral</span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> <span class="token keyword">init</span><span class="token punctuation">(</span>integerLiteral value<span class="token punctuation">:</span> <span class="token class-name">StaticBigInt</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// On peut extraire les données de StaticBigInt sans limite de taille</span>
+        <span class="token function">precondition</span><span class="token punctuation">(</span>value<span class="token punctuation">.</span><span class="token function">signum</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&gt;=</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"Seuls les entiers positifs sont supportés ici"</span></span><span class="token punctuation">)</span>
+        <span class="token comment">// Logique de conversion...</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> value<span class="token punctuation">:</span> <span class="token class-name">UInt256</span> <span class="token operator">=</span> <span class="token number">0x1_0000_0000_0000_0000_0000</span> <span class="token comment">// Fonctionne parfaitement</span>
+</code></pre>
+<p>L'introduction de <code>StaticBigInt</code> permet aux types personnalisés d'accepter une valeur de taille arbitraire lors de l'initialisation via un littéral. Cela lève la barrière imposée par les types de la bibliothèque standard et permet aux développeurs de créer des types numériques de grande taille (ex: <code>UInt256</code>, <code>Int512</code>) sans restriction de capacité lors de la saisie de valeurs dans le code source.</p>
 
   </div>
 </article>

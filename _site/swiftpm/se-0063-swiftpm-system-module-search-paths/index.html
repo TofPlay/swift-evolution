@@ -76,28 +76,21 @@
     <h1>SE-0063 - SwiftPM System Module Search Paths</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
-<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<h2 id="disponible-%C3%A0-partir" tabindex="-1"><a href="#disponible-%C3%A0-partir" class="header-anchor">Disponible à partir</a></h2>
 <p>Swift 3.0</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0063-swiftpm-system-module-search-paths.md">SE-0063 - SwiftPM System Module Search Paths</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition vise à améliorer la gestion des bibliothèques système via Swift Package Manager (SwiftPM) en facilitant l'importation de modules C.</p>
-<p>Les problèmes identifiés concernaient la variabilité des chemins d'installation selon les plateformes (ex: Homebrew vs /usr), l'obligation d'utiliser des chemins absolus dans les fichiers <code>.modulemap</code>, et la difficulté pour l'utilisateur de savoir quel paquet système installer.</p>
-<p>La solution introduite permet à SwiftPM de :</p>
-<ol>
-<li><strong>Lire les fichiers <code>.pc</code> (pkg-config)</strong> pour extraire automatiquement les chemins d'inclusion, de liaison et les drapeaux de compilation nécessaires.</li>
-<li><strong>Utiliser des métadonnées dans <code>Package.swift</code></strong> pour associer des noms de paquets système (ex: <code>.Apt</code>, <code>.Brew</code>) aux dépendances, permettant d'afficher des messages d'erreur explicites indiquant la commande exacte à exécuter pour installer la bibliothèque manquante.</li>
-</ol>
+<p>La proposition introduit une amélioration de la gestion des <code>System Package</code> au sein de Swift Package Manager (SwiftPM). Le mécanisme permet à SwiftPM de lire les fichiers <code>.pc</code> (pkg-config) pour obtenir automatiquement les chemins de recherche (<code>search paths</code>) et les drapeaux de compilation et de liaison (<code>flags</code>) nécessaires à l'utilisation de bibliothèques système. La solution inclut l'extension du fichier <code>Package.swift</code> avec des métadonnées pour suggérer des noms de paquets spécifiques aux gestionnaires de paquets système (ex: <code>apt</code>, <code>brew</code>) en cas d'échec de build, facilitant ainsi l'installation des dépendances manquantes par l'utilisateur.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0063" tabindex="-1"><a href="#avant-se-0063" class="header-anchor">Avant SE-0063</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// L'utilisateur doit gérer manuellement les chemins complexes</span>
-<span class="token comment">// et identifier lui-même le nom du paquet système</span>
-<span class="token comment">// (ex: libgtk-3-0-dev sur Debian, mais différent sur macOS)</span>
-<span class="token keyword">import</span> <span class="token constant">GTK</span> 
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// L'utilisation d'une bibliothèque système nécessite souvent</span>
+<span class="token comment">// une configuration manuelle complexe ou des chemins absolus</span>
+<span class="token comment">// dans les fichiers module-map.</span>
 </code></pre>
-<p>L'importation peut échouer si les chemins <code>-I</code> ou <code>-L</code> ne sont pas correctement configurés manuellement ou si les chemins dans le <code>.modulemap</code> ne correspondent pas à l'installation (ex: Homebrew).</p>
+<p>L'utilisation de <code>module-map</code> avec des bibliothèques système pose problème car les emplacements d'installation varient selon les plateformes (ex: <code>/usr/lib</code> vs Homebrew) et les fichiers <code>.modulemap</code> exigent souvent des chemins absolus. La gestion des drapeaux de compilation et de liaison (<code>-I</code>, <code>-L</code>) pour des bibliothèques complexes comme GTK nécessite une intervention manuelle de l'utilisateur.</p>
 <h3 id="apr%C3%A8s-se-0063" tabindex="-1"><a href="#apr%C3%A8s-se-0063" class="header-anchor">Après SE-0063</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans le Package.swift du paquet dépendant</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition d'un package qui fournit des indices pour le gestionnaire de paquets système</span>
 <span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
     name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"CFoo"</span></span><span class="token punctuation">,</span>
     pkgConfigName<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"foo"</span></span><span class="token punctuation">,</span>
@@ -107,11 +100,14 @@
     <span class="token punctuation">]</span><span class="token punctuation">,</span>
 <span class="token punctuation">)</span>
 </code></pre>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> foo <span class="token comment">// SwiftPM utilise pkg-config pour trouver les headers/libs</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// SwiftPM lit le fichier .pc correspondant à "foo.pc" pour</span>
+<span class="token comment">// extraire automatiquement les chemins et les flags.</span>
 </code></pre>
-<p>Si le module est absent, SwiftPM fournit une aide explicite :
-<code>error: failed to build module 'bar'</code>
-<code>note: you may need to install 'foo' using your system-packager: apt-get install libfoo-dev</code></p>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// En cas d'erreur, le système fournit une aide explicite :</span>
+<span class="token comment">// error: failed to build module `bar`</span>
+<span class="token comment">// note: you may need to install `foo` using your system-packager: apt-get install libfoo-dev</span>
+</code></pre>
+<p>La proposition résout le problème en déléguant la connaissance des chemins à des fichiers standardisés (<code>.pc</code>). Cela élimine le besoin de spécifier manuellement des matrices de chemins complexes dans le <code>Package.swift</code> et fournit une aide contextuelle pertinente à l'utilisateur pour résoudre les dépendances système manquantes.</p>
 
   </div>
 </article>

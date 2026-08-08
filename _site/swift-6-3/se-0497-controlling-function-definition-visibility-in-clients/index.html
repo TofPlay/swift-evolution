@@ -73,7 +73,8 @@
     <main class="body-tag">
       <article class="post" data-pagefind-body="">
   <div class="post-body">
-    <h1>SE-0497 - Controlling function definition visibility in clients</h1>
+    <p>Toutes mes excuses. J'ai commis une erreur en utilisant un terme proscrit par tes instructions. Voici la version corrigée, strictement conforme au protocole.</p>
+<h1>SE-0497 - Controlling function definition visibility in clients</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
 <h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
@@ -81,39 +82,49 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0497-definition-visibility.md">SE-0497 - Controlling function definition visibility in clients</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit l'attribut <code>@export</code> pour permettre aux développeurs de décider précisément comment une fonction est partagée avec les autres modules. Jusqu'ici, avec <code>@inlinable</code>, une fonction était soit "totalement ouverte" (on peut voir son code pour l'optimiser), soit "fermée".</p>
-<p>Le problème est que l'optimisation automatique peut parfois "fuiter" des détails internes (le code source d'une fonction) vers des modules qui ne devraient pas y avoir accès. <code>@export</code> sépare deux besoins :</p>
+<p>La proposition introduit l'attribut <code>@export</code> pour offrir un contrôle explicite sur deux aspects fondamentaux d'une fonction :</p>
 <ol>
-<li><strong>L'interface :</strong> Est-ce que je crée un "nom" (symbole) pour que d'autres puissent appeler ma fonction ?</li>
-<li><strong>L'implémentation :</strong> Est-ce que je donne mon "code source" (définition) pour que d'autres puissent l'intégrer directement dans leur propre code pour gagner en vitesse ?</li>
+<li><strong>L'interface</strong> (<code>interface</code>) : Détermine si un symbole exécutable est généré dans le binaire pour que les clients puissent appeler la fonction.</li>
+<li><strong>L'implémentation</strong> (<code>implementation</code>) : Détermine si la <code>definition</code> (le corps de la fonction) est accessible aux modules clients pour des optimisations telles que la spécialisation générique ou l'inlining.</li>
 </ol>
-<p>Cela est crucial pour l'<strong>Embedded Swift</strong> (systèmes très limités en mémoire) et pour éviter que des modules dépendants ne se retrouvent avec des fonctions "cachées" qui n'auraient pas dû être visibles.</p>
+<p>L'attribut <code>@export</code> se décline en deux configurations principales via ses arguments :</p>
+<ul>
+<li><code>@export(interface)</code> : Garantit la présence d'un symbole pour les appels externes, mais cache le corps de la fonction (empêchant l'inlining ou la spécialisation par le client).</li>
+<li><code>@export(implementation)</code> : Rend le corps de la fonction disponible pour les optimisations par le client, mais ne garantit pas l'émission d'un symbole d'interface dans le binaire d'origine.</li>
+</ul>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0497" tabindex="-1"><a href="#avant-se-0497" class="header-anchor">Avant SE-0497</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Actuellement, on utilise @inlinable</span>
-<span class="token attribute atrule">@inlinable</span> 
-<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">maFonction</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Le client voit le code (pour l'optimisation) </span>
-    <span class="token comment">// ET un symbole est créé dans le binaire.</span>
-<span class="token punctuation">}</span>
-</code></pre>
-<p>On ne peut pas choisir de donner le code sans créer de symbole, ni de créer un symbole sans donner le code de manière garantie.</p>
-<h3 id="apr%C3%A8s-se-0497" tabindex="-1"><a href="#apr%C3%A8s-se-0497" class="header-anchor">Après SE-0497</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Option 1 : On veut juste qu'on puisse appeler la fonction, sans voir son code</span>
-<span class="token attribute atrule">@export</span><span class="token punctuation">(</span>interface<span class="token punctuation">)</span>
-<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">fonctionS</span>écurisé<span class="token function">e</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Le client peut l'appeler, mais ne peut pas copier son code (pas d'inlining).</span>
-    <span class="token comment">// Cela protège les détails internes du module.</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Avec l'attribut @inlinable</span>
+<span class="token attribute atrule">@inlinable</span>
+<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">maFonction</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>valeur<span class="token punctuation">:</span> <span class="token class-name">T</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// La definition est accessible pour l'optimisation</span>
+    <span class="token comment">// ET un symbole est généré par le compilateur</span>
 <span class="token punctuation">}</span>
 
-<span class="token comment">// Option 2 : On veut que le code soit ultra-rapide (inlined) mais sans créer de symbole</span>
-<span class="token attribute atrule">@export</span><span class="token punctuation">(</span>implementation<span class="token punctuation">)</span>
-<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">fonctionOptimis</span>é<span class="token function">e</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Le client reçoit le code pour l'intégrer directement, </span>
-    <span class="token comment">// mais il n'y a pas de "nom" de fonction stocké dans le binaire.</span>
+<span class="token comment">// Avec l'attribut @_alwaysEmitIntoClient</span>
+<span class="token attribute atrule">@_alwaysEmitIntoClient</span>
+<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">maFonctionAlternative</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// La definition est disponible pour le client</span>
+    <span class="token comment">// Mais aucun symbole n'est garanti dans le binaire d'origine</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'attribut <code>@export</code> permet donc de choisir entre la <strong>performance maximale</strong> (en donnant le code) et la <strong>sécurité/stabilité</strong> (en ne donnant qu'un point d'entrée fixe sans divulguer l'implémentation).</p>
+<p>Le développeur manque de granularité. L'utilisation de <code>@inlinable</code> combine l'exposition de la <code>definition</code> et la création d'un symbole, sans permettre de séparer ces deux concepts de manière explicite pour répondre aux besoins spécifiques de l'ABI ou de l'Embedded Swift.</p>
+<h3 id="apr%C3%A8s-se-0497" tabindex="-1"><a href="#apr%C3%A8s-se-0497" class="header-anchor">Après SE-0497</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Option 1 : Uniquement l'interface</span>
+<span class="token attribute atrule">@export</span><span class="token punctuation">(</span>interface<span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">maFonction</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Le client peut appeler la fonction via un symbole</span>
+    <span class="token comment">// Mais il ne peut pas voir ou inliner le corps</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Option 2 : Uniquement l'implémentation</span>
+<span class="token attribute atrule">@export</span><span class="token punctuation">(</span>implementation<span class="token punctuation">)</span>
+<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">maFonctionOptimisee</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>valeur<span class="token punctuation">:</span> <span class="token class-name">T</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Le client peut inliner ou spécialiser la fonction</span>
+    <span class="token comment">// Mais il n'y a pas de symbole d'interface garanti dans le binaire d'origine</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'attribut <code>@export</code> permet de découpler la visibilité du code source (<code>access control</code>) de la visibilité technique de la <code>definition</code> pour le compilateur. La proposition résout le problème de la dépendance transitive et permet de choisir précisément si une fonction doit faire partie de l'interface binaire ou être uniquement utilisée pour l'optimisation par les clients.</p>
 
   </div>
 </article>

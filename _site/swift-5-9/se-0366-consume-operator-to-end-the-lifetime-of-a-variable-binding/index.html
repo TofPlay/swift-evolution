@@ -81,27 +81,35 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0366-move-function.md">SE-0366 - consume operator to end the lifetime of a variable binding</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit le mot-clé contextuel <code>consume</code> pour permettre aux développeurs de transférer explicitement la propriété (ownership) d'une valeur et de mettre fin à la durée de vie d'une liaison (binding) locale.</p>
-<p>Actuellement, Swift utilise le comptage de références et le <em>copy-on-write</em> (COW), ce qui peut entraîner des copies inutiles ou des appels de gestion de mémoire (retain/release) dans du code hautement optimisé. Avec <code>consume</code>, le développeur peut garantir au compilateur qu'une variable ne sera plus utilisée après l'opération, permettant ainsi des optimisations de performance (comme la mutation en place d'un buffer unique) tout en recevant un diagnostic si une utilisation après consommation est tentée.</p>
+<p>La proposition introduit l'opérateur <code>consume</code>, un mot-clé contextuel qui permet de mettre fin explicitement à la durée de vie (<em>lifetime</em>) d'une liaison (<em>binding</em>) ayant une durée de vie statique (comme une <code>let</code>, une <code>var</code> locale ou un paramètre de fonction).</p>
+<p>L'utilisation de <code>consume</code> transfère la propriété de la valeur vers le nouvel usage, garantissant que l'ancienne liaison ne peut plus être utilisée. Si le développeur tente d'accéder à la variable après l'avoir consommée, le compilateur génère un diagnostic d'erreur. Cela permet de communiquer clairement l'intention de transfert de propriété pour optimiser les performances, notamment en évitant des copies inutiles (Copy-on-Write) lors du passage de variables vers d'autres fonctions.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0366" tabindex="-1"><a href="#avant-se-0366" class="header-anchor">Avant SE-0366</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">doStuffUniquely</span><span class="token punctuation">(</span>with value<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Int</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> newValue <span class="token operator">=</span> value
+    <span class="token comment">// Le compilateur doit potentiellement faire une copie ici </span>
+    <span class="token comment">// pour garantir la sécurité si l'appelant réutilise 'value'</span>
+    <span class="token keyword">var</span> newValue <span class="token operator">=</span> value 
     newValue<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">)</span>
     <span class="token function">process</span><span class="token punctuation">(</span>newValue<span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 
 <span class="token keyword">func</span> <span class="token function-definition function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token keyword">var</span> x<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Int</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span>
-    x<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span>
+    x<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">)</span>
+    
+    <span class="token comment">// On passe x à la fonction. </span>
+    <span class="token comment">// Swift doit incrémenter le compteur de référence ou copier par précaution.</span>
     <span class="token function">doStuffUniquely</span><span class="token punctuation">(</span>with<span class="token punctuation">:</span> x<span class="token punctuation">)</span>
-    <span class="token comment">// x est toujours techniquement accessible ici, ce qui peut empêcher </span>
-    <span class="token comment">// certaines optimisations de mutation en place dans doStuffUniquely.</span>
+    
+    <span class="token comment">// On aimerait que x soit déjà "vide" ou "déplacé" pour réutilisation immédiate</span>
+    <span class="token comment">// mais l'usage de x après doStuffUniquely est toujours valide techniquement.</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>Dans ce code, le compilateur ne peut pas garantir que <code>x</code> ne sera pas réutilisé après l'appel à <code>doStuffUniquely</code>, ce qui oblige potentiellement <code>doStuffUniquely</code> à effectuer une copie pour garantir l'unicité du buffer avant la mutation.</p>
+<p>Le code "Avant" oblige le développeur à accepter le comportement par défaut de Swift (gestion par comptage de références et copies défensives). Dans le cas de structures utilisant le <em>Copy-on-Write</em> (COW), même si <code>x</code> est la seule référence, le compilateur peut ne pas savoir avec certitude que <code>x</code> ne sera pas réutilisée après l'appel, ce qui peut entraîner des copies de données coûteuses lors de la mutation dans <code>doStuffUniquely</code>.</p>
 <h3 id="apr%C3%A8s-se-0366" tabindex="-1"><a href="#apr%C3%A8s-se-0366" class="header-anchor">Après SE-0366</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">doStuffUniquely</span><span class="token punctuation">(</span>with value<span class="token punctuation">:</span> consuming <span class="token punctuation">[</span><span class="token class-name">Int</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Grâce au paramètre 'consuming', on sait que 'value' est notre propriété.</span>
+    <span class="token comment">// 'consume' permet de déplacer la valeur sans copie.</span>
     <span class="token keyword">var</span> newValue <span class="token operator">=</span> consume value
     newValue<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">)</span>
     <span class="token function">process</span><span class="token punctuation">(</span>newValue<span class="token punctuation">)</span>
@@ -109,13 +117,18 @@
 
 <span class="token keyword">func</span> <span class="token function-definition function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token keyword">var</span> x<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Int</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span>
-    x<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">5</span><span class="token punctuation">)</span>
+    x<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">)</span>
+    
+    <span class="token comment">// L'opérateur 'consume' indique que x n'est plus utilisé ici.</span>
     <span class="token function">doStuffUniquely</span><span class="token punctuation">(</span>with<span class="token punctuation">:</span> consume x<span class="token punctuation">)</span>
     
-    <span class="token comment">// useX(x) // Erreur de compilation : utilisation de x après consommation</span>
+    <span class="token comment">// x.append(5) // ERREUR : x a été consommé, son lifetime est terminé.</span>
+    
+    x <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token comment">// OK : on réassigne une nouvelle valeur à x</span>
+    <span class="token function">doMoreStuff</span><span class="token punctuation">(</span>with<span class="token punctuation">:</span> <span class="token operator">&amp;</span>x<span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'utilisation de <code>consume x</code> transfère explicitement la propriété à la fonction. À l'intérieur de la fonction, <code>consume value</code> permet de récupérer la valeur sans copie supplémentaire. Le compilateur garantit également qu'aucune utilisation accidentelle de <code>x</code> n'aura lieu après ce point.</p>
+<p>L'opérateur <code>consume</code> permet de transférer explicitement la propriété de <code>x</code> à la fonction <code>doStuffUniquely</code>. Cela garantit que la valeur est mutée en place sans copie inutile. De plus, le compilateur devient un garde-fou : il interdit toute tentative d'utilisation accidentelle de <code>x</code> après qu'il a été consommé, augmentant ainsi la sécurité et la clarté du code.</p>
 
   </div>
 </article>

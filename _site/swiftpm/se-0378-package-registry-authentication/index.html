@@ -2,7 +2,7 @@
 <html lang="fr"><head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TofPlay - SE-0378 - Package Registry Authentication</title>
+    <title>TofPlay - SE-0378 - Package Registry Authentication Proposal</title>
 
     <meta name="supported-color-schemes" content="light dark">
     <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
@@ -40,7 +40,7 @@
               </a>
           </li>
           <li>
-              <span aria-current="page">SE-0378 - Package Registry Authentication</span>
+              <span aria-current="page">SE-0378 - Package Registry Authentication Proposal</span>
           </li>
       </ol>
 
@@ -73,42 +73,32 @@
     <main class="body-tag">
       <article class="post" data-pagefind-body="">
   <div class="post-body">
-    <h1>SE-0378 - Package Registry Authentication</h1>
+    <h1>SE-0378 - Package Registry Authentication Proposal</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
 <h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
 <p>Swift 5.8</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
-<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0378-package-registry-auth.md">SE-0378 - Package Registry Authentication</a></p>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0378-package-registry-auth.md">SE-0378 - Package Registry Authentication Proposal</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit un système d'authentification pour le gestionnaire de paquets Swift (SwiftPM) lors de l'interaction avec des registres de paquets. Jusqu'à présent, SwiftPM ne supportait que l'authentification de base (Basic Authentication), ce qui limitait l'interopérabilité avec de nombreux services modernes.</p>
-<p>La solution introduit :</p>
-<ul>
-<li>Des sous-commandes <code>login</code> et <code>logout</code> pour la gestion des identifiants via la commande <code>swift package-registry</code>.</li>
-<li>Le support de l'authentification par jeton (Token Authentication) en plus de l'authentification de base.</li>
-<li>Une gestion sécurisée des identifiants utilisant le magasin de mots de passe natif de l'OS (comme le Keychain sur macOS) ou, à défaut, le fichier <code>~/.netrc</code>.</li>
-<li>Une modification du fichier de configuration <code>registries.json</code> pour mapper les types d'authentification aux URLs des registres.</li>
-</ul>
+<p>La proposition introduit un mécanisme d'authentification pour la commande <code>swift package-registry</code>. Elle permet de gérer les accès aux registres de packages via deux méthodes : l'authentification de type <code>basic</code> (username et password) et l'authentification par <code>token</code> (access token). Le système utilise des sous-commandes <code>login</code> et <code>logout</code> pour gérer les identifiants. Les credentials sont stockés de manière sécurisée dans le magasin de mots de passe de l'OS (comme le Keychain sur macOS) ou, en cas d'indisponibilité, dans le fichier <code>netrc</code> de l'utilisateur. Le fichier de configuration <code>registries.json</code> est également mis à jour pour mémoriser le type d'authentification requis pour chaque URL de registre.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0378" tabindex="-1"><a href="#avant-se-0378" class="header-anchor">Avant SE-0378</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// SwiftPM ne supportait que l'authentification de base via des options limitées</span>
-<span class="token comment">// et ne permettait pas facilement l'utilisation de jetons (tokens).</span>
-<span class="token comment">// La gestion des identifiants était moins flexible et moins sécurisée.</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// SwiftPM ne supporte que l'authentification basic via des options limitées</span>
+<span class="token comment">// dans la commande swift package-registry set</span>
 </code></pre>
-<p>La limitation résidait dans l'impossibilité d'utiliser des méthodes d'authentification modernes comme les jetons d'accès (OAuth-like), limitant l'usage de SwiftPM avec des registres professionnels exigeant une sécurité accrue.</p>
+<p>La gestion des identifiants est limitée à l'authentification de type <code>basic</code>. L'absence de support pour les <code>access tokens</code> restreint l'interaction avec les services de registres modernes qui utilisent des méthodes d'authentification plus sécurisées ou différentes.</p>
 <h3 id="apr%C3%A8s-se-0378" tabindex="-1"><a href="#apr%C3%A8s-se-0378" class="header-anchor">Après SE-0378</a></h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Authentification de base (interactive)
-$ swift package-registry login https://example-registry.com \
-    --username jappleseed
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Authentification par token via la nouvelle commande login</span>
+swift package<span class="token operator">-</span>registry login https<span class="token punctuation">:</span><span class="token operator">//</span>example<span class="token operator">-</span>registry<span class="token punctuation">.</span>com <span class="token operator">--</span>token my_access_token
 
-# Authentification par jeton (Token)
-$ swift package-registry login https://example-registry.com \
-    --token jappleseedstoken
+<span class="token comment">// Authentification basic</span>
+swift package<span class="token operator">-</span>registry login https<span class="token punctuation">:</span><span class="token operator">//</span>example<span class="token operator">-</span>registry<span class="token punctuation">.</span>com <span class="token operator">--</span>username jappleseed <span class="token operator">--</span>password alpine
 
-# Déconnexion
-$ swift package-registry logout https://example-registry.com
+<span class="token comment">// Suppression des identifiants</span>
+swift package<span class="token operator">-</span>registry logout https<span class="token punctuation">:</span><span class="token operator">//</span>example<span class="token operator">-</span>registry<span class="token punctuation">.</span>com
 </code></pre>
-<p>La proposition permet d'utiliser des jetons d'accès de manière native et assure que les identifiants sont stockés de manière sécurisée dans le magasin de mots de passe du système d'exploitation.</p>
+<p>La proposition introduit des sous-commandes dédiées qui permettent de valider et de persister les accès. Le support des <code>tokens</code> via l'en-tête <code>Authorization: Bearer &lt;token&gt;</code> permet une compatibilité accrue avec les standards du web. L'utilisation du magasin de mots de passe natif de l'OS renforce la sécurité en évitant le stockage de secrets en clair dans des fichiers de projet.</p>
 
   </div>
 </article>

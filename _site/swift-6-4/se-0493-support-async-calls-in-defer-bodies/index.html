@@ -81,31 +81,34 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0493-defer-async.md">SE-0493 - Support async calls in defer bodies</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit la possibilité d'exécuter des appels asynchrones à l'intérieur des blocs <code>defer</code>. Auparavant, les blocs <code>defer</code> étaient strictement limités au code synchrone, empêchant toute opération de nettoyage nécessitant une suspension (comme la fermeture d'une ressource réseau ou l'écriture asynchrone d'un fichier).</p>
-<p>Avec cette modification, si un bloc <code>defer</code> contient un appel marqué par <code>await</code>, le moteur Swift générera implicitement un point de suspension à la sortie de la portée pour attendre la complétion de ce travail asynchrone. Cette fonctionnalité est conditionnée par le fait que le contexte d'appel (la fonction ou la closure) soit lui-même asynchrone.</p>
+<p>La proposition introduit la capacité d'exécuter des appels asynchrones à l'intérieur d'un bloc <code>defer</code>. Pour que cela soit possible, le contexte englobant doit déjà être marqué comme <code>async</code>. Lorsqu'un bloc <code>defer</code> contient un appel asynchrone (marqué par <code>await</code>), le langage génère implicitement un point de suspension lors de la sortie de la portée (scope) afin d'attendre la complétion de l'opération de nettoyage. L'ordre d'exécution des blocs <code>defer</code> reste inchangé (ordre inverse de déclaration). Le comportement vis-à-vis de l'annulation des tâches (<code>task cancellation</code>) reste identique aux blocs <code>defer</code> synchrones, garantissant que le code de nettoyage observe l'état de la tâche parente.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0493" tabindex="-1"><a href="#avant-se-0493" class="header-anchor">Avant SE-0493</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span> 
-    <span class="token keyword">await</span> <span class="token function">setUp</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
-    <span class="token comment">// error: 'async' call cannot occur in a defer body</span>
-    <span class="token keyword">defer</span> <span class="token punctuation">{</span> 
-        <span class="token keyword">await</span> <span class="token function">performAsyncTeardown</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
-    <span class="token punctuation">}</span> 
-    <span class="token keyword">try</span> <span class="token function">doSomething</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> <span class="token function">setUp</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    
+    <span class="token keyword">defer</span> <span class="token punctuation">{</span>
+        <span class="token comment">// error: 'async' call cannot occur in a defer body</span>
+        <span class="token keyword">await</span> <span class="token function">performAsyncTeardown</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token keyword">try</span> <span class="token function">doSomething</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>Actuellement, il est impossible d'utiliser <code>await</code> dans un <code>defer</code>, ce qui oblige les développeurs soit à dupliquer manuellement le code de nettoyage sur chaque chemin de sortie, soit à lancer une <code>Task</code> détachée (au risque de ne pas attendre la fin du nettoyage avant la fin de la fonction).</p>
+<p>Le langage interdit l'utilisation du mot-clé <code>await</code> à l'intérieur d'un bloc <code>defer</code>. Cela pose un problème majeur lorsque les opérations de nettoyage (comme fermer une connexion réseau ou écrire dans un fichier de manière asynchrone) nécessitent une suspension. Les développeurs sont alors obligés de soit répéter le code de nettoyage sur chaque chemin de sortie (risquant des erreurs), soit lancer une nouvelle <code>Task</code> (ce qui signifie que le nettoyage ne sera pas attendu et pourrait s'exécuter après la fin de la fonction).</p>
 <h3 id="apr%C3%A8s-se-0493" tabindex="-1"><a href="#apr%C3%A8s-se-0493" class="header-anchor">Après SE-0493</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span> 
-    <span class="token keyword">await</span> <span class="token function">setUp</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
-    <span class="token comment">// OK : le bloc est await-é implicitement à la sortie de la portée</span>
-    <span class="token keyword">defer</span> <span class="token punctuation">{</span> 
-        <span class="token keyword">await</span> <span class="token function">performAsyncTeardown</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
-    <span class="token punctuation">}</span> 
-    <span class="token keyword">try</span> <span class="token function">doSomething</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">f</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> <span class="token function">setUp</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    
+    <span class="token keyword">defer</span> <span class="token punctuation">{</span>
+        <span class="token comment">// OK: Le bloc est attendu lors de la sortie de la portée</span>
+        <span class="token keyword">await</span> <span class="token function">performAsyncTeardown</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token keyword">try</span> <span class="token function">doSomething</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>La proposition permet d'écrire du code de nettoyage asynchrone propre et sécurisé. Le système garantit que les blocs <code>defer</code> contenant des appels asynchrones seront exécutés et attendus (awaited) avant que la fonction ne se termine, assurant ainsi l'intégrité des ressources.</p>
+<p>La proposition permet l'utilisation de <code>await</code> dans un <code>defer</code> si la fonction parente est <code>async</code>. Le système attendra automatiquement la fin du bloc <code>defer</code> avant de quitter la fonction, garantissant un nettoyage complet et fiable sans intervention manuelle complexe.</p>
 
   </div>
 </article>

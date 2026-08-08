@@ -81,35 +81,43 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0442-allow-taskgroup-childtaskresult-type-to-be-inferred.md">SE-0442 - Allow TaskGroup's ChildTaskResult Type To Be Inferred</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Actuellement, les fonctions <code>withTaskGroup(of:returning:body:)</code> et <code>withThrowingTaskGroup(of:returning:body:)</code> obligent l'utilisateur à spécifier explicitement le type générique <code>ChildTaskResult</code> (le type de retour des tâches enfants) via le paramètre <code>of:</code>. Cette exigence peut être confuse, notamment lorsque le type est <code>Void</code>.</p>
-<p>La proposition SE-0442 introduit un argument par défaut pour le paramètre <code>of:</code>, permettant au compilateur d'inférer le type de <code>ChildTaskResult</code> à partir des expressions passées à <code>group.addTask</code>. Cela simplifie grandement l'API et améliore l'ergonomie, tout en conservant la possibilité de spécifier le type manuellement si nécessaire (par exemple, pour éviter des erreurs d'inférence lors de l'utilisation de <code>group.cancelAll()</code> avant le premier <code>addTask</code>).</p>
+<p>La proposition introduit la possibilité pour le compilateur d'inférer automatiquement le type <code>ChildTaskResult</code> dans les fonctions <code>withTaskGroup</code> et <code>withThrowingTaskGroup</code>.</p>
+<p>Jusqu'à présent, ces fonctions nécessitaient la spécification explicite du type de retour des tâches enfants via le paramètre <code>of:</code>. La modification consiste à ajouter une valeur par défaut pour le paramètre <code>childTaskResultType</code>, permettant ainsi au compilateur de déduire ce type en observant les appels à la méthode <code>addTask</code> à l'intérieur de la closure. Cela simplifie l'écriture du code en réduisant la redondance et en rendant l'API plus intuitive, notamment lorsque le type retourné est <code>Void</code>.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0442" tabindex="-1"><a href="#avant-se-0442" class="header-anchor">Avant SE-0442</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> messages <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">withTaskGroup</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> <span class="token class-name">Message</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> group <span class="token keyword">in</span>
-    <span class="token keyword">for</span> id <span class="token keyword">in</span> ids <span class="token punctuation">{</span>
-        group<span class="token punctuation">.</span>addTask <span class="token punctuation">{</span> <span class="token keyword">await</span> <span class="token function">downloadMessage</span><span class="token punctuation">(</span><span class="token keyword">for</span><span class="token punctuation">:</span> id<span class="token punctuation">)</span> <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">var</span> messages<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Message</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
-    <span class="token keyword">for</span> <span class="token keyword">await</span> message <span class="token keyword">in</span> group <span class="token punctuation">{</span>
-        messages<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> messages
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Il est obligatoire de spécifier le type de la tâche enfant (Message.self)</span>
+<span class="token keyword">let</span> messages <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">withTaskGroup</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> <span class="token class-name">Message</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> group <span class="token keyword">in</span> 
+    <span class="token keyword">for</span> id <span class="token keyword">in</span> ids <span class="token punctuation">{</span> 
+        group<span class="token punctuation">.</span>addTask <span class="token punctuation">{</span> 
+            <span class="token keyword">await</span> <span class="token function">downloadMessage</span><span class="token punctuation">(</span><span class="token keyword">for</span><span class="token punctuation">:</span> id<span class="token punctuation">)</span> 
+        <span class="token punctuation">}</span> 
+    <span class="token punctuation">}</span> 
+    
+    <span class="token keyword">var</span> messages<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Message</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span> 
+    <span class="token keyword">for</span> <span class="token keyword">await</span> message <span class="token keyword">in</span> group <span class="token punctuation">{</span> 
+        messages<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span> 
+    <span class="token punctuation">}</span> 
+    <span class="token keyword">return</span> messages 
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'utilisateur doit spécifier explicitement <code>Message.self</code> dans le paramètre <code>of:</code>, même si le type de retour de la closure <code>addTask</code> permettrait de le déduire.</p>
+<p>L'obligation de spécifier explicitement <code>Message.self</code> peut être confuse pour les nouveaux utilisateurs, car le système de types de Swift est capable de comprendre ce que renvoie <code>addTask</code> par l'analyse du code, mais l'API actuelle force une déclaration manuelle.</p>
 <h3 id="apr%C3%A8s-se-0442" tabindex="-1"><a href="#apr%C3%A8s-se-0442" class="header-anchor">Après SE-0442</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> messages <span class="token operator">=</span> <span class="token keyword">await</span> withTaskGroup <span class="token punctuation">{</span> group <span class="token keyword">in</span>
-    <span class="token keyword">for</span> id <span class="token keyword">in</span> ids <span class="token punctuation">{</span>
-        group<span class="token punctuation">.</span>addTask <span class="token punctuation">{</span> <span class="token keyword">await</span> <span class="token function">downloadMessage</span><span class="token punctuation">(</span><span class="token keyword">for</span><span class="token punctuation">:</span> id<span class="token punctuation">)</span> <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">var</span> messages<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Message</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
-    <span class="token keyword">for</span> <span class="token keyword">await</span> message <span class="token keyword">in</span> group <span class="token punctuation">{</span>
-        messages<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">return</span> messages
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le type ChildTaskResult est maintenant inféré automatiquement</span>
+<span class="token keyword">let</span> messages <span class="token operator">=</span> <span class="token keyword">await</span> withTaskGroup <span class="token punctuation">{</span> group <span class="token keyword">in</span> 
+    <span class="token keyword">for</span> id <span class="token keyword">in</span> ids <span class="token punctuation">{</span> 
+        group<span class="token punctuation">.</span>addTask <span class="token punctuation">{</span> 
+            <span class="token keyword">await</span> <span class="token function">downloadMessage</span><span class="token punctuation">(</span><span class="token keyword">for</span><span class="token punctuation">:</span> id<span class="token punctuation">)</span> 
+        <span class="token punctuation">}</span> 
+    <span class="token punctuation">}</span> 
+    
+    <span class="token keyword">var</span> messages<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Message</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span> 
+    <span class="token keyword">for</span> <span class="token keyword">await</span> message <span class="token keyword">in</span> group <span class="token punctuation">{</span> 
+        messages<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span> 
+    <span class="token punctuation">}</span> 
+    <span class="token keyword">return</span> messages 
 <span class="token punctuation">}</span>
 </code></pre>
-<p>Le type <code>ChildTaskResult</code> est maintenant automatiquement inféré comme <code>Message</code> grâce à l'expression <code>await downloadMessage(for: id)</code>, simplifiant ainsi l'appel de la fonction.</p>
+<p>La syntaxe est plus épurée. Le compilateur analyse la closure de <code>addTask</code> et déduit que <code>ChildTaskResult</code> est de type <code>Message</code>, tout en inférant également <code>GroupResult</code> comme étant <code>[Message]</code>. Cela rend l'utilisation des <code>TaskGroup</code> beaucoup plus fluide et moins verbeuse.</p>
 
   </div>
 </article>

@@ -2,7 +2,7 @@
 <html lang="fr"><head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TofPlay - SE-0414 - Region based Isolation</title>
+    <title>TofPlay - SE-0414 - Region based Isolation Proposal</title>
 
     <meta name="supported-color-schemes" content="light dark">
     <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
@@ -40,7 +40,7 @@
               </a>
           </li>
           <li>
-              <span aria-current="page">SE-0414 - Region based Isolation</span>
+              <span aria-current="page">SE-0414 - Region based Isolation Proposal</span>
           </li>
       </ol>
 
@@ -73,53 +73,62 @@
     <main class="body-tag">
       <article class="post" data-pagefind-body="">
   <div class="post-body">
-    <h1>SE-0414 - Region based Isolation</h1>
+    <h1>SE-0414 - Region based Isolation Proposal</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
-<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<h2 id="disponible-%C3%A0-partir" tabindex="-1"><a href="#disponible-%C3%A0-partir" class="header-anchor">Disponible à partir</a></h2>
 <p>Swift 6.0</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
-<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0414-region-based-isolation.md">SE-0414 - Region based Isolation</a></p>
+<p><a href="https://github.com/swiftlang/proposals/0414-region-based-isolation.md">SE-0414 - Region based Isolation Proposal</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>La proposition introduit le concept d'<strong>isolation par régions</strong> pour assouplir les restrictions de conformité <code>Sendable</code> dans Swift Concurrency. Actuellement, tout type non <code>Sendable</code> est interdit de transfert entre les domaines d'isolation (acteurs ou tâches) pour éviter les data races.</p>
-<p>Le mécanisme des régions permet au compilateur de raisonner sur la durée de vie et l'usage des valeurs. Si le compilateur peut prouver qu'un objet non <code>Sendable</code> n'est plus utilisé par le code appelant après avoir été transféré vers un acteur (transfert par "consumation"), alors le transfert est jugé sûr, même si l'objet lui-même n'est pas <code>Sendable</code>. Cette approche utilise un diagnostic sensible au flux de contrôle pour identifier les accès concurrents potentiels après un transfert, permettant ainsi des motifs de programmation plus naturels et réduisant le besoin de recourir à <code>@unchecked Sendable</code>.</p>
+<p>La proposition introduit le concept d'<strong>isolation regions</strong> (régions d'isolation) pour assouplir les restrictions de <code>Sendable</code> dans le modèle de concurrence de Swift. Le langage restreint le passage de valeurs non-<code>Sendable</code> entre différents domaines d'isolation (par exemple, d'un contexte non-isolés vers un <code>actor</code>), ce qui empêche des patterns de programmation pourtant sûrs.</p>
+<p>Le mécanisme utilise une analyse sensible au flux de contrôle (control flow) pour déterminer si une valeur non-<code>Sendable</code> peut être transférée en prouvant qu'elle n'est plus utilisée dans le contexte d'origine après le transfert. Le compilateur regroupe les valeurs qui peuvent s'influencer mutuellement (via des alias ou des accès de propriétés) dans une même région. Si une valeur est transférée vers un <code>actor</code>, elle rejoint la région de l' <code>actor</code> ; toute tentative d'accès ultérieur à cette valeur depuis le contexte d'origine est alors diagnostiquée comme une course de données potentielle.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0414" tabindex="-1"><a href="#avant-se-0414" class="header-anchor">Avant SE-0414</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Not Sendable</span>
-<span class="token keyword">class</span> <span class="token class-name">Client</span> <span class="token punctuation">{</span> 
-    <span class="token keyword">init</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">,</span> initialBalance<span class="token punctuation">:</span> <span class="token class-name">Double</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span> 
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Un type qui n'est pas Sendable</span>
+<span class="token keyword">class</span> <span class="token class-name">Client</span> <span class="token punctuation">{</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">,</span> initialBalance<span class="token punctuation">:</span> <span class="token class-name">Double</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 
-<span class="token keyword">actor</span> <span class="token class-name">ClientStore</span> <span class="token punctuation">{</span> 
-    <span class="token keyword">var</span> clients<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Client</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span> 
-    <span class="token keyword">func</span> <span class="token function-definition function">addClient</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> c<span class="token punctuation">:</span> <span class="token class-name">Client</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> clients<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span> <span class="token punctuation">}</span> 
+<span class="token keyword">actor</span> <span class="token class-name">ClientStore</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> clients<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Client</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">addClient</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> c<span class="token punctuation">:</span> <span class="token class-name">Client</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        clients<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 
-<span class="token keyword">func</span> <span class="token function-definition function">openNewAccount</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">,</span> initialBalance<span class="token punctuation">:</span> <span class="token class-name">Double</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span> 
-    <span class="token keyword">let</span> client <span class="token operator">=</span> <span class="token class-name">Client</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> name<span class="token punctuation">,</span> initialBalance<span class="token punctuation">:</span> initialBalance<span class="token punctuation">)</span> 
-    <span class="token keyword">await</span> <span class="token class-name">ClientStore</span><span class="token punctuation">.</span>shared<span class="token punctuation">.</span><span class="token function">addClient</span><span class="token punctuation">(</span>client<span class="token punctuation">)</span> <span class="token comment">// Error! 'Client' is non-`Sendable`! </span>
+<span class="token keyword">func</span> <span class="token function-definition function">openNewAccount</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">,</span> initialBalance<span class="token punctuation">:</span> <span class="token class-name">Double</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> client <span class="token operator">=</span> <span class="token class-name">Client</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> name<span class="token punctuation">,</span> initialBalance<span class="token punctuation">:</span> initialBalance<span class="token punctuation">)</span>
+    <span class="token comment">// Erreur ! 'Client' est non-`Sendable` !</span>
+    <span class="token keyword">await</span> <span class="token class-name">ClientStore</span><span class="token punctuation">.</span>shared<span class="token punctuation">.</span><span class="token function">addClient</span><span class="token punctuation">(</span>client<span class="token punctuation">)</span> 
 <span class="token punctuation">}</span>
 </code></pre>
-<p>Le compilateur bloque le transfert car <code>Client</code> n'est pas <code>Sendable</code>, empêchant de passer un objet fraîchement initialisé à un acteur, même si l'objet ne sera plus jamais utilisé localement.</p>
+<p>Le modèle impose des restrictions sévères qui bloquent des patterns naturels de programmation. Le compilateur ne peut pas garantir que l'instance <code>client</code> ne sera pas réutilisée, car il ne peut pas suivre l'unicité de la valeur, obligeant le développeur à utiliser des solutions peu sûres comme <code>@unchecked Sendable</code>.</p>
 <h3 id="apr%C3%A8s-se-0414" tabindex="-1"><a href="#apr%C3%A8s-se-0414" class="header-anchor">Après SE-0414</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Not Sendable</span>
-<span class="token keyword">class</span> <span class="token class-name">Client</span> <span class="token punctuation">{</span> 
-    <span class="token keyword">init</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">,</span> initialBalance<span class="token punctuation">:</span> <span class="token class-name">Double</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span> 
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">class</span> <span class="token class-name">Client</span> <span class="token punctuation">{</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">,</span> initialBalance<span class="token punctuation">:</span> <span class="token class-name">Double</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 
-<span class="token keyword">actor</span> <span class="token class-name">ClientStore</span> <span class="token punctuation">{</span> 
-    <span class="token keyword">var</span> clients<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Client</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span> 
-    <span class="token keyword">func</span> <span class="token function-definition function">addClient</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> c<span class="token punctuation">:</span> <span class="token class-name">Client</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> clients<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span> <span class="token punctuation">}</span> 
+<span class="token keyword">actor</span> <span class="token class-name">ClientStore</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> clients<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Client</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">addClient</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> c<span class="token punctuation">:</span> <span class="token class-name">Client</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        clients<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 
-<span class="token keyword">func</span> <span class="token function-definition function">openNewAccount</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">,</span> initialBalance<span class="token punctuation">:</span> <span class="token class-name">Double</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span> 
-    <span class="token keyword">let</span> client <span class="token operator">=</span> <span class="token class-name">Client</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> name<span class="token punctuation">,</span> initialBalance<span class="token punctuation">:</span> initialBalance<span class="token punctuation">)</span> 
-    <span class="token keyword">await</span> <span class="token class-name">ClientStore</span><span class="token punctuation">.</span>shared<span class="token punctuation">.</span><span class="token function">addClient</span><span class="token punctuation">(</span>client<span class="token punctuation">)</span> <span class="token comment">// Valide : transfert sûr car 'client' n'est plus utilisé</span>
+<span class="token keyword">func</span> <span class="token function-definition function">openNewAccount</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">,</span> initialBalance<span class="token punctuation">:</span> <span class="token class-name">Double</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> client <span class="token operator">=</span> <span class="token class-name">Client</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> name<span class="token punctuation">,</span> initialBalance<span class="token punctuation">:</span> initialBalance<span class="token punctuation">)</span>
     
-    <span class="token comment">// client.logToAuditStream() // Error! Déjà transféré dans l'isolation de ClientStore... cela pourrait provoquer une race!</span>
+    <span class="token comment">// Le transfert est autorisé car 'client' n'est plus utilisé ici</span>
+    <span class="token keyword">await</span> <span class="token class-name">ClientStore</span><span class="token punctuation">.</span>shared<span class="token punctuation">.</span><span class="token function">addClient</span><span class="token punctuation">(</span>client<span class="token punctuation">)</span>
+    
+    <span class="token comment">// Si on tentait d'utiliser 'client' ici, le compilateur </span>
+    <span class="token comment">// déclencherait une erreur car 'client' appartient désormais </span>
+    <span class="token comment">// à l'isolation de ClientStore</span>
+    <span class="token comment">// client.logToAuditStream() // Erreur !</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>Le compilateur autorise le transfert car il détecte que <code>client</code> n'est plus utilisé dans le contexte appelant après l'appel à <code>addClient</code>. Cependant, il génère une erreur si l'on tente d'accéder à l'objet après son transfert, garantissant la sécurité.</p>
+<p>La proposition résout le problème en permettant le transfert de valeurs non-<code>Sendable</code> dès lors que le compilateur prouve l'absence d'accès possible dans le contexte d'origine. Cela permet de conserver une sécurité maximale contre les courses de données tout en augmentant l'expressivité du langage.</p>
 
   </div>
 </article>

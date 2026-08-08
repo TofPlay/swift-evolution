@@ -76,58 +76,55 @@
     <h1>SE-0480 - Warning Control Settings for SwiftPM</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
-<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<h2 id="disponible-%C3%A0-partir" tabindex="-1"><a href="#disponible-%C3%A0-partir" class="header-anchor">Disponible à partir</a></h2>
 <p>Swift 6.2</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0480-swiftpm-warning-control.md">SE-0480 - Warning Control Settings for SwiftPM</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit une API unifiée dans Swift Package Manager (SwiftPM) pour contrôler la gestion des avertissements (warnings) lors de la compilation des langages Swift, C et C++.</p>
-<p>Auparavant, les développeurs devaient utiliser des <code>unsafeFlags</code> pour modifier le comportement des compilateurs, ce qui manquait de granularité et de sécurité. La nouvelle approche permet de :</p>
-<ul>
-<li>Transformer tous les avertissements en erreurs (<code>treatAllWarnings(as: .error)</code>) ou les maintenir en avertissements.</li>
-<li>Cibler des avertissements spécifiques pour modifier leur sévérité (<code>treatWarning(_:as:)</code>).</li>
-<li>Activer ou désactiver des groupes d'avertissements spécifiques pour le C et le C++ (<code>enableWarning</code>, <code>disableWarning</code>).</li>
-<li>Garantir que ces paramètres ne s'appliquent qu'aux cibles locales et non aux dépendances distantes (pour éviter que les avertissements d'une bibliothèque tierce ne fassent échouer la compilation du projet principal).</li>
-</ul>
+<p>Cette proposition introduit de nouveaux paramètres dans Swift Package Manager (SwiftPM) pour contrôler le traitement des avertissements (warnings) lors de la compilation pour les langages Swift, C et C++. Elle permet de définir si un avertissement doit être traité comme un simple avertissement ou comme une erreur bloquante via l'énumération <code>WarningLevel</code>. L'API propose des méthodes pour traiter tous les avertissements d'un coup ou cibler un avertissement spécifique via son nom. Pour le C et le C++, elle permet également d'activer ou de désactiver des groupes d'avertissements spécifiques. Les réglages sont appliqués uniquement aux cibles locales ; pour les dépendances distantes, SwiftPM remplace ces configurations par des options de suppression d'avertissements afin d'éviter que des avertissements dans une bibliothèque tierce ne fassent échouer la compilation du projet principal.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0480" tabindex="-1"><a href="#avant-se-0480" class="header-anchor">Avant SE-0480</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de unsafeFlags qui est moins sûr et moins explicite</span>
-<span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>
-    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyLib"</span></span><span class="token punctuation">,</span>
-    swiftSettings<span class="token punctuation">:</span> <span class="token punctuation">[</span>
-        <span class="token punctuation">.</span><span class="token function">unsafeFlags</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"-Werror"</span></span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token comment">// Force tous les warnings en erreurs</span>
-    <span class="token punctuation">]</span><span class="token punctuation">,</span>
-    cSettings<span class="token punctuation">:</span> <span class="token punctuation">[</span>
-        <span class="token punctuation">.</span><span class="token function">unsafeFlags</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"-Wno-unused-function"</span></span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token comment">// Désactive un warning spécifique</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le développeur utilise des unsafeFlags pour gérer les avertissements</span>
+<span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
+    targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyTarget"</span></span><span class="token punctuation">,</span>
+            cSettings<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+                <span class="token punctuation">.</span><span class="token function">unsafeFlags</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"-Werror"</span></span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token comment">// Force tous les avertissements C en erreurs</span>
+            <span class="token punctuation">]</span>
+        <span class="token punctuation">)</span>
     <span class="token punctuation">]</span>
 <span class="token punctuation">)</span>
 </code></pre>
-<p>L'utilisation de <code>unsafeFlags</code> est risquée car elle expose directement les flags du compilateur, peut varier selon le compilateur utilisé et ne permet pas une gestion propre via l'API de SwiftPM.</p>
+<p>L'utilisation de <code>unsafeFlags</code> manque d'abstraction et ne permet pas une gestion fine et sécurisée des avertissements pour Swift, C et C++ de manière unifiée au sein de SwiftPM.</p>
 <h3 id="apr%C3%A8s-se-0480" tabindex="-1"><a href="#apr%C3%A8s-se-0480" class="header-anchor">Après SE-0480</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
-    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyExecutable"</span></span><span class="token punctuation">,</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
     targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
-        <span class="token comment">// C target avec gestion fine des warnings</span>
         <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>
-            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"cfoo"</span></span><span class="token punctuation">,</span>
-            cSettings<span class="token punctuation">:</span> <span class="token punctuation">[</span>
-                <span class="token punctuation">.</span><span class="token function">enableWarning</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"all"</span></span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-                <span class="token punctuation">.</span><span class="token function">treatAllWarnings</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token punctuation">.</span>error<span class="token punctuation">)</span><span class="token punctuation">,</span>
-                <span class="token punctuation">.</span><span class="token function">treatWarning</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"unused-variable"</span></span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token punctuation">.</span>warning<span class="token punctuation">)</span><span class="token punctuation">,</span>
-            <span class="token punctuation">]</span>
-        <span class="token punctuation">)</span><span class="token punctuation">,</span>
-        <span class="token comment">// Swift target avec gestion fine des warnings</span>
-        <span class="token punctuation">.</span><span class="token function">executableTarget</span><span class="token punctuation">(</span>
-            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"swiftfoo"</span></span><span class="token punctuation">,</span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyTarget"</span></span><span class="token punctuation">,</span>
             swiftSettings<span class="token punctuation">:</span> <span class="token punctuation">[</span>
                 <span class="token punctuation">.</span><span class="token function">treatAllWarnings</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token punctuation">.</span>error<span class="token punctuation">)</span><span class="token punctuation">,</span>
-                <span class="token punctuation">.</span><span class="token function">treatWarning</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"DeprecatedDeclaration"</span></span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token punctuation">.</span>warning<span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token punctuation">.</span><span class="token function">treatWarning</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"DeprecatedDeclaration"</span></span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token punctuation">.</span>warning<span class="token punctuation">)</span>
+            <span class="token punctuation">]</span><span class="token punctuation">,</span>
+            cSettings<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+                <span class="token punctuation">.</span><span class="token function">enableWarning</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"all"</span></span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token punctuation">.</span><span class="token function">disableWarning</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"unused-function"</span></span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token punctuation">.</span><span class="token function">treatAllWarnings</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token punctuation">.</span>error<span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token punctuation">.</span><span class="token function">treatWarning</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"unused-variable"</span></span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token punctuation">.</span>warning<span class="token punctuation">)</span>
+            <span class="token punctuation">]</span><span class="token punctuation">,</span>
+            cxxSettings<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+                <span class="token punctuation">.</span><span class="token function">enableWarning</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"all"</span></span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token punctuation">.</span><span class="token function">disableWarning</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"unused-function"</span></span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token punctuation">.</span><span class="token function">treatAllWarnings</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token punctuation">.</span>error<span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token punctuation">.</span><span class="token function">treatWarning</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"unused-variable"</span></span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token punctuation">.</span>warning<span class="token punctuation">)</span>
             <span class="token punctuation">]</span>
-        <span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">)</span>
     <span class="token punctuation">]</span>
 <span class="token punctuation">)</span>
 </code></pre>
-<p>L'API est désormais typée et abstraction les flags spécifiques au compilateur (Clang/MSVC), offrant une méthode unifiée et sécurisée pour configurer la sévérité des avertissements par cible.</p>
+<p>La proposition résout le problème en fournissant une API structurée et multi-langage. L'utilisation de <code>treatAllWarnings</code> et <code>treatWarning</code> permet de contrôler précisément la sévérité des messages sans manipuler manuellement les drapeaux (flags) du compilateur. L'ordre des éléments dans les tableaux de réglages permet de gérer la priorité des drapeaux, respectant la logique du compilateur où le dernier flag spécifié prévaut.</p>
 
   </div>
 </article>

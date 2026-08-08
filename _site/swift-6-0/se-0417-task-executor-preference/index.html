@@ -81,34 +81,45 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0417-task-executor-preference.md">SE-0417 - Task Executor Preference</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>La proposition introduit le concept de "préférence d'exécuteur de tâche" (<em>task executor preference</em>). Actuellement, les fonctions asynchrones non isolées basculent systématiquement vers le pool global de threads de Swift Concurrency. Cette approche, bien que sécurisée, peut entraîner des changements de contexte (<em>context switching</em>) coûteux dans des systèmes haute performance (comme les serveurs basés sur des boucles d'événements).</p>
-<p>Le nouveau mécanisme permet de définir un exécuteur spécifique pour une tâche, lequel est "collant" (<em>sticky</em>) et se propage à toute la hiérarchie de tâches structurées (comme les <code>TaskGroup</code> ou <code>async let</code>). Si une préférence est définie, les fonctions non isolées s'exécuteront sur cet exécuteur plutôt que de basculer vers le pool global. Cette préférence peut également influencer l'endroit où les "acteurs par défaut" (ceux sans exécuteur personnalisé) exécutent leur code, sans pour autant rompre l'isolation des acteurs.</p>
+<p>La proposition introduit le concept de <strong>task executor preference</strong>, permettant de spécifier l'executor sur lequel un <code>Task</code> ou une hiérarchie de tâches structurées doit s'exécuter. Le comportement standard impose aux fonctions <code>nonisolated</code> de s'exécuter sur le <code>global concurrent executor</code>. Avec cette modification, si un <code>Task</code> possède une préférence d'executor, les fonctions <code>nonisolated</code> s'exécuteront sur cet executor au lieu de faire un "hop" vers le pool global. Cette préférence est "sticky" (collante) : elle est héritée par les tâches enfants via la programmation structurée (<code>async let</code>, <code>TaskGroup</code>). De plus, cette préférence peut influencer l'exécution des <code>default actors</code> (ceux qui n'ont pas de <code>custom executor</code>), en utilisant l'executor de la tâche pour fournir le thread d'exécution, tout en maintenant l'isolation via le <code>SerialExecutor</code> de l'actor.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0417" tabindex="-1"><a href="#avant-se-0417" class="header-anchor">Avant SE-0417</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">nonisolatedAsyncFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token operator">-&gt;</span> <span class="token class-name">Int</span> <span class="token punctuation">{</span>
-    <span class="token comment">// S'exécute toujours sur le pool global de Swift Concurrency</span>
-    <span class="token keyword">return</span> <span class="token number">42</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Un thread est utilisé pour l'actor</span>
+<span class="token keyword">actor</span> <span class="token class-name">Worker</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">doWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Travail sur l'executor de l'actor</span>
+    <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 
-<span class="token keyword">await</span> <span class="token function">nonisolatedAsyncFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
+<span class="token comment">// Une fonction nonisolated</span>
+<span class="token keyword">func</span> <span class="token function-definition function">nonisolatedFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+    <span class="token comment">// S'exécute toujours sur le global concurrent executor</span>
+<span class="token punctuation">}</span>
+
+<span class="token class-name">Task</span> <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> <span class="token function">nonisolatedFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Saut vers le global pool</span>
+<span class="token punctuation">}</span>
 </code></pre>
-<p>Les fonctions asynchrones non isolées basculent systématiquement vers l'exécuteur global concurrent par défaut, ce qui empêche de contrôler précisément le thread d'exécution pour optimiser les performances.</p>
+<p>Le comportement par défaut force les fonctions <code>nonisolated</code> à quitter l'exécution actuelle pour rejoindre le pool global de threads de Swift Concurrency. Cela entraîne des changements de contexte (context switching) coûteux dans des systèmes haute performance comme les event-loops.</p>
 <h3 id="apr%C3%A8s-se-0417" tabindex="-1"><a href="#apr%C3%A8s-se-0417" class="header-anchor">Après SE-0417</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation d'un exécuteur personnalisé via une préférence de tâche</span>
-<span class="token keyword">let</span> myExecutor <span class="token operator">=</span> <span class="token class-name">MyCustomExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition d'un executor personnalisé</span>
+<span class="token keyword">let</span> myExecutor<span class="token punctuation">:</span> any <span class="token class-name">TaskExecutor</span> <span class="token operator">=</span> <span class="token class-name">MyCustomExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 
-<span class="token class-name">Task</span><span class="token punctuation">(</span>executorPreference<span class="token punctuation">:</span> myExecutor<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment">// S'exécute sur myExecutor</span>
-    <span class="token keyword">await</span> <span class="token function">nonisolatedAsyncFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">func</span> <span class="token function-definition function">nonisolatedFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+    <span class="token comment">// S'exécutera sur l'executor de la tâche parente si une préférence est définie</span>
 <span class="token punctuation">}</span>
 
-<span class="token comment">// Utilisation via une portée spécifique</span>
-<span class="token keyword">await</span> <span class="token function">withTaskExecutorPreference</span><span class="token punctuation">(</span>myExecutor<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Toutes les tâches structurées ici utiliseront myExecutor</span>
-    <span class="token keyword">async</span> <span class="token keyword">let</span> value <span class="token operator">=</span> <span class="token function">nonisolatedAsyncFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-    <span class="token keyword">await</span> value
+<span class="token comment">// Utilisation d'une nouvelle API pour définir la préférence</span>
+<span class="token class-name">Task</span><span class="token punctuation">(</span>executorPreference<span class="token punctuation">:</span> myExecutor<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> <span class="token function">nonisolatedFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Exécuté sur myExecutor (pas de saut vers le global pool)</span>
+    
+    <span class="token keyword">await</span> <span class="token function">withTaskExecutorPreference</span><span class="token punctuation">(</span>myExecutor<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">async</span> <span class="token keyword">let</span> result <span class="token operator">=</span> <span class="token function">nonisolatedFunc</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Héritage de la préférence</span>
+        <span class="token function">print</span><span class="token punctuation">(</span><span class="token keyword">await</span> result<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>La proposition permet de spécifier un exécuteur via <code>Task(executorPreference:)</code> ou <code>withTaskExecutorPreference</code>. Les fonctions asynchrones non isolées au sein de ces tâches utiliseront l'exécuteur préféré, réduisant ainsi les changements de contexte inutiles tout en maintenant l'isolation des acteurs.</p>
+<p>La proposition permet de définir une préférence d'exécution qui se propage dans la hiérarchie. Les fonctions <code>nonisolated</code> utilisent cet executor, évitant ainsi les sauts inutiles vers le pool global et optimisant les performances pour les systèmes sensibles au changement de contexte.</p>
 
   </div>
 </article>

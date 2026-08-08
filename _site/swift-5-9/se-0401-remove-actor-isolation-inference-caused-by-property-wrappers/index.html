@@ -2,7 +2,7 @@
 <html lang="fr"><head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TofPlay - SE-0401 - Remove Property Wrapper Isolation Inference caused by Property Wrappers</title>
+    <title>TofPlay - SE-0401 - Remove Actor Isolation Inference caused by Property Wrappers</title>
 
     <meta name="supported-color-schemes" content="light dark">
     <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
@@ -40,7 +40,7 @@
               </a>
           </li>
           <li>
-              <span aria-current="page">SE-0401 - Remove Property Wrapper Isolation Inference caused by Property Wrappers</span>
+              <span aria-current="page">SE-0401 - Remove Actor Isolation Inference caused by Property Wrappers</span>
           </li>
       </ol>
 
@@ -73,56 +73,53 @@
     <main class="body-tag">
       <article class="post" data-pagefind-body="">
   <div class="post-body">
-    <h1>SE-0401 - Remove Property Wrapper Isolation Inference caused by Property Wrappers</h1>
+    <h1>SE-0401 - Remove Actor Isolation Inference caused by Property Wrappers</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
 <h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
 <p>Swift 5.9</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
-<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0401-remove-property-wrapper-isolation.md">SE-0401 - Remove Property Wrapper Isolation Inference caused by Property Wrappers</a></p>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0401-remove-property-wrapper-isolation.md">SE-0401 - Remove Actor Isolation Inference caused by Property Wrappers</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition vise à modifier le comportement de l'inférence d'isolation des acteurs en mode de langage Swift 6. Actuellement, si une propriété est marquée avec un Property Wrapper possédant une valeur isolée à un acteur global (comme <code>@MainActor</code>), le type contenant cette propriété hérite automatiquement de cette isolation. Ce comportement est jugé imprévisible car une modification mineure sur une propriété peut changer l'isolation d'une classe ou d'une structure entière, provoquant des erreurs de compilation "spookies" dans des fonctions liées sans lien direct. La solution consiste à désactiver cette inférence ascendante en Swift 6, forçant les développeurs à être explicites s'ils souhaitent isoler un type, augmentant ainsi la clarté et la raisonnabilité locale du code.</p>
+<p>La proposition supprime la règle d'inférence de l'isolation d'un <code>actor</code> (global actor) basée sur les <code>property wrapper</code>. Dans les versions précédentes de Swift, si une <code>struct</code> ou une <code>class</code> contenait une propriété utilisant un <code>property wrapper</code> qualifié par un <code>global actor</code> (comme <code>@MainActor</code>), l'ensemble de la <code>type</code> héritait automatiquement de cette isolation.</p>
+<p>La proposition introduit une séparation nette : l'isolation d'un <code>property wrapper</code> n'impacte plus l'isolation du <code>type</code> qui le contient. En mode de langage Swift 6, l'isolation doit être explicitement déclarée sur le <code>type</code> si elle est requise. Cela élimine l'effet "viral" où l'utilisation d'un simple attribut sur une propriété modifie le comportement de sécurité et de synchronisation de tout le composant.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0401" tabindex="-1"><a href="#avant-se-0401" class="header-anchor">Avant SE-0401</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@propertyWrapper</span> 
 <span class="token keyword">struct</span> <span class="token class-name">UIUpdating</span><span class="token operator">&lt;</span><span class="token class-name">Wrapped</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span> 
     <span class="token attribute atrule">@MainActor</span> <span class="token keyword">var</span> wrappedValue<span class="token punctuation">:</span> <span class="token class-name">Wrapped</span> 
-<span class="token punctuation">}</span> 
+<span class="token punctuation">}</span>
 
 <span class="token keyword">struct</span> <span class="token class-name">CounterView</span> <span class="token punctuation">{</span> 
+    <span class="token comment">// L'isolation @MainActor est inférée pour toute la struct </span>
+    <span class="token comment">// à cause du property wrapper ci-dessus.</span>
     <span class="token attribute atrule">@UIUpdating</span> <span class="token keyword">var</span> intValue<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token operator">=</span> <span class="token number">0</span> 
-    
-    <span class="token keyword">func</span> <span class="token function-definition function">doSomething</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token function">print</span><span class="token punctuation">(</span>intValue<span class="token punctuation">)</span>
+
+    <span class="token keyword">func</span> <span class="token function-definition function">updateUI</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> 
+        <span class="token comment">// Fonction qui semble non-isolée, mais qui est </span>
+        <span class="token comment">// en réalité isolée au MainActor par inférence.</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'utilisation du property wrapper <code>@UIUpdating</code> force l'inférence de <code>@MainActor</code> sur toute la structure <code>CounterView</code>, même si cela n'est pas explicitement écrit.</p>
+<p>L'utilisation d'un <code>property wrapper</code> avec un <code>global actor</code> provoque une "action fantôme à distance" (<em>spooky action at a distance</em>). Le développeur peut voir un changement d'isolation s'appliquer à toute la <code>struct</code> simplement en modifiant ou en supprimant une propriété, ce qui rend le raisonnement local sur la sécurité du code très difficile.</p>
 <h3 id="apr%C3%A8s-se-0401" tabindex="-1"><a href="#apr%C3%A8s-se-0401" class="header-anchor">Après SE-0401</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@propertyWrapper</span> 
 <span class="token keyword">struct</span> <span class="token class-name">UIUpdating</span><span class="token operator">&lt;</span><span class="token class-name">Wrapped</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span> 
     <span class="token attribute atrule">@MainActor</span> <span class="token keyword">var</span> wrappedValue<span class="token punctuation">:</span> <span class="token class-name">Wrapped</span> 
-<span class="token punctuation">}</span> 
-
-<span class="token keyword">struct</span> <span class="token class-name">CounterView</span> <span class="token punctuation">{</span> 
-    <span class="token attribute atrule">@UIUpdating</span> <span class="token keyword">var</span> intValue<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token operator">=</span> <span class="token number">0</span> 
-    
-    <span class="token keyword">func</span> <span class="token function-definition function">doSomething</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token function">print</span><span class="token punctuation">(</span>intValue<span class="token punctuation">)</span>
-    <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 
-<span class="token comment">// Pour obtenir le même comportement qu'avant, il faut être explicite :</span>
-<span class="token attribute atrule">@MainActor</span> 
-<span class="token keyword">struct</span> <span class="token class-name">ExplicitCounterView</span> <span class="token punctuation">{</span> 
+<span class="token comment">// L'isolation est maintenant explicite. </span>
+<span class="token comment">// La structure n'est pas automatiquement isolée au MainActor.</span>
+<span class="token keyword">struct</span> <span class="token class-name">CounterView</span> <span class="token punctuation">{</span> 
     <span class="token attribute atrule">@UIUpdating</span> <span class="token keyword">var</span> intValue<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token operator">=</span> <span class="token number">0</span> 
-    
-    <span class="token keyword">func</span> <span class="token function-definition function">doSomething</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token function">print</span><span class="token punctuation">(</span>intValue<span class="token punctuation">)</span>
+
+    <span class="token keyword">func</span> <span class="token function-definition function">updateUI</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> 
+        <span class="token comment">// La fonction reste non-isolée sauf si l'on </span>
+        <span class="token comment">// ajoute explicitement @MainActor sur la struct ou la méthode.</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>En mode Swift 6, la structure <code>CounterView</code> n'est plus automatiquement isolée au <code>MainActor</code>. L'isolation est devenue explicite et prévisible, évitant que des changements de propriétés ne modifient l'isolation globale de manière non intentionnelle.</p>
+<p>La proposition résout le problème en désactivant cette étape d'inférence automatique. L'isolation d'un <code>type</code> dépend désormais uniquement des annotations explicites (comme <code>@MainActor</code>) et non plus de l'implémentation interne de ses membres via les <code>property wrapper</code>. Cela garantit que le comportement d'un composant est prévisible et stable.</p>
 
   </div>
 </article>

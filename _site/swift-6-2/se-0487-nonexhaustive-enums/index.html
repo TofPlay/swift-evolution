@@ -76,28 +76,22 @@
     <h1>SE-0487 - Nonexhaustive enums</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
-<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<h2 id="disponible-%C3%A0-partir" tabindex="-1"><a href="#disponible-%C3%A0-partir" class="header-anchor">Disponible à partir</a></h2>
 <p>Swift 6.2.3</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0487-extensible-enums.md">SE-0487 - Nonexhaustive enums</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit l'attribut <code>@nonexhaustive</code> pour permettre aux développeurs de marquer les énumérations publiques dans des bibliothèques "non-résilientes" (non-ABI stable) comme étant extensibles.</p>
-<p>Actuellement, dans le dialecte par défaut de Swift, toute énumération est considérée comme non-extensible : l'ajout d'un nouveau cas est une rupture de l'API (breaking change) car les structures <code>switch</code> existantes ne sont plus exhaustives. L'introduction de <code>@nonexhaustive</code> permet de :</p>
-<ul>
-<li>Permettre l'ajout de nouveaux cas dans les énumérations publiques sans casser la compatibilité source pour les clients.</li>
-<li>Forcer les utilisateurs de bibliothèques à utiliser un cas <code>@unknown default</code> pour gérer les futurs membres.</li>
-<li>Offrir un mécanisme de transition via <code>@nonexhaustive(warn)</code> pour transformer progressivement une énumération fermée en énumération extensible.</li>
-</ul>
+<p>La proposition introduit l'attribut <code>@nonexhaustive</code> pour les <code>enum</code>. Cet attribut permet de marquer une <code>enum</code> publique dans une bibliothèque "non-resilient" (le mode par défaut de Swift) comme étant extensible. Lorsqu'une <code>enum</code> est marquée avec <code>@nonexhaustive</code>, le compilateur ne considère plus les <code>switch</code> qui couvrent uniquement les <code>case</code> connus comme exhaustifs si l'appel est effectué depuis un autre module. Cela force l'utilisateur à utiliser une clause <code>@unknown default</code> pour gérer d'éventuels nouveaux <code>case</code> ajoutés ultérieurement par la bibliothèque, garantissant ainsi une compatibilité binaire (ABI) et évitant des ruptures de code (breaking changes) lors de l'ajout de nouveaux membres. L'attribut <code>@nonexhaustive(warn)</code> est également introduit pour permettre une transition progressive en transformant l'erreur de compilation en avertissement.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0487" tabindex="-1"><a href="#avant-se-0487" class="header-anchor">Avant SE-0487</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans une bibliothèque publique (non-resilient)</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Module A</span>
 <span class="token keyword">public</span> <span class="token keyword">enum</span> <span class="token class-name">PizzaFlavor</span> <span class="token punctuation">{</span>
     <span class="token keyword">case</span> hawaiian
     <span class="token keyword">case</span> pepperoni
     <span class="token keyword">case</span> cheese
 <span class="token punctuation">}</span>
 
-<span class="token comment">// Dans l'application cliente</span>
+<span class="token comment">// Module B</span>
 <span class="token keyword">switch</span> pizzaFlavor <span class="token punctuation">{</span>
 <span class="token keyword">case</span> <span class="token punctuation">.</span>hawaiian<span class="token punctuation">:</span>
     <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Hawaiian"</span></span><span class="token punctuation">)</span>
@@ -107,17 +101,17 @@
     <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Cheese"</span></span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'ajout d'un nouveau cas (ex: <code>.veggie</code>) dans la bibliothèque brisera la compilation du client car le <code>switch</code> ne sera plus exhaustif.</p>
+<p>Le code ci-dessus est problématique car si le Module A ajoute un nouveau <code>case .veggie</code> dans une version future, le code du Module B ne compilera plus (erreur de "non-exhaustive switch"), rendant l'ajout d'un cas dans le Module A comme une rupture majeure de l'API.</p>
 <h3 id="apr%C3%A8s-se-0487" tabindex="-1"><a href="#apr%C3%A8s-se-0487" class="header-anchor">Après SE-0487</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans une bibliothèque publique (non-resilient)</span>
-<span class="token attribute atrule">@nonexhaustive</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Module A</span>
+<span class="token attribute atrule">@nonexhaustive</span> 
 <span class="token keyword">public</span> <span class="token keyword">enum</span> <span class="token class-name">PizzaFlavor</span> <span class="token punctuation">{</span>
     <span class="token keyword">case</span> hawaiian
     <span class="token keyword">case</span> pepperoni
     <span class="token keyword">case</span> cheese
 <span class="token punctuation">}</span>
 
-<span class="token comment">// Dans l'application cliente</span>
+<span class="token comment">// Module B</span>
 <span class="token keyword">switch</span> pizzaFlavor <span class="token punctuation">{</span>
 <span class="token keyword">case</span> <span class="token punctuation">.</span>hawaiian<span class="token punctuation">:</span>
     <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Hawaiian"</span></span><span class="token punctuation">)</span>
@@ -125,11 +119,11 @@
     <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Pepperoni"</span></span><span class="token punctuation">)</span>
 <span class="token keyword">case</span> <span class="token punctuation">.</span>cheese<span class="token punctuation">:</span>
     <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Cheese"</span></span><span class="token punctuation">)</span>
-<span class="token attribute atrule">@unknown</span> <span class="token keyword">default</span><span class="token punctuation">:</span>
+<span class="token keyword">case</span> <span class="token attribute atrule">@unknown</span> <span class="token keyword">default</span><span class="token punctuation">:</span>
     <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Unknown flavor"</span></span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'ajout d'un nouveau cas dans la bibliothèque n'entraîne plus d'erreur de compilation chez le client, celui-ci étant protégé par le bloc <code>@unknown default</code>.</p>
+<p>La proposition résout le problème en permettant au développeur d'indiquer explicitement que la <code>enum</code> est susceptible d'évoluer. Le développeur du Module B est alors encouragé (et forcé, s'il veut éviter les erreurs de compilation) à gérer le cas inconnu via <code>@unknown default</code>, protégeant ainsi son code contre les futurs ajouts de la bibliothèque.</p>
 
   </div>
 </article>
