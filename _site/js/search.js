@@ -42,12 +42,14 @@ async function getPageMeta(url) {
  */
 function buildResultHTML(item) {
   let ret = `<div class="pf-result">`;
+  const parentUrl = fullUrl(item.parent_url);
+  const pageUrl = fullUrl(item.url);
 
   if (item.parent) {
-    ret += `<a class="pf-result-parent" href="${fullUrl(item.parent_url)}">${item.parent}</a><br>`;
+    ret += `<a class="pf-result-parent" href="${parentUrl}">${item.parent}</a><br>`;
   }
 
-  ret += `<a class="pf-result-title" href="${fullUrl(item.url)}">${item.title}</a>`;
+  ret += `<a class="pf-result-title" href="${pageUrl}">${item.title}</a>`;
 
   if (item.excerpt) {
     ret += `<div class="pf-result-excerpt">${item.excerpt}</div>`
