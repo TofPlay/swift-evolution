@@ -192,6 +192,11 @@ main {
   padding-bottom: 0.7rem;
 }
 
+/* Séparateur plus discret en mode sombre */
+[data-theme="dark"] .pf-result {
+  border-bottom-color: #333;
+}
+
 .pf-result-parent {
   font-size: 0.85em;
   opacity: 0.7;
