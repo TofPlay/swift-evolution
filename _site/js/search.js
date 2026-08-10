@@ -1,3 +1,14 @@
+function fullUrl(path) {
+  // 1. Enlever les slashes de fin de base
+  const cleanBase = window.location.href.replace(/\/+$/, '');
+  
+  // 2. Enlever les slashes de début de path
+  const cleanPath = path.replace(/^\/+/, '');
+  
+  // 3. Les concaténer avec un seul slash
+  return cleanBase + '/' + cleanPath;
+}
+
 /**
  * Extrait les métadonnées Pagefind d'une URL de page
  * @param {string} url - L'URL de la page (ex: /swift-5-5/)
@@ -6,10 +17,10 @@
 async function getPageMeta(url) {
   try {
     // 1. Construire l'URL complète (en supposant que url est relative)
-    const fullUrl = new URL(url, window.location.origin).href;
+    const url = fullUrl(url);
     
     // 2. Récupérer le HTML de la page
-    const response = await fetch(fullUrl);
+    const response = await fetch(url);
     if (!response.ok) return { parent: null, parent_url: null };
     
     const html = await response.text();
@@ -68,7 +79,8 @@ window.addEventListener('DOMContentLoaded', () => {
       // Appel à l'API Pagefind
       const pagefindOptions = {meta: ["parent", "parent_url"]};
 
-      const pagefind = await import('/pagefind/pagefind.js');
+      const pageFindUrl = fullUrl('pagefind/pagefind.js');
+      const pagefind = await import(pageFindUrl);
       const search = await pagefind.search(query, pagefindOptions);
       
       const results = await Promise.all(
