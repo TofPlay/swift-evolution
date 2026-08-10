@@ -219,3 +219,131 @@ main {
 .pf-result-excerpt mark {
   background: #ffe566;
 }
+
+/* --- STYLES DE LA BARRE DE RECHERCHE (Correction Loupe) --- */
+
+/* Conteneur relatif pour positionner la loupe de manière absolue */
+.search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* La loupe : positionnée absolument pour rester fixe */
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: #666;
+  pointer-events: none; /* Ne pas interférer avec les clics sur l'input */
+  z-index: 10;
+}
+
+/* L'input : padding-left pour ne pas cacher le texte sous la loupe */
+#search-input {
+  width: 100%;
+  padding: 12px 40px 12px 40px; /* 40px de padding gauche et droit pour loupe + bouton */
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #333;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+#search-input:focus {
+  border-color: #007aff;
+}
+
+[data-theme="dark"] #search-input {
+  background-color: #1a1a2e;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .search-icon {
+  color: #aaa;
+}
+
+[data-theme="dark"] #search-input:focus {
+  border-color: #009fff;
+}
+
+/* --- Bouton "Effacer" à droite de l'input --- */
+.clear-search-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: none;
+  z-index: 10;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+  width: 28px;
+  height: 28px;
+  /* Réinitialisation complète */
+  padding: 0;
+  margin: 0;
+  font-size: 0;
+  line-height: 0;
+  min-height: 0;
+  min-width: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+}
+
+/* SVG à l'intérieur du bouton */
+.clear-search-btn svg {
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  display: block;
+  fill: #aaa;
+  transition: fill 0.2s ease, transform 0.3s ease;
+  /* Le SVG doit être centré dans le bouton */
+  margin: auto;
+}
+
+/* Afficher le bouton quand l'input a du contenu */
+.search-wrapper:has(#search-input:not(:placeholder-shown)) .clear-search-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+/* Apparence au survol : fond gris + icône bleue */
+.clear-search-btn:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.clear-search-btn:hover svg {
+  fill: #007aff;
+  transform: rotate(90deg);
+}
+
+/* État actif (clic) */
+.clear-search-btn:active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Thème sombre */
+[data-theme="dark"] .clear-search-btn svg {
+  fill: #888;
+}
+
+[data-theme="dark"] .clear-search-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .clear-search-btn:hover svg {
+  fill: #009fff;
+}

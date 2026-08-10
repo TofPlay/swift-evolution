@@ -69,6 +69,32 @@ window.addEventListener('DOMContentLoaded', () => {
   const input = document.getElementById('search-input');
   const resultsContainer = document.getElementById('search-results');
   const homeIntros = document.querySelectorAll('.home-intro');
+  const clearBtn = document.getElementById('clear-search');
+
+  /**
+   * Réinitialise la barre de recherche (vide l'input, masque les résultats, réaffiche les home-intro)
+   */
+  function clearSearch() {
+    input.value = '';
+    resultsContainer.innerHTML = '';
+    homeIntros.forEach(el => {
+      el.style.display = 'block';
+    });
+    input.focus();
+  }
+
+  // Gestion du bouton "Effacer"
+  if (clearBtn) {
+    clearBtn.addEventListener('click', clearSearch);
+  }
+
+  // Gestion de la touche ESC
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      clearSearch();
+    }
+  });
 
   input.addEventListener('input', async (e) => {
     const query = e.target.value;
