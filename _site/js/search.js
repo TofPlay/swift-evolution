@@ -1,6 +1,10 @@
 function fullUrl(path) {
-  // L'objet URL gère nativement la résolution des chemins relatifs/absolus
-  // par rapport à une URL de base.
+  const base = window.location.pathname;
+  
+  if (!path.startsWith(base)) {
+    path = base.replace(/\/+$/, '') + '/' + path.replace(/^\/+/, '');
+  }
+  
   return new URL(path, window.location.href).href;
 }
 
