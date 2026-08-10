@@ -1,12 +1,7 @@
 function fullUrl(path) {
-  // 1. Enlever les slashes de fin de base
-  const cleanBase = window.location.href.replace(/\/+$/, '');
-  
-  // 2. Enlever les slashes de début de path
-  const cleanPath = path.replace(/^\/+/, '');
-  
-  // 3. Les concaténer avec un seul slash
-  return cleanBase + '/' + cleanPath;
+  // L'objet URL gère nativement la résolution des chemins relatifs/absolus
+  // par rapport à une URL de base.
+  return new URL(path, window.location.href).href;
 }
 
 /**
@@ -17,10 +12,10 @@ function fullUrl(path) {
 async function getPageMeta(url) {
   try {
     // 1. Construire l'URL complète (en supposant que url est relative)
-    const url = fullUrl(url);
+    const pageUrl = fullUrl(url);
     
     // 2. Récupérer le HTML de la page
-    const response = await fetch(url);
+    const response = await fetch(pageUrl);
     if (!response.ok) return { parent: null, parent_url: null };
     
     const html = await response.text();
