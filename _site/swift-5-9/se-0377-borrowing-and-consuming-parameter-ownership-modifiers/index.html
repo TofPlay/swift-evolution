@@ -99,7 +99,7 @@
 <span class="token keyword">let</span> myString <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"Hello"</span></span>
 <span class="token function">process</span><span class="token punctuation">(</span>myString<span class="token punctuation">)</span>
 </code></pre>
-<p>Le comportement est géré de manière opaque par le compilateur via des règles de décision implicites, ce qui peut entraîner des copies ou des appels ARC (Reference Counting) supplémentaires non souhaités pour des raisons de performance.</p>
+<p>Le comportement est géré de manière opaque par le compilateur via des règles de décision implicites, ce qui peut entraîner des copies ou des appels ARC supplémentaires non souhaités.</p>
 <h3 id="apr%C3%A8s-se-0377" tabindex="-1"><a href="#apr%C3%A8s-se-0377" class="header-anchor">Après SE-0377</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">process</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> value<span class="token punctuation">:</span> borrowing <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token comment">// Le paramètre est emprunté : pas de copie implicite possible.</span>
@@ -107,38 +107,48 @@
     <span class="token comment">// let duplicate = value // ERREUR : tente de copier un paramètre 'borrowing'</span>
 <span class="token punctuation">}</span>
 
-<span class="token keyword">func</span> <span class="token function-definition function">consumeValue</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> value<span class="token punctuation">:</span> consuming <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<span class="token keyword">let</span> myString <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"Hello"</span></span>
+<span class="token function">process</span><span class="token punctuation">(</span>myString<span class="token punctuation">)</span> <span class="token comment">// Utilisation efficace sans copie inutile</span>
+</code></pre>
+<p>Avec <code>borrowing</code>, on garantit que le paramètre est utilisé sans être copié, offrant un contrôle fin sur l'optimisation des performances.</p>
+<h3 id="avant-se-0377-1" tabindex="-1"><a href="#avant-se-0377-1" class="header-anchor">Avant SE-0377</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">consumeValue</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> value<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Le paramètre est traité selon la règle par défaut du compilateur.</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> myString <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"Hello"</span></span>
+<span class="token function">consumeValue</span><span class="token punctuation">(</span>myString<span class="token punctuation">)</span>
+</code></pre>
+<p>Le développeur n'a aucun contrôle sur le fait que la fonction prend ou non la propriété de l'argument.</p>
+<h3 id="apr%C3%A8s-se-0377-1" tabindex="-1"><a href="#apr%C3%A8s-se-0377-1" class="header-anchor">Après SE-0377</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">consumeValue</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> value<span class="token punctuation">:</span> consuming <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token comment">// Le paramètre est consommé : la fonction prend la propriété.</span>
     <span class="token function">print</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 
 <span class="token keyword">let</span> myString <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"Hello"</span></span>
-<span class="token function">process</span><span class="token punctuation">(</span>myString<span class="token punctuation">)</span> <span class="token comment">// Utilisation efficace sans copie inutile</span>
+<span class="token function">consumeValue</span><span class="token punctuation">(</span>myString<span class="token punctuation">)</span> <span class="token comment">// La fonction prend explicitement la propriété</span>
 </code></pre>
-<p>Avec <code>borrowing</code>, on garantit que le paramètre est utilisé sans être copié, optimisant ainsi l'accès. Avec <code>consuming</code>, on indique explicitement que la fonction prend la propriété du paramètre, ce qui est essentiel pour définir un contrat clair, notamment avec les types non-copiables.</p>
-<h3 id="avant-se-0377-1" tabindex="-1"><a href="#avant-se-0377-1" class="header-anchor">Avant SE-0377</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">extension</span> <span class="token class-name">String</span> <span class="token punctuation">{</span>
-    <span class="token keyword">func</span> <span class="token function-definition function">appendExtra</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> other<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">String</span> <span class="token punctuation">{</span>
-        <span class="token keyword">var</span> result <span class="token operator">=</span> <span class="token keyword">self</span>
-        result <span class="token operator">+=</span> other
-        <span class="token keyword">return</span> result
-    <span class="token punctuation">}</span>
+<p>Avec <code>consuming</code>, on indique explicitement que la fonction prend la propriété du paramètre, définissant un contrat clair et prévisible.</p>
+<h3 id="avant-se-0377-1-1" tabindex="-1"><a href="#avant-se-0377-1-1" class="header-anchor">Avant SE-0377</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">dup</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> x<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">,</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token punctuation">(</span>x<span class="token punctuation">,</span> x<span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>La modification du paramètre implique souvent des copies de l'objet original ou une gestion automatique qui ne permet pas de tirer pleinement parti de l'unicité de la valeur.</p>
-<h3 id="apr%C3%A8s-se-0377-1" tabindex="-1"><a href="#apr%C3%A8s-se-0377-1" class="header-anchor">Après SE-0377</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">extension</span> <span class="token class-name">String</span> <span class="token punctuation">{</span>
-    consuming <span class="token keyword">func</span> <span class="token function-definition function">plus</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> other<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">String</span> <span class="token punctuation">{</span>
-        <span class="token comment">// 'self' est consommé, on peut donc le modifier en place </span>
-        <span class="token comment">// si l'instance est unique, optimisant les performances.</span>
-        <span class="token keyword">self</span> <span class="token operator">+=</span> other
-        <span class="token keyword">return</span> <span class="token keyword">self</span>
-    <span class="token punctuation">}</span>
+<p>Dans le code standard, une copie est effectuée implicitement pour satisfaire la signature de la fonction si une nouvelle instance est nécessaire.</p>
+<h3 id="apr%C3%A8s-se-0377-1-1" tabindex="-1"><a href="#apr%C3%A8s-se-0377-1-1" class="header-anchor">Après SE-0377</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">dup</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> x<span class="token punctuation">:</span> borrowing <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token punctuation">(</span><span class="token class-name">String</span><span class="token punctuation">,</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// ERREUR : tente de copier 'x' implicitement alors qu'il est marqué 'borrowing'</span>
+    <span class="token comment">// return (x, x) </span>
+    
+    <span class="token comment">// Solution : utiliser l'opérateur 'copy' pour une copie explicite</span>
+    <span class="token keyword">return</span> <span class="token punctuation">(</span>copy x<span class="token punctuation">,</span> copy x<span class="token punctuation">)</span> 
 <span class="token punctuation">}</span>
 
-<span class="token keyword">let</span> helloWorld <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"hello "</span></span><span class="token punctuation">.</span><span class="token function">plus</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"world"</span></span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> result <span class="token operator">=</span> <span class="token function">dup</span><span class="token punctuation">(</span>myString<span class="token punctuation">)</span>
 </code></pre>
-<p>En utilisant <code>consuming</code>, si la valeur possède une propriété d'unicité, la fonction peut modifier la valeur directement en mémoire (in-place), évitant ainsi une allocation et une copie coûteuse.</p>
+<p>L'opérateur <code>copy x</code> permet de lever l'interdiction de copie imposée par les modificateurs <code>borrowing</code> ou <code>consuming</code>, permettant une copie explicite et intentionnelle de la valeur.</p>
 
   </div>
 </article>
