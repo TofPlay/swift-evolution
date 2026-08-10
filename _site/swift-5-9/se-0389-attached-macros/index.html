@@ -93,10 +93,9 @@
 <li><strong>Member attribute macros</strong> : Appliquent des attributs sur les membres d'un type.</li>
 <li><strong>Conformance macros</strong> : Ajoutent des conformités à des protocoles.</li>
 </ul>
-<hr>
 <h3 id="peer-macros" tabindex="-1"><a href="#peer-macros" class="header-anchor">Peer macros</a></h3>
 <p>Les <strong>Peer macros</strong> génèrent de nouvelles déclarations au même niveau que la déclaration cible (ex: générer une version asynchrone d'une fonction synchrone).</p>
-<h3 id="apr%C3%A8s-se-0389" tabindex="-1"><a href="#apr%C3%A8s-se-0389" class="header-anchor">Après SE-0389</a></h3>
+<h4 id="apr%C3%A8s-se-0389" tabindex="-1"><a href="#apr%C3%A8s-se-0389" class="header-anchor">Après SE-0389</a></h4>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro</span>
 <span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>peer<span class="token punctuation">,</span> names<span class="token punctuation">:</span> overloaded<span class="token punctuation">)</span>
 <span class="token keyword">public</span> macro <span class="token class-name">AddCompletionHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MacroExamplesImplementation"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"AddCompletionHandlerMacro"</span></span><span class="token punctuation">)</span>
@@ -130,10 +129,9 @@
 <span class="token punctuation">}</span>
 </code></pre>
 <p>Les peer macros permettent de créer des variantes de fonctions (surcharges) ou des propriétés de support sans modifier la déclaration originale.</p>
-<hr>
 <h3 id="member-macros" tabindex="-1"><a href="#member-macros" class="header-anchor">Member macros</a></h3>
 <p>Les <strong>Member macros</strong> ajoutent des membres (propriétés, méthodes, types) à l'intérieur d'un type (class, struct, enum).</p>
-<h3 id="apr%C3%A8s-se-0389-1" tabindex="-1"><a href="#apr%C3%A8s-se-0389-1" class="header-anchor">Après SE-0389</a></h3>
+<h4 id="apr%C3%A8s-se-0389-1" tabindex="-1"><a href="#apr%C3%A8s-se-0389-1" class="header-anchor">Après SE-0389</a></h4>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro</span>
 <span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>member<span class="token punctuation">,</span> names<span class="token punctuation">:</span> arbitrary<span class="token punctuation">)</span>
 <span class="token keyword">public</span> macro <span class="token class-name">CaseDetection</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MacroExamplesImplementation"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"CaseDetectionMacro"</span></span><span class="token punctuation">)</span>
@@ -176,10 +174,9 @@
 <span class="token punctuation">}</span>
 </code></pre>
 <p>Les member macros simplifient la création de boilerplate pour les énumérations ou les structures (ex: génération automatique de propriétés basées sur les cas d'un enum).</p>
-<hr>
 <h3 id="accessor-macros" tabindex="-1"><a href="#accessor-macros" class="header-anchor">Accessor macros</a></h3>
 <p>Les <strong>Accessor macros</strong> modifient l'accès à une propriété en remplaçant sa valeur stockée par un bloc de code <code>get</code> ou <code>set</code>.</p>
-<h3 id="apr%C3%A8s-se-0389-1-1" tabindex="-1"><a href="#apr%C3%A8s-se-0389-1-1" class="header-anchor">Après SE-0389</a></h3>
+<h4 id="apr%C3%A8s-se-0389-1-1" tabindex="-1"><a href="#apr%C3%A8s-se-0389-1-1" class="header-anchor">Après SE-0389</a></h4>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro</span>
 <span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>accessor<span class="token punctuation">)</span>
 <span class="token keyword">public</span> macro <span class="token class-name">EnvironmentValue</span><span class="token punctuation">(</span><span class="token keyword">for</span> key<span class="token punctuation">:</span> any <span class="token class-name">EnvironmentKey</span><span class="token punctuation">.</span><span class="token keyword">Type</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MacroExamplesImplementation"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"EnvironmentValueMacro"</span></span><span class="token punctuation">)</span>
@@ -210,10 +207,9 @@
 <span class="token punctuation">}</span>
 </code></pre>
 <p>Les accessor macros permettent de déléguer le stockage d'une propriété à un dictionnaire ou un gestionnaire externe, transformant une propriété simple en propriété calculée.</p>
-<hr>
 <h3 id="member-attribute-macros" tabindex="-1"><a href="#member-attribute-macros" class="header-anchor">Member attribute macros</a></h3>
 <p>Les <strong>Member attribute macros</strong> ne créent pas de nouveaux membres, mais appliquent des attributs (comme <code>@objc</code> ou <code>@available</code>) sur les membres existants.</p>
-<h3 id="apr%C3%A8s-se-0389-1-1-1" tabindex="-1"><a href="#apr%C3%A8s-se-0389-1-1-1" class="header-anchor">Après SE-0389</a></h3>
+<h4 id="apr%C3%A8s-se-0389-1-1-1" tabindex="-1"><a href="#apr%C3%A8s-se-0389-1-1-1" class="header-anchor">Après SE-0389</a></h4>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro</span>
 <span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>memberAttribute<span class="token punctuation">)</span>
 <span class="token keyword">public</span> macro <span class="token function">memberDeprecated</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MacroExamplesImplementation"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MemberDeprecatedMacro"</span></span><span class="token punctuation">)</span>
