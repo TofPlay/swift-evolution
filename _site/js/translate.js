@@ -21,8 +21,4 @@
   const script = document.createElement("script");
   script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
   document.head.appendChild(script);
-
-  // Observer les changements dans le DOM pour cacher la barre
-  const observer = new MutationObserver(hideGoogleBar);
-  observer.observe(document.body, { childList: true, subtree: true });
 })();

@@ -4,11 +4,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TofPlay - Acceuil</title>
 
+
     <meta name="supported-color-schemes" content="light dark">
     <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
 
-    <link rel="stylesheet" href="/swift-evolution/pagefind/pagefind-ui.css"><link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
     <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
     <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
     <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
@@ -24,7 +25,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="description" content="Encore un site dédié à Swift">
 <meta name="generator" content="Lume 3.3.0">
-<script type="text/javascript" src="/swift-evolution/pagefind/pagefind-ui.js"></script><script type="text/javascript">window.addEventListener('DOMContentLoaded',()=>{new PagefindUI({"element":"#search","showImages":false,"excerptLength":0,"showEmptyFilters":true,"showSubResults":false,"resetStyles":true,"bundlePath":"/swift-evolution/pagefind/","baseUrl":"/swift-evolution/"});});</script></head>
+</head>
   <body>
     <nav class="navbar">
       <a href="/swift-evolution/" class="navbar-home">
@@ -59,7 +60,8 @@
     </header>
     
     <main class="body-tag">
-      <article class="post" data-pagefind-body="">
+      <article class="post" data-pagefind-body="" data-title="" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:">
+  
   <div class="post-body">
     <header class="page-header">
     <div class="home-intro body" style="margin-top: 0.75rem;">
@@ -71,7 +73,12 @@ Vous pouvez :</p>
 </ul>
     </div>
 
-  <div class="search" id="search"></div>
+  <div id="search-container">
+    <input type="text" id="search-input" placeholder="Rechercher...">
+    <div id="search-results"></div>
+  </div>
+
+  <script src="/swift-evolution/js/search.js"></script>
 
     <div class="home-intro body" style="margin-top: 0.75rem;">
       <p>Les versions Swift supportées sont :</p>
