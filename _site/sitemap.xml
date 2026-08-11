@@ -944,7 +944,7 @@
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/</loc>
-    <lastmod>2026-08-11T12:20:27.303Z</lastmod>
+    <lastmod>2026-08-05T18:19:52.621Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0063-swiftpm-system-module-search-paths/</loc>
@@ -1011,6 +1011,10 @@
     <lastmod>2026-08-11T12:20:27.315Z</lastmod>
   </url>
   <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0321-package-registry-service-publish-endpoint/</loc>
+    <lastmod>2026-08-11T14:09:05.893Z</lastmod>
+  </url>
+  <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0325-additional-package-plugin-apis/</loc>
     <lastmod>2026-08-11T12:20:27.312Z</lastmod>
   </url>
@@ -1063,5 +1067,9 @@
       https://tofplay.github.io/swift-evolution/swiftpm/se-0509-software-bill-of-materials-sbom-generation-for-swift-package-manager/
     </loc>
     <lastmod>2026-08-11T12:20:27.295Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0511-swift-package-add-target-plugin-command/</loc>
+    <lastmod>2026-08-11T14:22:09.255Z</lastmod>
   </url>
 </urlset>
