@@ -2,20 +2,19 @@
 <html lang="fr"><head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TofPlay - Content not found</title>
-
+    <title>Content not found - TofPlay</title>
 
     <meta name="supported-color-schemes" content="light dark">
     <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
-
+    
     <link rel="stylesheet" href="/swift-evolution/styles.css">
     <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
     <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
     <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
     <link rel="canonical" href="https://tofplay.github.io/swift-evolution/404.html">
     <script src="/swift-evolution/js/main.js" type="module"></script>
-    <link rel="stylesheet" href="/swift-evolution/custom.css">
+    <link rel="stylesheet" href="/swift-evolution/style/custom.css">
   <meta property="og:type" content="website">
 <meta property="og:site_name" content="TofPlay">
 <meta property="og:locale" content="fr">
@@ -32,48 +31,32 @@
           <strong>TofPlay</strong>
       </a>
 
-      <ol class="breadcrumb">
-      <li><a href="/swift-evolution/">Swift Evolution</a></li>
-
-      </ol>
-
-      <ul class="navbar-links">        <li>
-          <script>
-            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
-              ? "dark"
-              : "light");
+      <ul class="navbar-links">      <li>
+        <script>
+          let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+          document.documentElement.dataset.theme = theme;
+          function changeTheme() {
+            theme = theme === "dark" ? "light" : "dark";
+            localStorage.setItem("theme", theme);
             document.documentElement.dataset.theme = theme;
-            function changeTheme() {
-              theme = theme === "dark" ? "light" : "dark";
-              localStorage.setItem("theme", theme);
-              document.documentElement.dataset.theme = theme;
-            }
-          </script>
-          <button class="button" onclick="changeTheme()">
-            <span class="icon">◐</span>
-          </button>
-        </li>
-        <li class="lang-selector">
-          <div id="google_translate_element"></div>
-        </li>
+          }
+        </script>
+        <button class="button" onclick="changeTheme()">
+          <span class="icon">◐</span>
+        </button>
+      </li>
       </ul>
     </nav>
 
-    <header class="site-welcome">
-      <h1 class="page-title">Swift Evolution</h1>
-    </header>
-    
     <main class="">
       <h1>Content not found.</h1>
 <p>Go <a href="/swift-evolution/">home</a>.</p>
 
     </main>
 
-    <footer class="ai-disclaimer">
-      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
-    </footer>    
-
-    <script src="/swift-evolution/js/translate.js"></script>
-
+    <!-- Current page: /404.html -->
   
+
 </body></html>

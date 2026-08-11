@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0321 - Package Registry Service - Publish Endpoint Proposal</title>
+
+    <meta data-pagefind-meta="parent:Swift 5.6">
+    <meta data-pagefind-meta="parent_url:/swift-5-6/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-5-6/se-0321-package-registry-service-publish-endpoint/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/style/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-5-6/se-0321-package-registry-service-publish-endpoint/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-5-6/">
+                  Swift 5.6
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0321 - Package Registry Service - Publish Endpoint Proposal</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+        <li class="lang-selector">
+          <div id="google_translate_element"></div>
+        </li>
+      </ul>
+    </nav>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main class="body-tag">
+      <article class="post" data-pagefind-body="" data-title="SE-0321 - Package Registry Service - Publish Endpoint Proposal" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0321 - Package Registry Service - Publish Endpoint Proposal">
+  
+  <div class="post-body">
+    <h1>SE-0321 - Package Registry Service - Publish Endpoint Proposal</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.6</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0321-package-registry-publish.md">SE-0321 - Package Registry Service - Publish Endpoint Proposal</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit un nouvel endpoint <code>PUT /{scope}/{name}/{version}</code> au sein de la spécification du Package Registry. Ce mécanisme permet de publier une release de package de manière standardisée. Le processus permet à un mainteneur d'envoyer un archive source (format Zip) vers un registre via une requête HTTP. Le registre peut traiter cette requête de manière synchrone ou asynchrone pour effectuer des analyses de qualité ou de sécurité avant de rendre la version disponible pour les consommateurs via des requêtes <code>GET</code>.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0321" tabindex="-1"><a href="#avant-se-0321" class="header-anchor">Avant SE-0321</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// La disponibilité d'une release dépend d'un processus hors bande (out-of-band)</span>
+<span class="token comment">// Un registre doit consulter un index de packages publics pour identifier les nouvelles versions</span>
+<span class="token comment">// Il n'existe pas d'interface standardisée pour pousser directement une version vers le registre</span>
+</code></pre>
+<p>La distribution d'un package nécessite un processus externe où le registre doit deviner ou indexer manuellement les versions disponibles à partir de sources tierces. Cela limite l'interopérabilité entre les différents fournisseurs de services de registres.</p>
+<h3 id="apr%C3%A8s-se-0321" tabindex="-1"><a href="#apr%C3%A8s-se-0321" class="header-anchor">Après SE-0321</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Génération de l'archive source</span>
+$ swift package archive<span class="token operator">-</span>source
+
+<span class="token comment">// Publication de la release via une requête PUT</span>
+$ curl <span class="token operator">-</span><span class="token class-name">X</span> <span class="token constant">PUT</span> <span class="token operator">--</span>netrc <span class="token punctuation">\</span>
+ <span class="token operator">-</span><span class="token class-name">H</span> <span class="token string-literal"><span class="token string">"Accept: application/vnd.swift.registry.v1+json"</span></span> <span class="token punctuation">\</span>
+ <span class="token operator">-</span><span class="token class-name">F</span> source<span class="token operator">-</span>archive<span class="token operator">=</span><span class="token string-literal"><span class="token string">"@LinkedList-1.1.1.zip"</span></span> <span class="token punctuation">\</span>
+ <span class="token string-literal"><span class="token string">"https://registry.example.com/mona/LinkedList?version=1.1.1"</span></span>
+
+<span class="token comment">// Vérification de la disponibilité de la nouvelle version</span>
+$ curl <span class="token operator">-</span><span class="token class-name">X</span> <span class="token constant">GET</span> <span class="token operator">-</span><span class="token class-name">H</span> <span class="token string-literal"><span class="token string">"Accept: application/vnd.swift.registry.v1+json"</span></span> <span class="token punctuation">\</span>
+ <span class="token string-literal"><span class="token string">"https://registry.example.com/mona/LinkedList"</span></span> <span class="token punctuation">\</span>
+ <span class="token operator">|</span> jq <span class="token string-literal"><span class="token string">".[] | keys"</span></span>
+# <span class="token punctuation">[</span> <span class="token string-literal"><span class="token string">"1.0.0"</span></span><span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"1.1.0"</span></span><span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"1.1.1"</span></span><span class="token punctuation">,</span> <span class="token punctuation">]</span>
+</code></pre>
+<p>La proposition instaure un endpoint standard qui permet aux mainteneurs de distribuer leur logiciel directement vers un registre. Cette méthode assure une meilleure interopérabilité et permet au registre de gérer la distribution de manière robuste en recevant l'archive source directement.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>
