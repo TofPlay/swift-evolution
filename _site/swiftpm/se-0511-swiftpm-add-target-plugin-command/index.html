@@ -2,7 +2,7 @@
 <html lang="fr"><head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TofPlay - SE-0511 - swift package add-target-plugin Command</title>
+    <title>TofPlay - SE-0511 - SwiftPM Add Target Plugin Command</title>
 
     <meta data-pagefind-meta="parent:Swift Package Manager (SwiftPM)">
     <meta data-pagefind-meta="parent_url:/swiftpm/">
@@ -15,7 +15,7 @@
     <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
     <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
     <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
-    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swiftpm/se-0511-swift-package-add-target-plugin-command/">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swiftpm/se-0511-swiftpm-add-target-plugin-command/">
     <script src="/swift-evolution/js/main.js" type="module"></script>
     <link rel="stylesheet" href="/swift-evolution/style/custom.css">
   <meta property="og:type" content="website">
@@ -23,7 +23,7 @@
 <meta property="og:locale" content="fr">
 <meta property="og:title" content="Acceuil">
 <meta property="og:description" content="Encore un site dédié à Swift">
-<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swiftpm/se-0511-swift-package-add-target-plugin-command/">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swiftpm/se-0511-swiftpm-add-target-plugin-command/">
 <meta name="twitter:card" content="summary">
 <meta name="description" content="Encore un site dédié à Swift">
 <meta name="generator" content="Lume 3.3.0">
@@ -43,7 +43,7 @@
               </a>
           </li>
           <li>
-              <span aria-current="page">SE-0511 - swift package add-target-plugin Command</span>
+              <span aria-current="page">SE-0511 - SwiftPM Add Target Plugin Command</span>
           </li>
       </ol>
 
@@ -74,39 +74,41 @@
     </header>
     
     <main class="body-tag">
-      <article class="post" data-pagefind-body="" data-title="SE-0511 - swift package add-target-plugin Command" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0511 - swift package add-target-plugin Command">
+      <article class="post" data-pagefind-body="" data-title="SE-0511 - SwiftPM Add Target Plugin Command" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0511 - SwiftPM Add Target Plugin Command">
   
   <div class="post-body">
-    <h1>SE-0511 - swift package add-target-plugin Command</h1>
+    <h1>SE-0511 - SwiftPM Add Target Plugin Command</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
 <h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
 <p>Swift 6.4</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
-<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0511-swiftpm-add-target-plugin.md">SE-0511 - swift package add-target-plugin Command</a></p>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0511-swiftpm-add-target-plugin.md">SE-0511 - SwiftPM Add Target Plugin Command</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>La proposition introduit une nouvelle commande CLI : <code>swift package add-target-plugin</code>. Cette commande permet de modifier programmatiquement le fichier <code>Package.swift</code> pour ajouter l'utilisation d'un plugin à un <code>target</code> existant. La commande prend en paramètre le nom du plugin et le nom du <code>target</code>, avec une option optionnelle <code>--package</code> pour spécifier le package source du plugin. Le mécanisme assure l'idempotence en vérifiant si le plugin est déjà présent dans le tableau <code>plugins</code> du <code>target</code>, et préserve le formatage ainsi que les commentaires du manifeste lors de la modification.</p>
+<p>La proposition introduit une nouvelle commande <code>swift package add-target-plugin</code> pour Swift Package Manager (SwiftPM). Cette commande permet d'ajouter l'utilisation d'un plugin à un <code>target</code> existant directement depuis la ligne de commande, en modifiant le fichier <code>Package.swift</code>. La commande prend en argument le nom du plugin et le nom du <code>target</code> cible, avec une option optionnelle <code>--package</code> pour spécifier le package source du plugin. Le mécanisme garantit l'idempotence, évitant les doublons si le plugin est déjà présent, et préserve le formatage du manifeste lors de la modification.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0511" tabindex="-1"><a href="#avant-se-0511" class="header-anchor">Avant SE-0511</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Package.swift</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le manifeste Package.swift nécessite une modification manuelle</span>
 <span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
     name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
+    products<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
     targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
         <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>
             name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyTarget"</span></span><span class="token punctuation">,</span>
             dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+            <span class="token comment">// L'ajout d'un plugin nécessite d'éditer cette section manuellement</span>
         <span class="token punctuation">)</span>
     <span class="token punctuation">]</span>
 <span class="token punctuation">)</span>
 </code></pre>
-<p>L'ajout d'un build tool plugin nécessite une modification manuelle du fichier <code>Package.swift</code>. Cette manipulation est sujette à des erreurs de syntaxe et nécessite une connaissance précise de la structure du manifeste.</p>
+<p>L'ajout d'un plugin nécessite une édition manuelle du fichier <code>Package.swift</code>. Cette opération est sujette à des erreurs de syntaxe et exige une connaissance précise de la structure du manifeste.</p>
 <h3 id="apr%C3%A8s-se-0511" tabindex="-1"><a href="#apr%C3%A8s-se-0511" class="header-anchor">Après SE-0511</a></h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Commande pour ajouter le plugin OpenAPIGenerator au target MyTarget
-swift package add-target-plugin OpenAPIGenerator MyTarget --package swift-openapi-generator
-</code></pre>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Package.swift résultant</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Commande CLI pour ajouter le plugin</span>
+<span class="token comment">// swift package add-target-plugin OpenAPIGenerator MyTarget --package swift-openapi-generator</span>
+
 <span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
     name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
+    products<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token operator">...</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
     targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
         <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>
             name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyTarget"</span></span><span class="token punctuation">,</span>
@@ -118,7 +120,7 @@ swift package add-target-plugin OpenAPIGenerator MyTarget --package swift-openap
     <span class="token punctuation">]</span>
 <span class="token punctuation">)</span>
 </code></pre>
-<p>La commande <code>add-target-plugin</code> automatise l'insertion de la dépendance de plugin dans le <code>target</code> spécifié. Elle gère l'écriture sécurisée du manifeste et permet d'intégrer des outils de génération de code de manière efficace via l'interface de ligne de commande.</p>
+<p>La commande <code>add-target-plugin</code> automatise la modification du fichier <code>Package.swift</code>. Elle insère la syntaxe <code>.plugin(name:package:)</code> dans le tableau <code>plugins</code> du <code>target</code> spécifié, assurant une intégration correcte et conforme à la syntaxe du langage.</p>
 
   </div>
 </article>
