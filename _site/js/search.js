@@ -128,18 +128,44 @@ window.addEventListener('DOMContentLoaded', () => {
       );
 
       sortedResults = results
+        // 1. Reduce : Déduplication par title. Si conflit, on garde celui dont le parent ne contient pas "SwiftPM"
+        .reduce((acc, item) => {
+          const title = (item.title || '').trim();
+          if (!title) return acc;
+
+          const existing = acc.find(i => (i.title || '').trim() === title);
+          if (!existing) {
+            acc.push(item);
+            return acc;
+          }
+
+          const existingParent = (existing.parent || '').toLowerCase();
+          const currentItemParent = (item.parent || '').toLowerCase();
+          
+          const existingHasSwiftPM = existingParent.includes('swiftpm');
+          const currentItemHasSwiftPM = currentItemParent.includes('swiftpm');
+
+          if (existingHasSwiftPM && !currentItemHasSwiftPM) {
+            const index = acc.indexOf(existing);
+            acc[index] = item;
+          }
+
+          return acc;
+        }, [])
+        // 2. Filter : Exclure les items où le title est identique au parent (normalisé)
         .filter(item => {
           if (!item.parent) return true;
           const titleNormalized = (item.title || '').toLowerCase().trim();
           const parentNormalized = (item.parent || '').toLowerCase().trim();
           return titleNormalized !== parentNormalized;
         })
+        // 3. Sort : Tri alphabétique par titre
         .sort((a, b) => {
           const titleA = (a.title || '').toLowerCase();
           const titleB = (b.title || '').toLowerCase();
           return titleA.localeCompare(titleB, 'fr');
         });
-
+        
       // Rendu des résultats avec du JavaScript (inévitable pour la recherche dynamique)
       resultsContainer.innerHTML = sortedResults
         .map((item) => buildResultHTML(item))
