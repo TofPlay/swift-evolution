@@ -2,7 +2,7 @@
 <html lang="fr"><head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TofPlay - SE-0492 - Section Placement Control Proposal</title>
+    <title>TofPlay - SE-0492 - Section Placement Control</title>
 
     <meta data-pagefind-meta="parent:Swift 6.3">
     <meta data-pagefind-meta="parent_url:/swift-6-3/">
@@ -43,7 +43,7 @@
               </a>
           </li>
           <li>
-              <span aria-current="page">SE-0492 - Section Placement Control Proposal</span>
+              <span aria-current="page">SE-0492 - Section Placement Control</span>
           </li>
       </ol>
 
@@ -74,16 +74,16 @@
     </header>
     
     <main class="body-tag">
-      <article class="post" data-pagefind-body="" data-title="SE-0492 - Section Placement Control Proposal" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0492 - Section Placement Control Proposal">
+      <article class="post" data-pagefind-body="" data-title="SE-0492 - Section Placement Control" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0492 - Section Placement Control">
   
   <div class="post-body">
-    <h1>SE-0492 - Section Placement Control Proposal</h1>
+    <h1>SE-0492 - Section Placement Control</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
 <h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
 <p>Swift 6.3</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
-<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0492-section-control.md">SE-0492 - Section Placement Control Proposal</a></p>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0492-section-control.md">SE-0492 - Section Placement Control</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
 <p>La proposition introduit deux nouveaux <code>attribute</code> : <code>@section</code> et <code>@used</code>, applicables aux variables <code>global</code> ou <code>static</code>.</p>
 <p>L'attribut <code>@section</code> permet de spécifier le nom d'une section spécifique dans le fichier objet (par exemple pour ELF, Mach-O ou COFF) où la variable doit être placée. Pour garantir que la donnée soit lisible sans initialisation complexe au runtime, l'expression d'initialisation doit être une expression constante (constant expression), forçant ainsi une initialisation statique.</p>

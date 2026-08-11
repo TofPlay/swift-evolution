@@ -2,7 +2,7 @@
 <html lang="fr"><head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TofPlay - SE-0378 - Package Registry Authentication Proposal</title>
+    <title>TofPlay - SE-0378 - Package Registry Authentication</title>
 
     <meta data-pagefind-meta="parent:Swift Package Manager (SwiftPM)">
     <meta data-pagefind-meta="parent_url:/swiftpm/">
@@ -43,7 +43,7 @@
               </a>
           </li>
           <li>
-              <span aria-current="page">SE-0378 - Package Registry Authentication Proposal</span>
+              <span aria-current="page">SE-0378 - Package Registry Authentication</span>
           </li>
       </ol>
 
@@ -74,35 +74,43 @@
     </header>
     
     <main class="body-tag">
-      <article class="post" data-pagefind-body="" data-title="SE-0378 - Package Registry Authentication Proposal" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0378 - Package Registry Authentication Proposal">
+      <article class="post" data-pagefind-body="" data-title="SE-0378 - Package Registry Authentication" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0378 - Package Registry Authentication">
   
   <div class="post-body">
-    <h1>SE-0378 - Package Registry Authentication Proposal</h1>
+    <h1>SE-0378 - Package Registry Authentication</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
 <h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
 <p>Swift 5.8</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
-<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0378-package-registry-auth.md">SE-0378 - Package Registry Authentication Proposal</a></p>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0378-package-registry-auth.md">SE-0378 - Package Registry Authentication</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>La proposition introduit un mécanisme d'authentification pour la commande <code>swift package-registry</code>. Elle permet de gérer les accès aux registres de packages via deux méthodes : l'authentification de type <code>basic</code> (username et password) et l'authentification par <code>token</code> (access token). Le système utilise des sous-commandes <code>login</code> et <code>logout</code> pour gérer les identifiants. Les credentials sont stockés de manière sécurisée dans le magasin de mots de passe de l'OS (comme le Keychain sur macOS) ou, en cas d'indisponibilité, dans le fichier <code>netrc</code> de l'utilisateur. Le fichier de configuration <code>registries.json</code> est également mis à jour pour mémoriser le type d'authentification requis pour chaque URL de registre.</p>
+<p>Cette proposition introduit une gestion améliorée de l'authentification pour les registres de packages via Swift Package Manager (SwiftPM). Jusqu'à présent, SwiftPM ne supportait que l'authentification de base (basic authentication).</p>
+<p>La solution introduit :</p>
+<ul>
+<li>Le support de l'authentification par jeton (token authentication) via l'en-tête <code>Authorization: Bearer &lt;token&gt;</code>.</li>
+<li>De nouvelles commandes <code>swift package-registry login</code> et <code>logout</code> pour gérer les identifiants de manière sécurisée.</li>
+<li>L'utilisation du gestionnaire de mots de passe natif du système d'exploitation (ex: Keychain sur macOS) pour stocker les identifiants, avec un repli sur le fichier <code>.netrc</code> si le stockage natif n'est pas disponible.</li>
+<li>Une mise à jour de la configuration utilisateur <code>registries.json</code> pour répertorier les types d'authentification par domaine.</li>
+</ul>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0378" tabindex="-1"><a href="#avant-se-0378" class="header-anchor">Avant SE-0378</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// SwiftPM ne supporte que l'authentification basic via des options limitées</span>
-<span class="token comment">// dans la commande swift package-registry set</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// SwiftPM ne supportait que l'authentification de base.</span>
+<span class="token comment">// Les identifiants devaient souvent être gérés manuellement </span>
+<span class="token comment">// ou via des méthodes limitées dans le projet.</span>
 </code></pre>
-<p>La gestion des identifiants est limitée à l'authentification de type <code>basic</code>. L'absence de support pour les <code>access tokens</code> restreint l'interaction avec les services de registres modernes qui utilisent des méthodes d'authentification plus sécurisées ou différentes.</p>
+<p>SwiftPM ne permettait pas d'utiliser des jetons d'accès (access tokens), ce qui limitait l'interaction avec les services de registres modernes utilisant des protocoles comme OAuth ou des jetons API.</p>
 <h3 id="apr%C3%A8s-se-0378" tabindex="-1"><a href="#apr%C3%A8s-se-0378" class="header-anchor">Après SE-0378</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Authentification par token via la nouvelle commande login</span>
-swift package<span class="token operator">-</span>registry login https<span class="token punctuation">:</span><span class="token operator">//</span>example<span class="token operator">-</span>registry<span class="token punctuation">.</span>com <span class="token operator">--</span>token my_access_token
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Connexion via utilisateur et mot de passe (Basic)</span>
+<span class="token comment">// swift package-registry login https://example.com --username user --password pass</span>
 
-<span class="token comment">// Authentification basic</span>
-swift package<span class="token operator">-</span>registry login https<span class="token punctuation">:</span><span class="token operator">//</span>example<span class="token operator">-</span>registry<span class="token punctuation">.</span>com <span class="token operator">--</span>username jappleseed <span class="token operator">--</span>password alpine
+<span class="token comment">// Connexion via jeton (Token)</span>
+<span class="token comment">// swift package-registry login https://example.com --token my_secret_token</span>
 
-<span class="token comment">// Suppression des identifiants</span>
-swift package<span class="token operator">-</span>registry logout https<span class="token punctuation">:</span><span class="token operator">//</span>example<span class="token operator">-</span>registry<span class="token punctuation">.</span>com
+<span class="token comment">// Déconnexion</span>
+<span class="token comment">// swift package-registry logout https://example.com</span>
 </code></pre>
-<p>La proposition introduit des sous-commandes dédiées qui permettent de valider et de persister les accès. Le support des <code>tokens</code> via l'en-tête <code>Authorization: Bearer &lt;token&gt;</code> permet une compatibilité accrue avec les standards du web. L'utilisation du magasin de mots de passe natif de l'OS renforce la sécurité en évitant le stockage de secrets en clair dans des fichiers de projet.</p>
+<p>La proposition permet désormais une authentification flexible (Basic ou Token) et sécurise le stockage des secrets en utilisant le Keychain sur macOS ou le fichier <code>.netrc</code> de l'utilisateur, tout en supprimant le support des fichiers <code>.netrc</code> au niveau du projet pour éviter les fuites de données accidentelles.</p>
 
   </div>
 </article>
