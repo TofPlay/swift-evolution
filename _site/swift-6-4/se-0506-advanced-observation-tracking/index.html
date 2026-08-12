@@ -101,7 +101,7 @@ withObservationTracking <span class="token punctuation">{</span>
     <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Changement détecté"</span></span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'API actuelle est limitée par son nature asynchrone (coalescence des événements) et ne permet pas de distinguer précisément le moment de la modification (<code>willSet</code> vs <code>didSet</code>) ou de détecter la désinitialisation (<code>deinit</code>).</p>
+<p>L'API actuelle est limitée par sa nature asynchrone (coalescence des événements) et ne permet pas de distinguer précisément le moment de la modification (<code>willSet</code> vs <code>didSet</code>) ou de détecter la désinitialisation (<code>deinit</code>).</p>
 <h3 id="apr%C3%A8s-se-0506" tabindex="-1"><a href="#apr%C3%A8s-se-0506" class="header-anchor">Après SE-0506</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de l'option .willSet pour une synchronisation immédiate</span>
 <span class="token function">withObservationTracking</span><span class="token punctuation">(</span>options<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token keyword">willSet</span><span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token keyword">didSet</span><span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token keyword">deinit</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -119,17 +119,26 @@ withObservationTracking <span class="token punctuation">{</span>
     <span class="token punctuation">}</span>
     
     <span class="token keyword">if</span> event<span class="token punctuation">.</span><span class="token function">matches</span><span class="token punctuation">(</span><span class="token punctuation">\</span><span class="token punctuation">.</span>property<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"La propriété spécifique a changé"</span></span><span class="token punctuation">)</span>
+        <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"La propriété spécifique a a changé"</span></span><span class="token punctuation">)</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 
-<span class="token comment">// Utilisation de l'observation continue</span>
-<span class="token keyword">let</span> token <span class="token operator">=</span> <span class="token function">withContinuousObservationTracking</span><span class="token punctuation">(</span>options<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token keyword">willSet</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> event <span class="token keyword">in</span>
-    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Changement continu détecté"</span></span><span class="token punctuation">)</span>
+<span class="token comment">// Utilisation de l'observation continue pour une synchronisation persistante</span>
+<span class="token attribute atrule">@MainActor</span>
+<span class="token keyword">final</span> <span class="token keyword">class</span> <span class="token class-name">Controller</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> view<span class="token punctuation">:</span> <span class="token class-name">MyView</span>
+    <span class="token keyword">var</span> model<span class="token punctuation">:</span> <span class="token class-name">MyObservable</span>
+    <span class="token keyword">let</span> synchronization<span class="token punctuation">:</span> <span class="token class-name">ObservationTracking</span><span class="token punctuation">.</span><span class="token class-name">Token</span>
+
+    <span class="token keyword">init</span><span class="token punctuation">(</span>view<span class="token punctuation">:</span> <span class="token class-name">MyView</span><span class="token punctuation">,</span> model<span class="token punctuation">:</span> <span class="token class-name">MyObservable</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// L'observation est maintenue tant que 'synchronization' est conservé</span>
+        synchronization <span class="token operator">=</span> <span class="token function">withContinuousObservationTracking</span><span class="token punctuation">(</span>options<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token keyword">willSet</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">[</span>view<span class="token punctuation">,</span> model<span class="token punctuation">]</span> event <span class="token keyword">in</span>
+            view<span class="token punctuation">.</span>label<span class="token punctuation">.</span>text <span class="token operator">=</span> model<span class="token punctuation">.</span>someStringValue
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
-<span class="token comment">// On peut garder le token pour maintenir l'observation ou appeler token.cancel()</span>
 </code></pre>
-<p>La proposition permet de capturer précisément l'état de l'objet (avant ou après modification) et de gérer la désinitialisation, tout en offrant une option de surveillance continue pour des systèmes synchrones ou des infrastructures complexes.</p>
+<p>La proposition permet de capturer précisément l'état de l'objet (avant ou après modification) et de gérer la désinitialisation, tout en offrant une option de surveillance continue via un <code>Token</code> pour des systèmes nécessitant une synchronisation constante et automatique.</p>
 
   </div>
 </article>
