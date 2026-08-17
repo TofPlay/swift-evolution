@@ -48,6 +48,32 @@
       </ol>
 
       <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
           <script>
             let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
               ? "dark"
@@ -63,17 +89,31 @@
             <span class="icon">◐</span>
           </button>
         </li>
-        <li class="lang-selector">
-          <div id="google_translate_element"></div>
-        </li>
       </ul>
     </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
 
     <header class="site-welcome">
       <h1 class="page-title">Swift Evolution</h1>
     </header>
     
-    <main class="body-tag">
+    <main id="content" class="body-tag" data-original-lang="fr">
       <article class="post" data-pagefind-body="" data-title="SE-0292 - Package Registry Service" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0292 - Package Registry Service">
   
   <div class="post-body">
@@ -110,6 +150,7 @@ dependencies<span class="token punctuation">:</span> <span class="token punctuat
       ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
     </footer>    
 
+    <script src="/swift-evolution/js/locales.js"></script>
     <script src="/swift-evolution/js/translate.js"></script>
 
   

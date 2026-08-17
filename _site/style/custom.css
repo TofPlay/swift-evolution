@@ -3,8 +3,11 @@ main {
 }
 
 .navbar {
-  flex-wrap: wrap;
-  row-gap: 0.5rem;
+  flex-wrap: nowrap;
+  row-gap: 0;
+  align-items: center;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 .navbar .breadcrumb {
@@ -12,16 +15,26 @@ main {
   padding: 0;
   margin: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
+  flex-wrap: nowrap;
+  gap: 0.15rem;
   align-items: center;
-  font-size: 0.9rem;
-  flex: 1;
+  font-size: 0.8rem;
+  min-width: 0;
+  overflow: hidden;
+  margin-left: 0.5rem;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  margin-left: auto; /* Pousse les boutons à droite */
+  gap: 0.5rem;
 }
 
 .navbar .breadcrumb li:not(:last-child)::after {
   content: "›";
-  margin-left: 0.35rem;
+  margin-left: 0.15rem;
+  margin-right: 0.15rem;
   opacity: 0.5;
 }
 
@@ -31,10 +44,25 @@ main {
 
 .navbar .breadcrumb a {
   text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+  display: inline-block;
+  vertical-align: bottom;
 }
 
 .navbar .breadcrumb a:hover {
   text-decoration: underline;
+}
+
+.navbar .breadcrumb li:last-child a {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+  display: inline-block;
+  vertical-align: bottom;
 }
 
 .navbar .breadcrumb [aria-current="page"] {
@@ -349,5 +377,309 @@ main {
 }
 
 [data-theme="dark"] .clear-search-btn:hover svg {
+  fill: #009fff;
+}
+
+/* --- PageTranslator --- */
+
+/* Toolbar */
+.translate-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  font-family: system-ui, sans-serif;
+}
+
+/* Selection de la langue */
+.lang-switcher {
+  position: relative;
+  display: inline-block;
+}
+
+.lang-btn {
+  min-width: 120px;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.lang-list {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 140px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.lang-switcher.open .lang-list {
+  display: block;
+}
+
+.lang-list li {
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+}
+
+.lang-list li:hover,
+.lang-list li[aria-selected="true"] {
+  background: #f0f4ff;
+}
+
+/* --- Sélecteur de langue en mode sombre --- */
+[data-theme="dark"] .lang-btn {
+  background: #1a1a2e;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .lang-list {
+  background: #1a1a2e;
+  border-color: #444;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .lang-list li:hover,
+[data-theme="dark"] .lang-list li[aria-selected="true"] {
+  background: #2a2a4e;
+}
+
+[data-theme="dark"] .lang-list li[aria-selected="true"] {
+  color: #009fff;
+}
+
+/* Selection du service */
+
+.service-switcher {
+  position: relative;
+  display: inline-block;
+}
+
+.service-btn {
+  min-width: 120px;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.service-list {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 140px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.service-switcher.open .service-list {
+  display: block;
+}
+
+.service-list li {
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.service-list li:hover,
+.service-list li[aria-selected="true"] {
+  background: #f0f4ff;
+}
+
+/* --- Sélecteur de service en mode sombre --- */
+[data-theme="dark"] .service-btn {
+  background: #1a1a2e;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .service-list {
+  background: #1a1a2e;
+  border-color: #444;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .service-list li:hover,
+[data-theme="dark"] .service-list li[aria-selected="true"] {
+  background: #2a2a4e;
+}
+
+[data-theme="dark"] .service-list li[aria-selected="true"] {
+  color: #009fff;
+}
+
+/* Bouton de restauration */
+.restore-btn {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* --- Bouton Restaurer en mode sombre --- */
+[data-theme="dark"] .restore-btn {
+  background: #1a1a2e;
+  border: 1px solid #444;
+  color: #e0e0e0;
+}
+
+/* Status */
+.status {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* --- Statut en mode sombre --- */
+[data-theme="dark"] .status {
+  color: #aaa;
+}
+
+/* --- Placeholder pour réserver l'espace sous la navbar --- */
+/* Note : Cette classe n'est plus utilisée pour le positionnement, 
+   mais on la garde si tu l'utilises ailleurs. 
+   Avec position: fixed, on n'a plus besoin de réserver l'espace en flux normal. */
+.status-placeholder {
+  height: 48px;
+  width: 100%;
+  position: relative;
+  display: none; 
+}
+
+/* --- Panneau de statut (Flottant sous la navbar, aligné à droite) --- */
+.status-toast {
+  position: fixed;
+  right: 1rem;
+  z-index: 999;
+
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.status-content {
+  position: relative;
+  width: auto;
+  max-width: 600px;
+  margin-left: 0;
+  
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  
+  padding: 0.6rem 0.9rem;
+  background: hsl(220, 20%, 96%);
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  
+  font-size: 0.9rem;
+  color: #333;
+  font-weight: 500;
+  
+  pointer-events: auto;
+  animation: statusFadeIn 0.3s ease-out;
+}
+
+/* Le texte du statut */
+.status-content .status {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 0.5rem;
+}
+
+/* Le bouton de fermeture */
+.status-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.status-close svg {
+  width: 16px;
+  height: 16px;
+  fill: #888;
+}
+
+.status-close:hover svg {
+  fill: #007aff;
+}
+
+/* Barre de progression */
+.status-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--accent-color, #007aff);
+  width: 100%;
+  animation: statusShrink 10s linear forwards;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* État caché */
+.status-toast[hidden] {
+  display: none;
+}
+
+@keyframes statusFadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes statusShrink {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+/* --- Mode sombre --- */
+[data-theme="dark"] .status-content {
+  background: hsl(220, 20%, 14%);
+  border-color: #444;
+  color: #e0e0e0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .status-close svg {
+  fill: #aaa;
+}
+
+[data-theme="dark"] .status-close:hover svg {
   fill: #009fff;
 }

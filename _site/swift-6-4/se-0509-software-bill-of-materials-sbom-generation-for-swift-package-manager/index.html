@@ -48,6 +48,32 @@
       </ol>
 
       <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
           <script>
             let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
               ? "dark"
@@ -63,17 +89,31 @@
             <span class="icon">◐</span>
           </button>
         </li>
-        <li class="lang-selector">
-          <div id="google_translate_element"></div>
-        </li>
       </ul>
     </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
 
     <header class="site-welcome">
       <h1 class="page-title">Swift Evolution</h1>
     </header>
     
-    <main class="body-tag">
+    <main id="content" class="body-tag" data-original-lang="fr">
       <article class="post" data-pagefind-body="" data-title="SE-0509 - Software Bill of Materials (SBOM) Generation for Swift Package Manager" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0509 - Software Bill of Materials (SBOM) Generation for Swift Package Manager">
   
   <div class="post-body">
@@ -94,20 +134,20 @@
 <p>L'implémentation utilise une architecture en trois couches : un extracteur (lecture du graphe de dépendances), un convertisseur (formatage CycloneDX ou SPDX) et un validateur (vérification via schémas JSON).</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0509" tabindex="-1"><a href="#avant-se-0509" class="header-anchor">Avant SE-0509</a></h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># SwiftPM ne possède pas de commande native pour générer des SBOM
-# Les développeurs doivent utiliser des outils tiers qui analysent 
-# souvent uniquement Package.resolved, manquant ainsi les dépendances 
-# liées à la compilation (ex: dépendances spécifiques à un OS).
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># SwiftPM ne possède pas de commande native pour générer des SBOM</span>
+<span class="token comment"># Les développeurs doivent utiliser des outils tiers qui analysent </span>
+<span class="token comment"># souvent uniquement Package.resolved, manquant ainsi les dépendances </span>
+<span class="token comment"># liées à la compilation (ex: dépendances spécifiques à un OS).</span>
 </code></pre>
 <p>L'absence de support natif oblige à dépendre d'outils externes qui ne voient pas forcément le graphe de dépendances calculé par le système de build lors de la compilation.</p>
 <h3 id="apr%C3%A8s-se-0509" tabindex="-1"><a href="#apr%C3%A8s-se-0509" class="header-anchor">Après SE-0509</a></h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Générer un SBOM CycloneDX pendant le build
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># Générer un SBOM CycloneDX pendant le build</span>
 $ swift build --sbom-spec cyclonedx
 
-# Générer un SBOM SPDX spécifique pour un produit donné
-$ swift build --product MyProduct --sbom-spec spdx
+<span class="token comment"># Générer un SBOM SPDX spécifique pour un produit donné</span>
+$ swift build <span class="token parameter variable">--product</span> MyProduct --sbom-spec spdx
 
-# Générer un SBOM via la commande dédiée (basé sur le graphe des modules)
+<span class="token comment"># Générer un SBOM via la commande dédiée (basé sur le graphe des modules)</span>
 $ swift package generate-sbom --sbom-spec spdx
 </code></pre>
 <p>L'intégration native permet de générer des inventaires précis (CycloneDX ou SPDX) qui peuvent refléter fidèlement les dépendances utilisées réellement lors de la compilation, facilitant ainsi l'audit et la conformité réglementaire.</p>
@@ -120,6 +160,7 @@ $ swift package generate-sbom --sbom-spec spdx
       ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
     </footer>    
 
+    <script src="/swift-evolution/js/locales.js"></script>
     <script src="/swift-evolution/js/translate.js"></script>
 
   
