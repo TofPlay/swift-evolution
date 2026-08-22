@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0272 - Package Manager Binary Dependencies</title>
+
+    <meta data-pagefind-meta="parent:Swift 5.3">
+    <meta data-pagefind-meta="parent_url:/swift-5-3/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-5-3/se-0272-package-manager-binary-dependencies/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-5-3/se-0272-package-manager-binary-dependencies/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-5-3/">
+                  Swift 5.3
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0272 - Package Manager Binary Dependencies</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0272 - Package Manager Binary Dependencies" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0272 - Package Manager Binary Dependencies">
+  
+  <div class="post-body">
+    <h1>SE-0272 - Package Manager Binary Dependencies</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.3</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0272-swiftpm-binary-dependencies.md">SE-0272 - Package Manager Binary Dependencies</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit le support des dépendances binaires dans Swift Package Manager (SwiftPM). Elle permet d'intégrer des artefacts précompilés (notamment au format <code>.xcframework</code> pour les plateformes Apple) via le fichier <code>Package.swift</code>. Le mécanisme utilise de nouveaux <code>target</code> de type <code>.binaryTarget</code> qui requièrent une <code>url</code> et un <code>checksum</code> pour garantir l'intégrité du fichier. Cette fonctionnalité permet aux fournisseurs de logiciels de distribuer des SDK sans divulguer leur code source ou pour éviter des processus de compilation complexes. Le système supporte des artefacts provenant d'une <code>url</code> distante ou d'un <code>path</code> local.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0272" tabindex="-1"><a href="#avant-se-0272" class="header-anchor">Avant SE-0272</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// SwiftPM supporte uniquement les packages basés sur le code source.</span>
+<span class="token comment">// Un développeur souhaitant utiliser une bibliothèque fermée </span>
+<span class="token comment">// doit utiliser des solutions tierces comme Cocoapods.</span>
+<span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
+    products<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">library</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">,</span> targets<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">,</span> dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">)</span>
+</code></pre>
+<p>L'impossibilité d'inclure des fichiers binaires limite l'adoption de SwiftPM par les fournisseurs de SDK propriétaires qui ne souhaitent pas distribuer leur code source ou qui utilisent des processus de build non compatibles avec le modèle strict de SwiftPM.</p>
+<h3 id="apr%C3%A8s-se-0272" tabindex="-1"><a href="#apr%C3%A8s-se-0272" class="header-anchor">Après SE-0272</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"SomePackage"</span></span><span class="token punctuation">,</span>
+    platforms<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">macOS</span><span class="token punctuation">(</span><span class="token punctuation">.</span>v10_10<span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">.</span><span class="token function">iOS</span><span class="token punctuation">(</span><span class="token punctuation">.</span>v8<span class="token punctuation">)</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    products<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">library</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"SomePackage"</span></span><span class="token punctuation">,</span> targets<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"SomePackageLib"</span></span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token comment">// Définition d'un binary target via une URL avec checksum</span>
+        <span class="token punctuation">.</span><span class="token function">binaryTarget</span><span class="token punctuation">(</span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"SomePackageLib"</span></span><span class="token punctuation">,</span>
+            url<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"https://github.com/some/package/releases/download/1.0.0/SomePackage-1.0.0.zip"</span></span><span class="token punctuation">,</span>
+            checksum<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"839F9F30DC13C30795666DD8F6FB77DD0E097B83D06954073E34FE5154481F7A"</span></span>
+        <span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token comment">// Définition d'un binary target via un chemin local</span>
+        <span class="token punctuation">.</span><span class="token function">binaryTarget</span><span class="token punctuation">(</span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"SomeLibOnDisk"</span></span><span class="token punctuation">,</span>
+            path<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"artifacts/SomeLibOnDisk.zip"</span></span>
+        <span class="token punctuation">)</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">)</span>
+</code></pre>
+<p>La proposition résout le problème en permettant de déclarer un <code>binaryTarget</code>. L'utilisation d'un <code>checksum</code> assure la sécurité en vérifiant que l'artefact téléchargé correspond exactement à celui attendu, empêchant ainsi toute modification malveillante du binaire sur le serveur distant. Le support des <code>.xcframework</code> permet une intégration native et simplifiée pour les développeurs iOS.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>
