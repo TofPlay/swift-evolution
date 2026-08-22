@@ -1,0 +1,685 @@
+main {
+  padding-top: 0.5rem; /* ou 0 si tu veux coller complètement */
+}
+
+.navbar {
+  flex-wrap: nowrap;
+  row-gap: 0;
+  align-items: center;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.navbar .breadcrumb {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.15rem;
+  align-items: center;
+  font-size: 0.8rem;
+  min-width: 0;
+  overflow: hidden;
+  margin-left: 0.5rem;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  margin-left: auto; /* Pousse les boutons à droite */
+  gap: 0.5rem;
+}
+
+.navbar .breadcrumb li:not(:last-child)::after {
+  content: "›";
+  margin-left: 0.15rem;
+  margin-right: 0.15rem;
+  opacity: 0.5;
+}
+
+.navbar .breadcrumb li:last-child::after {
+  content: none;
+}
+
+.navbar .breadcrumb a {
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+.navbar .breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.navbar .breadcrumb li:last-child a {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+.navbar .breadcrumb [aria-current="page"] {
+  opacity: 0.7;
+}
+
+.site-welcome {
+  max-width: min(100% - 15vw, 45em);
+  margin: 0 auto;
+  padding: 0.5rem 0 0;
+}
+
+.site-welcome .page-title {
+  margin: 0;
+}
+
+.page-header {
+  margin-bottom: 0.5rem; /* ou 0 si tu veux encore plus serré */
+}
+
+.breadcrumb {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.breadcrumb ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.breadcrumb li:not(:last-child)::after {
+  content: "›";
+  margin-left: 0.35rem;
+  opacity: 0.5;
+}
+
+.breadcrumb a {
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb [aria-current="page"] {
+  opacity: 0.7;
+}
+
+/* --- Base du Footer (Positionnement & Structure) --- */
+.ai-disclaimer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.2rem;
+  border-top: 1px solid;
+  z-index: 1000;
+  box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(5px);
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+/* --- Thème Clair (Par défaut) --- */
+.ai-disclaimer {
+  color: #666;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-top-color: #eee;
+  box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* --- Thème Sombre (Géré par le bouton de changement de thème) --- */
+/* Le JavaScript dans base.vto définit data-theme="dark" sur <html> */
+[data-theme="dark"] .ai-disclaimer {
+  color: #e0e0e0;
+  background-color: rgba(20, 20, 20, 0.95);
+  border-top-color: #333;
+  box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Sélecteur de langue dans la navbar --- */
+.navbar-links .lang-selector {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-links .lang-selector select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 1px solid;
+  border-color: var(--border-color, #ddd);
+  border-radius: 6px;
+  padding: 0.3rem 1.8rem 0.3rem 0.4rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+  font-family: inherit;
+  color: inherit;
+}
+
+[data-theme="dark"] .navbar-links .lang-selector select {
+  border-color: var(--border-color, #444);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #e0e0e0;
+}
+
+.navbar-links .lang-selector select:hover {
+  border-color: var(--accent-color, #007aff);
+}
+
+.navbar-links .lang-selector select:focus {
+  outline: 2px solid var(--accent-color, #007aff);
+  outline-offset: 2px;
+}
+
+.navbar-links .lang-selector select option {
+  background: var(--bg-color, #fff);
+  color: #333;
+  padding: 0.4rem;
+}
+
+[data-theme="dark"] .navbar-links .lang-selector select option {
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
+/* Flèche custom pour le select */
+.navbar-links .lang-selector select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  padding-right: 2rem;
+}
+
+[data-theme="dark"] .navbar-links .lang-selector select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23aaa' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+}
+
+/* Titre parent au-dessus du titre de la page */
+.pf-result {
+  display: block;
+  border-bottom: 1px solid #eee;
+  text-decoration: none;
+  color: inherit;
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+}
+
+/* Séparateur plus discret en mode sombre */
+[data-theme="dark"] .pf-result {
+  border-bottom-color: #333;
+}
+
+.pf-result-parent {
+  font-size: 0.85em;
+  opacity: 0.7;
+}
+
+.pf-result-parent a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.pf-result-parent a:hover {
+  text-decoration: underline;
+}
+
+.pf-result-title {
+  font-weight: 600;
+}
+
+.pf-result-excerpt {
+  font-size: 0.95em;
+  opacity: 0.85;
+  line-height: 1.4;
+}
+
+.pf-result-excerpt mark {
+  background: #ffe566;
+}
+
+/* --- STYLES DE LA BARRE DE RECHERCHE (Correction Loupe) --- */
+
+/* Conteneur relatif pour positionner la loupe de manière absolue */
+.search-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* La loupe : positionnée absolument pour rester fixe */
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: #666;
+  pointer-events: none; /* Ne pas interférer avec les clics sur l'input */
+  z-index: 10;
+}
+
+/* L'input : padding-left pour ne pas cacher le texte sous la loupe */
+#search-input {
+  width: 100%;
+  padding: 12px 40px 12px 40px; /* 40px de padding gauche et droit pour loupe + bouton */
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #333;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+#search-input:focus {
+  border-color: #007aff;
+}
+
+[data-theme="dark"] #search-input {
+  background-color: #1a1a2e;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .search-icon {
+  color: #aaa;
+}
+
+[data-theme="dark"] #search-input:focus {
+  border-color: #009fff;
+}
+
+/* --- Bouton "Effacer" à droite de l'input --- */
+.clear-search-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: none;
+  z-index: 10;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+  width: 28px;
+  height: 28px;
+  /* Réinitialisation complète */
+  padding: 0;
+  margin: 0;
+  font-size: 0;
+  line-height: 0;
+  min-height: 0;
+  min-width: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+}
+
+/* SVG à l'intérieur du bouton */
+.clear-search-btn svg {
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  display: block;
+  fill: #aaa;
+  transition: fill 0.2s ease, transform 0.3s ease;
+  /* Le SVG doit être centré dans le bouton */
+  margin: auto;
+}
+
+/* Afficher le bouton quand l'input a du contenu */
+.search-wrapper:has(#search-input:not(:placeholder-shown)) .clear-search-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+/* Apparence au survol : fond gris + icône bleue */
+.clear-search-btn:hover {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+.clear-search-btn:hover svg {
+  fill: #007aff;
+  transform: rotate(90deg);
+}
+
+/* État actif (clic) */
+.clear-search-btn:active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Thème sombre */
+[data-theme="dark"] .clear-search-btn svg {
+  fill: #888;
+}
+
+[data-theme="dark"] .clear-search-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .clear-search-btn:hover svg {
+  fill: #009fff;
+}
+
+/* --- PageTranslator --- */
+
+/* Toolbar */
+.translate-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  font-family: system-ui, sans-serif;
+}
+
+/* Selection de la langue */
+.lang-switcher {
+  position: relative;
+  display: inline-block;
+}
+
+.lang-btn {
+  min-width: 120px;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.lang-list {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 140px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.lang-switcher.open .lang-list {
+  display: block;
+}
+
+.lang-list li {
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+}
+
+.lang-list li:hover,
+.lang-list li[aria-selected="true"] {
+  background: #f0f4ff;
+}
+
+/* --- Sélecteur de langue en mode sombre --- */
+[data-theme="dark"] .lang-btn {
+  background: #1a1a2e;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .lang-list {
+  background: #1a1a2e;
+  border-color: #444;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .lang-list li:hover,
+[data-theme="dark"] .lang-list li[aria-selected="true"] {
+  background: #2a2a4e;
+}
+
+[data-theme="dark"] .lang-list li[aria-selected="true"] {
+  color: #009fff;
+}
+
+/* Selection du service */
+
+.service-switcher {
+  position: relative;
+  display: inline-block;
+}
+
+.service-btn {
+  min-width: 120px;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.service-list {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 140px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.service-switcher.open .service-list {
+  display: block;
+}
+
+.service-list li {
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.service-list li:hover,
+.service-list li[aria-selected="true"] {
+  background: #f0f4ff;
+}
+
+/* --- Sélecteur de service en mode sombre --- */
+[data-theme="dark"] .service-btn {
+  background: #1a1a2e;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .service-list {
+  background: #1a1a2e;
+  border-color: #444;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .service-list li:hover,
+[data-theme="dark"] .service-list li[aria-selected="true"] {
+  background: #2a2a4e;
+}
+
+[data-theme="dark"] .service-list li[aria-selected="true"] {
+  color: #009fff;
+}
+
+/* Bouton de restauration */
+.restore-btn {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* --- Bouton Restaurer en mode sombre --- */
+[data-theme="dark"] .restore-btn {
+  background: #1a1a2e;
+  border: 1px solid #444;
+  color: #e0e0e0;
+}
+
+/* Status */
+.status {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* --- Statut en mode sombre --- */
+[data-theme="dark"] .status {
+  color: #aaa;
+}
+
+/* --- Placeholder pour réserver l'espace sous la navbar --- */
+/* Note : Cette classe n'est plus utilisée pour le positionnement, 
+   mais on la garde si tu l'utilises ailleurs. 
+   Avec position: fixed, on n'a plus besoin de réserver l'espace en flux normal. */
+.status-placeholder {
+  height: 48px;
+  width: 100%;
+  position: relative;
+  display: none; 
+}
+
+/* --- Panneau de statut (Flottant sous la navbar, aligné à droite) --- */
+.status-toast {
+  position: fixed;
+  right: 1rem;
+  z-index: 999;
+
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.status-content {
+  position: relative;
+  width: auto;
+  max-width: 600px;
+  margin-left: 0;
+  
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  
+  padding: 0.6rem 0.9rem;
+  background: hsl(220, 20%, 96%);
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  
+  font-size: 0.9rem;
+  color: #333;
+  font-weight: 500;
+  
+  pointer-events: auto;
+  animation: statusFadeIn 0.3s ease-out;
+}
+
+/* Le texte du statut */
+.status-content .status {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 0.5rem;
+}
+
+/* Le bouton de fermeture */
+.status-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.status-close svg {
+  width: 16px;
+  height: 16px;
+  fill: #888;
+}
+
+.status-close:hover svg {
+  fill: #007aff;
+}
+
+/* Barre de progression */
+.status-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--accent-color, #007aff);
+  width: 100%;
+  animation: statusShrink 10s linear forwards;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* État caché */
+.status-toast[hidden] {
+  display: none;
+}
+
+@keyframes statusFadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes statusShrink {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+/* --- Mode sombre --- */
+[data-theme="dark"] .status-content {
+  background: hsl(220, 20%, 14%);
+  border-color: #444;
+  color: #e0e0e0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .status-close svg {
+  fill: #aaa;
+}
+
+[data-theme="dark"] .status-close:hover svg {
+  fill: #009fff;
+}
