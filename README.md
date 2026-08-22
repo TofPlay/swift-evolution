@@ -21,17 +21,22 @@ Each proposal is summarized with:
 
 | Version  | Status  |
 |----------|---------|
-| Swift 5.5 | ✅ Available |
-| Swift 5.6 | ✅ Available |
-| Swift 5.7 | ✅ Available |
-| Swift 5.8 | ✅ Available |
-| Swift 5.9 | ✅ Available |
-| Swift 5.10 | ✅ Available |
-| Swift 6.0 | ✅ Available |
-| Swift 6.1 | ✅ Available |
-| Swift 6.2 | ✅ Available |
-| Swift 6.3 | ✅ Available |
 | Swift 6.4 | ✅ Available |
+| Swift 6.3 | ✅ Available |
+| Swift 6.2 | ✅ Available |
+| Swift 6.1 | ✅ Available |
+| Swift 6.0 | ✅ Available |
+| Swift 5.10 | ✅ Available |
+| Swift 5.9 | ✅ Available |
+| Swift 5.8 | ✅ Available |
+| Swift 5.7 | ✅ Available |
+| Swift 5.6 | ✅ Available |
+| Swift 5.5 | ✅ Available |
+| Swift 5.4 | ✅ Available |
+| Swift 5.3 | ✅ Available |
+| Swift 5.2 | ✅ Available |
+| Swift 5.1 | ✅ Available |
+| Swift 5.0 | ✅ Available |
 | SwiftPM | ✅ Available |
 
 ## How to Use
