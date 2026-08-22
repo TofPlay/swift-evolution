@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0221 - Character Properties</title>
+
+    <meta data-pagefind-meta="parent:Swift 5.0">
+    <meta data-pagefind-meta="parent_url:/swift-5-0/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-5-0/se-0221-character-properties/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-5-0/se-0221-character-properties/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-5-0/">
+                  Swift 5.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0221 - Character Properties</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0221 - Character Properties" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0221 - Character Properties">
+  
+  <div class="post-body">
+    <h1>SE-0221 - Character Properties</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0221-character-properties.md">SE-0221 - Character Properties</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit une série de propriétés et de méthodes sur le type <code>Character</code> pour faciliter l'interaction avec les propriétés Unicode. Le langage permet désormais de requêter directement si un <code>Character</code> est une lettre (<code>isLetter</code>), un chiffre (<code>isNumber</code>), un symbole (<code>isSymbol</code>), ou s'il possède des caractéristiques spécifiques comme être en ASCII (<code>isASCII</code>), être un espace blanc (<code>isWhitespace</code>) ou un saut de ligne (<code>isNewline</code>). La proposition distingue les propriétés restrictives, qui exigent une analyse précise du grapheme pour garantir une valeur exacte (comme <code>wholeNumberValue</code> pour les nombres entiers), des propriétés permissives, qui fournissent une classification plus large (comme <code>isLetter</code> qui analyse le premier <code>scalar</code> du grapheme). Des méthodes de conversion de casse (<code>uppercased()</code>, <code>lowercased()</code>) sont également ajoutées pour gérer la transformation des caractères en <code>String</code>.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0221" tabindex="-1"><a href="#avant-se-0221" class="header-anchor">Avant SE-0221</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// L'accès aux propriétés nécessite de passer par les Unicode.Scalar</span>
+<span class="token keyword">let</span> char<span class="token punctuation">:</span> <span class="token class-name">Character</span> <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"7"</span></span>
+<span class="token keyword">if</span> <span class="token keyword">let</span> scalar <span class="token operator">=</span> char<span class="token punctuation">.</span>unicodeScalars<span class="token punctuation">.</span>first<span class="token punctuation">,</span> scalar<span class="token punctuation">.</span>value <span class="token operator">==</span> <span class="token number">0x37</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Logique complexe et peu ergonomique pour identifier un chiffre</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> digit<span class="token punctuation">:</span> <span class="token class-name">Character</span> <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"7"</span></span>
+<span class="token comment">// Impossible d'extraire directement la valeur entière d'un Character</span>
+</code></pre>
+<p>L'utilisation de <code>Character</code> est limitée à l'ordre et à l'accès brut aux <code>Unicode.Scalar</code>. L'identification de propriétés complexes comme les types de symboles ou les valeurs numériques demande une analyse manuelle et technique des <code>scalar</code> qui composent le grapheme.</p>
+<h3 id="apr%C3%A8s-se-0221" tabindex="-1"><a href="#apr%C3%A8s-se-0221" class="header-anchor">Après SE-0221</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> char<span class="token punctuation">:</span> <span class="token class-name">Character</span> <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"7"</span></span>
+<span class="token keyword">if</span> char<span class="token punctuation">.</span>isNumber <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"C'est un nombre"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">if</span> <span class="token keyword">let</span> value <span class="token operator">=</span> char<span class="token punctuation">.</span>wholeNumberValue <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Valeur: </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">value</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> letter<span class="token punctuation">:</span> <span class="token class-name">Character</span> <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"é"</span></span>
+<span class="token function">print</span><span class="token punctuation">(</span>letter<span class="token punctuation">.</span>isLetter<span class="token punctuation">)</span> <span class="token comment">// true</span>
+<span class="token function">print</span><span class="token punctuation">(</span>letter<span class="token punctuation">.</span><span class="token function">lowercased</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// "é"</span>
+
+<span class="token keyword">let</span> sym<span class="token punctuation">:</span> <span class="token class-name">Character</span> <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"$"</span></span>
+<span class="token function">print</span><span class="token punctuation">(</span>sym<span class="token punctuation">.</span>isCurrencySymbol<span class="token punctuation">)</span> <span class="token comment">// true</span>
+</code></pre>
+<p>Le type <code>Character</code> propose des propriétés directement utilisables pour identifier la nature du grapheme. Le système permet de récupérer des valeurs numériques ou de transformer la casse de manière intuitive sans manipulation directe des <code>scalar</code>.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

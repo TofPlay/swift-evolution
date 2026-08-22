@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0232 - Remove Some Customization Points from the Standard Library's Collection Hierarchy</title>
+
+    <meta data-pagefind-meta="parent:Swift 5.0">
+    <meta data-pagefind-meta="parent_url:/swift-5-0/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-5-0/se-0232-remove-some-customization-points-from-the-standard-library-s-collection-hierarchy/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-5-0/se-0232-remove-some-customization-points-from-the-standard-library-s-collection-hierarchy/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-5-0/">
+                  Swift 5.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0232 - Remove Some Customization Points from the Standard Library's Collection Hierarchy</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0232 - Remove Some Customization Points from the Standard Library's Collection Hierarchy" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0232 - Remove Some Customization Points from the Standard Library's Collection Hierarchy">
+  
+  <div class="post-body">
+    <h1>SE-0232 - Remove Some Customization Points from the Standard Library's Collection Hierarchy</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0232-remove-customization-points-from-the-standard-library-s-collection-hierarchy.md">SE-0232 - Remove Some Customization Points from the Standard Library's Collection Hierarchy</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition supprime quatre points de personnalisation (<code>customization points</code>) des protocoles de la bibliothèque standard. Les méthodes visées sont <code>map</code>, <code>filter</code> et <code>forEach</code> pour le protocole <code>Sequence</code>, ainsi que <code>prefix(upTo:)</code>, <code>prefix(through:)</code> et <code>suffix(from:)</code> pour le protocole <code>BidirectionalCollection</code>. La suppression de ces points de personnalisation signifie que les implémentations par défaut ne seront plus sujettes au dispatch dynamique via les extensions de protocoles pour ces méthodes spécifiques. Les implémentations par défaut restent disponibles pour garantir la continuité des opérations. Cette mesure vise à réduire les coûts de compilation et d'exécution tout en préparant le langage pour l'introduction des types avec sémantique de déplacement (<code>move-only types</code>).</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0232" tabindex="-1"><a href="#avant-se-0232" class="header-anchor">Avant SE-0232</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">protocol</span> <span class="token class-name">MySequence</span><span class="token punctuation">:</span> <span class="token class-name">Sequence</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Les méthodes map, filter, forEach sont déclarées dans le protocole</span>
+    <span class="token comment">// Elles peuvent être surchargées pour modifier le comportement de base</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">MyType</span><span class="token punctuation">:</span> <span class="token class-name">MySequence</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Une implémentation personnalisée de map peut être appelée </span>
+    <span class="token comment">// via un dispatch dynamique dans un contexte générique.</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La présence de ces points de personnalisation permet à un type d'intercepter les appels faits via des extensions de protocole. Cela introduit un coût de performance et de taille de code, et peut poser des problèmes de conception avec l'arrivée des types avec sémantique de déplacement, car ces méthodes ne peuvent pas facilement retourner des éléments de types non copiables via des options.</p>
+<h3 id="apr%C3%A8s-se-0232" tabindex="-1"><a href="#apr%C3%A8s-se-0232" class="header-anchor">Après SE-0232</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">protocol</span> <span class="token class-name">MySequence</span><span class="token punctuation">:</span> <span class="token class-name">Sequence</span> <span class="token punctuation">{</span>
+    <span class="token comment">// map, filter et forEach ne sont plus des points de personnalisation</span>
+    <span class="token comment">// Ils utilisent uniquement l'implémentation par défaut du protocole</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">MyType</span><span class="token punctuation">:</span> <span class="token class-name">MySequence</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Même si une méthode personnalisée existe, l'appel via une </span>
+    <span class="token comment">// extension de protocole utilisera l'implémentation par défaut.</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition résout le problème en supprimant la possibilité de modifier le comportement de ces méthodes de manière dynamique via le protocole. Cela simplifie le système de types pour les futurs types avec sémantique de déplacement et élimine des micro-optimisations risquées ou des coûts de performance inutiles. L'utilisation de l'implémentation par défaut garantit un comportement prévisible et stable pour la bibliothèque standard.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

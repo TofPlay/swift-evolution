@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0237 - Introduce withContiguous{Mutable}StorageIfAvailable methods</title>
+
+    <meta data-pagefind-meta="parent:Swift 5.0">
+    <meta data-pagefind-meta="parent_url:/swift-5-0/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-5-0/se-0237-introduce-withcontiguous-mutable-storageifavailable-methods/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-5-0/se-0237-introduce-withcontiguous-mutable-storageifavailable-methods/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-5-0/">
+                  Swift 5.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0237 - Introduce withContiguous{Mutable}StorageIfAvailable methods</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0237 - Introduce withContiguous{Mutable}StorageIfAvailable methods" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0237 - Introduce withContiguous{Mutable}StorageIfAvailable methods">
+  
+  <div class="post-body">
+    <h1>SE-0237 - Introduce withContiguous{Mutable}StorageIfAvailable methods</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0237-contiguous-collection.md">SE-0237 - Introduce withContiguous{Mutable}StorageIfAvailable methods</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit deux nouvelles méthodes sur les protocoles <code>Sequence</code> et <code>MutableCollection</code> : <code>withContiguousStorageIfAvailable</code> et <code>withContiguousMutableStorageIfAvailable</code>. Ces méthodes permettent aux algorithmes génériques d'accéder au stockage contigu d'une collection via un <code>UnsafeBufferPointer</code> ou un <code>UnsafeMutableBufferPointer</code>. Si la collection ne supporte pas de stockage contigu, la méthode retourne <code>nil</code>. Cette extension permet d'optimiser les performances en autorisant l'utilisation de primitives de manipulation mémoire (comme <code>memcpy</code>) pour les types qui le permettent, tout en maintenant une interface générique compatible avec les types comme <code>Array</code> ou <code>ArraySlice</code>.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0237" tabindex="-1"><a href="#avant-se-0237" class="header-anchor">Avant SE-0237</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">process</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token punctuation">:</span> <span class="token class-name">Sequence</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> sequence<span class="token punctuation">:</span> <span class="token class-name">T</span><span class="token punctuation">)</span> <span class="token keyword">where</span> <span class="token class-name">T</span><span class="token punctuation">.</span><span class="token class-name">Element</span> <span class="token operator">==</span> <span class="token class-name">UInt8</span> <span class="token punctuation">{</span>
+    <span class="token comment">// La méthode withUnsafeBufferPointer n'est disponible que sur des types concrets (comme Array)</span>
+    <span class="token comment">// L'utilisation de méthodes génériques limite l'accès au stockage brut</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'impossibilité d'accéder au stockage contigu de manière générique empêche l'utilisation d'optimisations de bas niveau (comme les mouvements de mémoire) lorsque l'on travaille avec des protocoles plutôt qu'avec des types concrets.</p>
+<h3 id="apr%C3%A8s-se-0237" tabindex="-1"><a href="#apr%C3%A8s-se-0237" class="header-anchor">Après SE-0237</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">process</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token punctuation">:</span> <span class="token class-name">Sequence</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> sequence<span class="token punctuation">:</span> <span class="token class-name">T</span><span class="token punctuation">)</span> <span class="token keyword">where</span> <span class="token class-name">T</span><span class="token punctuation">.</span><span class="token class-name">Element</span> <span class="token operator">==</span> <span class="token class-name">UInt8</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token keyword">let</span> buffer <span class="token operator">=</span> sequence<span class="token punctuation">.</span><span class="token function">withContiguousStorageIfAvailable</span><span class="token punctuation">(</span><span class="token punctuation">{</span> buffer <span class="token keyword">in</span>
+        <span class="token comment">// Utilisation du buffer contigu de manière sécurisée et performante</span>
+        <span class="token keyword">return</span> buffer
+    <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Traitement optimisé du buffer</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">mutate</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token punctuation">:</span> <span class="token class-name">MutableCollection</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> collection<span class="token punctuation">:</span> <span class="token keyword">inout</span> <span class="token class-name">T</span><span class="token punctuation">)</span> <span class="token keyword">where</span> <span class="token class-name">T</span><span class="token punctuation">.</span><span class="token class-name">Element</span> <span class="token operator">==</span> <span class="token class-name">UInt8</span> <span class="token punctuation">{</span>
+    collection<span class="token punctuation">.</span>withContiguousMutableStorageIfAvailable <span class="token punctuation">{</span> buffer <span class="token keyword">in</span>
+        <span class="token comment">// Accès direct au stockage mutable</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition résout le problème en fournissant un point d'accès générique au stockage contigu. Le langage permet désormais de vérifier la disponibilité du stockage via une optionnelle et d'exécuter un bloc de code avec un pointeurs sur ce stockage, garantissant des performances élevées pour les types supportant la contiguïté.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

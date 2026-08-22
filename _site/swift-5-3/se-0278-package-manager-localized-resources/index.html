@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0278 - Package Manager Localized Resources</title>
+
+    <meta data-pagefind-meta="parent:Swift 5.3">
+    <meta data-pagefind-meta="parent_url:/swift-5-3/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-5-3/se-0278-package-manager-localized-resources/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-5-3/se-0278-package-manager-localized-resources/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-5-3/">
+                  Swift 5.3
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0278 - Package Manager Localized Resources</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0278 - Package Manager Localized Resources" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0278 - Package Manager Localized Resources">
+  
+  <div class="post-body">
+    <h1>SE-0278 - Package Manager Localized Resources</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.3</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0278-package-manager-localized-resources.md">SE-0278 - Package Manager Localized Resources</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit le support des ressources localisées au sein de Swift Package Manager (SwiftPM). Elle permet de définir des variantes linguistiques pour des ressources (images, fichiers de données, etc.) directement dans le manifeste du package. Le système utilise un paramètre <code>defaultLocalization</code> dans l'initialiseur <code>Package</code> pour définir une langue de secours. La détection des ressources s'appuie sur une structure de répertoires utilisant l'extension <code>.lproj</code> (ex: <code>en.lproj</code>, <code>fr-CH.lproj</code>) ou le répertoire spécial <code>Base.lproj</code>. SwiftPM gère le processus de copie des fichiers dans le bundle et génère un fichier <code>Info.plist</code> contenant la clé <code>CFBundleDevelopmentRegion</code> correspondant à la localisation par défaut. De plus, la fonction <code>Resource.process</code> accepte désormais un paramètre <code>localization</code> (<code>.default</code> ou <code>.base</code>) pour permettre la déclaration de ressources localisées situées en dehors des répertoires <code>.lproj</code>.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0278" tabindex="-1"><a href="#avant-se-0278" class="header-anchor">Avant SE-0278</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"BestPackage"</span></span><span class="token punctuation">,</span>
+    targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"BestTarget"</span></span><span class="token punctuation">,</span>
+            resources<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+                <span class="token punctuation">.</span><span class="token function">process</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Resources/Icon.png"</span></span><span class="token punctuation">)</span>
+            <span class="token punctuation">]</span>
+        <span class="token punctuation">)</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">)</span>
+</code></pre>
+<p>Le mécanisme de gestion des ressources de SwiftPM ne permet pas de définir nativement des variantes localisées pour un même fichier via le manifeste. Pour bénéficier de la localisation, le développeur doit contourner le système en utilisant <code>.copy</code> au lieu de <code>.process</code> afin de conserver une structure de répertoires manuelle, ce qui empêche l'optimisation des fichiers par la plateforme et l'absence de diagnostics de configuration.</p>
+<h3 id="apr%C3%A8s-se-0278" tabindex="-1"><a href="#apr%C3%A8s-se-0278" class="header-anchor">Après SE-0278</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"BestPackage"</span></span><span class="token punctuation">,</span>
+    defaultLocalization<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"en"</span></span><span class="token punctuation">,</span>
+    targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"BestTarget"</span></span><span class="token punctuation">,</span>
+            resources<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+                <span class="token punctuation">.</span><span class="token function">process</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Resources/Icon.png"</span></span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token punctuation">.</span><span class="token function">process</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Resources/Special"</span></span><span class="token punctuation">,</span> localization<span class="token punctuation">:</span> <span class="token punctuation">.</span>base<span class="token punctuation">)</span>
+            <span class="token punctuation">]</span>
+        <span class="token punctuation">)</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-none" tabindex="0"><code class="language-none">// Structure de fichiers supportée
+Resources/
+├── Icon.png (version par défaut)
+├── en.lproj/
+│   └── Icon.png (version anglaise)
+├── fr-CH.lproj/
+│   └── Icon.png (version française suisse)
+└── Special.strings (déclarée comme .base)
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Accès au runtime via Foundation</span>
+<span class="token keyword">let</span> path <span class="token operator">=</span> <span class="token class-name">Bundle</span><span class="token punctuation">.</span>module<span class="token punctuation">.</span><span class="token function">path</span><span class="token punctuation">(</span>forResource<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Icon"</span></span><span class="token punctuation">,</span> ofType<span class="token punctuation">:</span> <span class="token nil constant">nil</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> image <span class="token operator">=</span> <span class="token class-name">UIImage</span><span class="token punctuation">(</span>named<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Icon"</span></span><span class="token punctuation">,</span> <span class="token keyword">in</span><span class="token punctuation">:</span> <span class="token punctuation">.</span>module<span class="token punctuation">,</span> with<span class="token punctuation">:</span> <span class="token nil constant">nil</span><span class="token punctuation">)</span>
+</code></pre>
+<p>La proposition résout le problème en intégrant la logique de localisation dans le cycle de vie de SwiftPM. L'utilisation de <code>defaultLocalization</code> assure une compatibilité avec les API <code>Bundle</code> de Foundation. La structure <code>.lproj</code> permet une organisation standardisée, tandis que le paramètre <code>localization</code> dans <code>Resource.process</code> offre de la flexibilité pour les fichiers hors répertoires dédiés. Le système inclut également des diagnostics pour détecter les erreurs de configuration, telles que l'absence de variante pour la langue par défaut ou la présence de répertoires imbriqués dans un répertoire de localisation.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

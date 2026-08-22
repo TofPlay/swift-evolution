@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0258 - Property Wrappers</title>
+
+    <meta data-pagefind-meta="parent:Swift 5.1">
+    <meta data-pagefind-meta="parent_url:/swift-5-1/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-5-1/se-0258-property-wrappers/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-5-1/se-0258-property-wrappers/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-5-1/">
+                  Swift 5.1
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0258 - Property Wrappers</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0258 - Property Wrappers" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0258 - Property Wrappers">
+  
+  <div class="post-body">
+    <h1>SE-0258 - Property Wrappers</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.1</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0258-property-wrappers.md">SE-0258 - Property Wrappers</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Le mécanisme des <code>property wrappers</code> permet d'encapsuler des patterns de gestion de propriétés répétés (comme la gestion du stockage, la délégation ou la validation) dans des types réutilisables. Un <code>property wrapper</code> est un type défini avec l'attribut <code>@propertyWrapper</code> qui doit posséder une propriété nommée <code>wrappedValue</code>. Lorsqu'une propriété est décorée avec un wrapper, le compilateur génère automatiquement une propriété de stockage privée (préfixée par <code>_</code>) et une propriété publique dont le <code>getter</code> et le <code>setter</code> accèdent à la <code>wrappedValue</code> du wrapper. Le mécanisme supporte également la composition de plusieurs wrappers et l'utilisation d'une projection via une propriété <code>projectedValue</code> accessible via le préfixe <code>$</code>.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0258" tabindex="-1"><a href="#avant-se-0258" class="header-anchor">Avant SE-0258</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">Foo</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Pattern de gestion du lazy sans support natif spécifique pour des patterns personnalisés</span>
+    <span class="token keyword">private</span> <span class="token keyword">var</span> _foo<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token operator">?</span>
+    <span class="token keyword">var</span> foo<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token punctuation">{</span>
+        <span class="token keyword">get</span> <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> <span class="token keyword">let</span> value <span class="token operator">=</span> _foo <span class="token punctuation">{</span> <span class="token keyword">return</span> value <span class="token punctuation">}</span>
+            <span class="token keyword">let</span> initialValue <span class="token operator">=</span> <span class="token number">1738</span>
+            _foo <span class="token operator">=</span> initialValue
+            <span class="token keyword">return</span> initialValue
+        <span class="token punctuation">}</span>
+        <span class="token keyword">set</span> <span class="token punctuation">{</span>
+            _foo <span class="token operator">=</span> newValue
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'implémentation de patterns comme le chargement différé ou la gestion de la mémoire (comme <code>@NSCopying</code>) nécessite une grande quantité de code répétitif (<code>boilerplate</code>) pour gérer manuellement le stockage privé et la logique d'accès.</p>
+<h3 id="apr%C3%A8s-se-0258" tabindex="-1"><a href="#apr%C3%A8s-se-0258" class="header-anchor">Après SE-0258</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@propertyWrapper</span>
+<span class="token keyword">struct</span> <span class="token class-name">Lazy</span><span class="token operator">&lt;</span><span class="token class-name">Value</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">Value</span><span class="token operator">?</span>
+    <span class="token keyword">let</span> initializer<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Value</span>
+
+    <span class="token keyword">var</span> wrappedValue<span class="token punctuation">:</span> <span class="token class-name">Value</span> <span class="token punctuation">{</span>
+        <span class="token keyword">mutating</span> <span class="token keyword">get</span> <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> <span class="token keyword">let</span> value <span class="token operator">=</span> value <span class="token punctuation">{</span> <span class="token keyword">return</span> value <span class="token punctuation">}</span>
+            <span class="token keyword">let</span> newValue <span class="token operator">=</span> <span class="token function">initializer</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+            value <span class="token operator">=</span> newValue
+            <span class="token keyword">return</span> newValue
+        <span class="token punctuation">}</span>
+        <span class="token keyword">set</span> <span class="token punctuation">{</span>
+            value <span class="token operator">=</span> newValue
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">init</span><span class="token punctuation">(</span>wrappedValue<span class="token punctuation">:</span> <span class="token attribute atrule">@autoclosure</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Value</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span>initializer <span class="token operator">=</span> <span class="token function">wrappedValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">Foo</span> <span class="token punctuation">{</span>
+    <span class="token attribute atrule">@Lazy</span> <span class="token keyword">var</span> foo <span class="token operator">=</span> <span class="token number">1738</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition introduit l'attribut <code>@propertyWrapper</code> qui délègue la logique d'accès à un type dédié, réduisant ainsi la complexité et le code redondant dans les structures et les classes.</p>
+<h3 id="apr%C3%A8s-se-0258-1" tabindex="-1"><a href="#apr%C3%A8s-se-0258-1" class="header-anchor">Après SE-0258</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@propertyWrapper</span>
+<span class="token keyword">struct</span> <span class="token class-name">Clamping</span><span class="token operator">&lt;</span><span class="token class-name">V</span><span class="token punctuation">:</span> <span class="token class-name">Comparable</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">V</span>
+    <span class="token keyword">let</span> min<span class="token punctuation">:</span> <span class="token class-name">V</span>
+    <span class="token keyword">let</span> max<span class="token punctuation">:</span> <span class="token class-name">V</span>
+
+    <span class="token keyword">var</span> wrappedValue<span class="token punctuation">:</span> <span class="token class-name">V</span> <span class="token punctuation">{</span>
+        <span class="token keyword">get</span> <span class="token punctuation">{</span> value <span class="token punctuation">}</span>
+        <span class="token keyword">set</span> <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> newValue <span class="token operator">&lt;</span> min <span class="token punctuation">{</span>
+                value <span class="token operator">=</span> min
+            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> newValue <span class="token operator">&gt;</span> max <span class="token punctuation">{</span>
+                value <span class="token operator">=</span> max
+            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+                value <span class="token operator">=</span> newValue
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">init</span><span class="token punctuation">(</span>wrappedValue<span class="token punctuation">:</span> <span class="token class-name">V</span><span class="token punctuation">,</span> min<span class="token punctuation">:</span> <span class="token class-name">V</span><span class="token punctuation">,</span> max<span class="token punctuation">:</span> <span class="token class-name">V</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span>value <span class="token operator">=</span> wrappedValue
+        <span class="token keyword">self</span><span class="token punctuation">.</span>min <span class="token operator">=</span> min
+        <span class="token keyword">self</span><span class="token punctuation">.</span>max <span class="token operator">=</span> max
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">Color</span> <span class="token punctuation">{</span>
+    <span class="token attribute atrule">@Clamping</span><span class="token punctuation">(</span>min<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span> max<span class="token punctuation">:</span> <span class="token number">255</span><span class="token punctuation">)</span> <span class="token keyword">var</span> red<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token operator">=</span> <span class="token number">127</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La solution permet de définir une logique de validation ou de transformation une seule fois dans un <code>struct</code> ou une <code>class</code> et de l'appliquer via un simple attribut sur n'importe quelle propriété.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>
