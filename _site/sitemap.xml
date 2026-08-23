@@ -207,7 +207,7 @@
     <lastmod>2026-08-22T13:54:45.536Z</lastmod>
   </url>
   <url>
-    <loc>https://tofplay.github.io/swift-evolution/swift-5-2/se-0226-package-manager-target-based-dependency-resolution-proposal/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-5-2/se-0226-package-manager-target-based-dependency-resolution/</loc>
     <lastmod>2026-08-22T13:12:12.265Z</lastmod>
   </url>
   <url>
@@ -1055,7 +1055,7 @@
     <lastmod>2026-01-15T10:25:56.866Z</lastmod>
   </url>
   <url>
-    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0482-binary-static-library-dependencies-for-non-apple-platforms/</loc>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-2/se-0482-binary-static-library-dependencies/</loc>
     <lastmod>2026-01-15T10:26:12.300Z</lastmod>
   </url>
   <url>
@@ -1310,11 +1310,11 @@
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0219-package-manager-dependency-mirroring/</loc>
-    <lastmod>2026-07-07T12:04:09.591Z</lastmod>
+    <lastmod>2026-08-22T13:36:13.479Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0226-package-manager-target-based-dependency-resolution/</loc>
-    <lastmod>2026-08-23T08:37:47.851Z</lastmod>
+    <lastmod>2026-08-22T13:12:12.265Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0236-package-manager-platform-deployment-settings/</loc>
@@ -1322,47 +1322,47 @@
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0238-package-manager-target-specific-build-settings/</loc>
-    <lastmod>2026-08-23T08:39:02.957Z</lastmod>
+    <lastmod>2026-08-22T13:47:52.245Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0271-package-manager-resources/</loc>
-    <lastmod>2026-07-07T12:07:18.164Z</lastmod>
+    <lastmod>2026-08-22T13:00:51.951Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0272-package-manager-binary-dependencies/</loc>
-    <lastmod>2026-07-07T12:09:29.966Z</lastmod>
+    <lastmod>2026-08-22T13:01:45.528Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0273-package-manager-conditional-target-dependencies/</loc>
-    <lastmod>2026-07-07T12:11:09.461Z</lastmod>
+    <lastmod>2026-08-22T13:02:26.423Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0278-package-manager-localized-resources/</loc>
-    <lastmod>2026-07-07T12:12:37.962Z</lastmod>
+    <lastmod>2026-08-22T13:04:53.398Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0291-package-collections/</loc>
-    <lastmod>2026-07-07T12:13:51.989Z</lastmod>
+    <lastmod>2026-02-04T14:37:20.779Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0292-package-registry-service/</loc>
-    <lastmod>2026-07-07T12:14:50.301Z</lastmod>
+    <lastmod>2026-02-03T15:13:05.033Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0294-declaring-executable-targets-in-package-manifests/</loc>
-    <lastmod>2026-07-07T12:16:07.727Z</lastmod>
+    <lastmod>2026-08-22T11:43:29.934Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0301-package-editor-commands/</loc>
-    <lastmod>2026-07-07T12:16:55.755Z</lastmod>
+    <lastmod>2026-01-15T09:17:01.992Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0303-package-manager-extensible-build-tools/</loc>
-    <lastmod>2026-08-23T08:39:34.685Z</lastmod>
+    <lastmod>2026-02-04T13:56:29.729Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0305-package-manager-binary-target-improvements/</loc>
-    <lastmod>2026-08-23T08:40:09.512Z</lastmod>
+    <lastmod>2026-02-04T13:57:43.741Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0321-package-registry-service-publish-endpoint/</loc>
@@ -1370,23 +1370,23 @@
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0325-additional-package-plugin-apis/</loc>
-    <lastmod>2026-07-07T12:17:55.820Z</lastmod>
+    <lastmod>2026-02-04T14:02:38.791Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0332-package-manager-command-plugins/</loc>
-    <lastmod>2026-07-07T12:19:09.212Z</lastmod>
+    <lastmod>2026-02-04T14:08:24.303Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0339-module-aliasing-for-disambiguation/</loc>
-    <lastmod>2026-07-07T12:20:34.346Z</lastmod>
+    <lastmod>2026-02-03T15:37:23.843Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0356-swift-snippets/</loc>
-    <lastmod>2026-07-07T12:21:34.167Z</lastmod>
+    <lastmod>2026-02-04T13:44:07.398Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0362-piecemeal-adoption-of-upcoming-language-improvements/</loc>
-    <lastmod>2026-07-07T12:22:56.154Z</lastmod>
+    <lastmod>2026-02-03T14:50:51.670Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0378-package-registry-authentication/</loc>
@@ -1394,33 +1394,33 @@
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0387-swift-sdks-for-cross-compilation/</loc>
-    <lastmod>2026-07-07T12:25:32.414Z</lastmod>
+    <lastmod>2026-01-15T10:09:04.703Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0391-package-registry-publish/</loc>
-    <lastmod>2026-07-07T12:26:27.055Z</lastmod>
+    <lastmod>2026-01-19T10:05:46.330Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0394-package-manager-support-for-custom-macros/</loc>
-    <lastmod>2026-07-07T12:27:32.764Z</lastmod>
+    <lastmod>2026-01-19T10:06:08.955Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0441-formalize-language-mode-terminology/</loc>
-    <lastmod>2026-07-07T12:28:31.717Z</lastmod>
+    <lastmod>2026-01-15T10:09:48.715Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0480-warning-control-settings-for-swiftpm/</loc>
-    <lastmod>2026-07-07T12:29:28.258Z</lastmod>
+    <lastmod>2026-01-15T10:25:56.866Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0482-binary-static-library-dependencies/</loc>
-    <lastmod>2026-07-07T12:30:13.731Z</lastmod>
+    <lastmod>2026-01-15T10:26:12.300Z</lastmod>
   </url>
   <url>
     <loc>
       https://tofplay.github.io/swift-evolution/swiftpm/se-0509-software-bill-of-materials-sbom-generation-for-swift-package-manager/
     </loc>
-    <lastmod>2026-07-07T12:31:20.939Z</lastmod>
+    <lastmod>2026-04-28T11:53:58.242Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0511-swiftpm-add-target-plugin-command/</loc>

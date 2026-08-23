@@ -125,47 +125,43 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0356-swift-snippets.md">SE-0356 - Swift Snippets</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>La proposition introduit les <code>snippets</code>, une convention pour créer des exemples de code courts et exécutables au sein d'un Swift package. Un <code>snippet</code> est un fichier <code>.swift</code> unique qui fonctionne comme une cible exécutable, permettant de démontrer une API ou une fonctionnalité de manière isolée tout en ayant accès au code du package hôte. La proposition définit un répertoire <code>Snippets</code> et utilise des commentaires spéciaux (<code>// snippet.hide</code>, <code>// snippet.show</code>) pour contrôler le code affiché dans la documentation. Elle introduit également un système de "tranches" (<code>slices</code>) via des identifiants (ex: <code>// snippet.IDENTIFIER</code>) pour permettre l'insertion fragmentée de code dans la documentation DocC via la directive <code>@Snippet</code>. Les <code>snippets</code> sont intégrés dans le flux de travail de SwiftPM, permettant leur compilation et leur exécution via <code>swift build --build-snippets</code> et <code>swift run</code>.</p>
+<p>Cette proposition introduit les <strong>Swift Snippets</strong>, une convention pour écrire des exemples de code courts et concis (fichiers <code>.swift</code> uniques) qui peuvent être compilés et exécutés comme des cibles exécutables au sein d'un Swift Package.</p>
+<p>Les snippets comblent le fossé entre les projets d'échantillons complets (souvent trop lourds à maintenir) et les listages de code en ligne (qui deviennent vite obsolètes car ils ne sont pas testés).</p>
+<p><strong>Caractéristiques principales :</strong></p>
+<ul>
+<li><strong>Exécutabilité :</strong> Chaque snippet est un programme complet capable d'accéder au code du package hôte.</li>
+<li><strong>Documentation :</strong> Utilisation de la directive <code>@Snippet</code> dans DocC pour intégrer le code et sa description Markdown.</li>
+<li><strong>Slicing :</strong> Possibilité de découper un snippet en "tranches" (slices) via des commentaires (<code>// snippet.IDENTIFIER</code>) pour afficher des segments de code spécifiques dans la documentation.</li>
+<li><strong>Contrôle d'affichage :</strong> Utilisation de <code>// snippet.hide</code> et <code>// snippet.show</code> pour masquer ou afficher des parties de code lors de la génération de la documentation.</li>
+<li><strong>Intégration SwiftPM :</strong> Les fichiers situés dans un répertoire <code>/Snippets</code> sont automatiquement reconnus comme cibles exécutables.</li>
+</ul>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0356" tabindex="-1"><a href="#avant-se-0356" class="header-anchor">Avant SE-0356</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Exemple de documentation utilisant des listes de code classiques</span>
-<span class="token operator">/**</span>
- <span class="token class-name">Voici</span> comment utiliser l'<span class="token constant">API</span> <span class="token punctuation">:</span>
- 
- ```swift
- <span class="token keyword">let</span> math <span class="token operator">=</span> <span class="token class-name">Math</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
- <span class="token function">print</span><span class="token punctuation">(</span>math<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-</code></pre>
-<p>*/</p>
-<pre class="language-none" tabindex="0"><code class="language-none">La documentation utilise des blocs de code statiques intégrés dans du texte. Ce code n'est pas vérifié par le compilateur, ce qui peut entraîner des erreurs de syntaxe ou des obsolescences si l'API change. De plus, il est difficile de proposer des exemples complexes sans créer un projet de sample complet et lourd à maintenir.
-
-### Après SE-0356
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans un fichier de documentation (Markdown)</span>
 ```swift
-// Dans un fichier Snippets/MathExample.swift
-// Un exemple simple de calcul mathématique.
-func demoMath() {
-    let math = Math()
-    // snippet.hide
-    let setupInfo = "Calcul complexe"
-    print(setupInfo)
-    // snippet.show
-    print(math.add(2, 3))
-}
-</code></pre>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans un fichier Markdown de documentation DocC</span>
-# <span class="token class-name">Utilisation</span> de l'<span class="token constant">API</span>
-<span class="token attribute atrule">@Snippet</span><span class="token punctuation">(</span>path<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage/Snippets/MathExample"</span></span><span class="token punctuation">)</span>
-</code></pre>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans un fichier Markdown utilisant une tranche (slice)</span>
-<span class="token attribute atrule">@Snippet</span><span class="token punctuation">(</span>path<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage/Snippets/MathExample"</span></span><span class="token punctuation">,</span> slice<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"demoMath"</span></span><span class="token punctuation">)</span>
-</code></pre>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le code résultant de l'expansion (ce qui est réellement affiché)</span>
-<span class="token keyword">func</span> <span class="token function-definition function">demoMath</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">let</span> math <span class="token operator">=</span> <span class="token class-name">Math</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-    <span class="token function">print</span><span class="token punctuation">(</span>math<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">func</span> <span class="token function-definition function">add</span><span class="token punctuation">(</span>a<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">,</span> b<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Int</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> a <span class="token operator">+</span> b
 <span class="token punctuation">}</span>
+<span class="token function">print</span><span class="token punctuation">(</span><span class="token function">add</span><span class="token punctuation">(</span>a<span class="token punctuation">:</span> <span class="token number">5</span><span class="token punctuation">,</span> b<span class="token punctuation">:</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
 </code></pre>
-<p>La proposition résout la problématique de la maintenance de la documentation en transformant les exemples en code source réel et exécutable. L'utilisation de marqueurs <code>hide</code>/<code>show</code> permet de garder le code de démonstration propre tout en conservant une logique de test ou de configuration dans le même fichier. Le système de <code>slices</code> permet d'extraire précisément une partie d'un fichier pour l'insérer de manière fluide dans un récit documentaire, garantissant que l'exemple reste concis et focalisé sur un point précis.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">Le code ci-dessus est du texte brut dans la documentation. Il n'est pas vérifié par le compilateur, peut contenir des erreurs de syntaxe et devient obsolète dès que l'API change.
+</code></pre>
+<h3 id="apr%C3%A8s-se-0356" tabindex="-1"><a href="#apr%C3%A8s-se-0356" class="header-anchor">Après SE-0356</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans un fichier .swift dans le dossier /Snippets</span>
+<span class="token comment">// Cette description s'affichera dans la documentation.</span>
+<span class="token keyword">func</span> <span class="token function-definition function">add</span><span class="token punctuation">(</span>a<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">,</span> b<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Int</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> a <span class="token operator">+</span> b
+<span class="token punctuation">}</span>
+
+<span class="token comment">// snippet.hide</span>
+<span class="token keyword">let</span> internalLog <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"Log interne non visible dans la doc"</span></span>
+<span class="token comment">// snippet.show</span>
+<span class="token function">print</span><span class="token punctuation">(</span><span class="token function">add</span><span class="token punctuation">(</span>a<span class="token punctuation">:</span> <span class="token number">5</span><span class="token punctuation">,</span> b<span class="token punctuation">:</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans un fichier .md de DocC</span>
+<span class="token attribute atrule">@Snippet</span><span class="token punctuation">(</span>path<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MonPackage/Snippets/MonSnippet"</span></span><span class="token punctuation">)</span>
+</code></pre>
+<p>L'utilisation des snippets permet de garantir que le code de l'exemple est toujours compilable (puisqu'il fait partie du package) et permet un contrôle précis de ce qui est affiché via les marqueurs <code>hide</code>/<code>show</code> et les slices.</p>
 
   </div>
 </article>

@@ -125,52 +125,24 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0391-package-registry-publish.md">SE-0391 - Package Registry Publish</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>La proposition introduit une commande <code>swift package-registry publish</code> pour standardiser le processus de publication des packages vers un <code>registry</code>. Le mécanisme unifie plusieurs étapes complexes : la préparation de l'archive source via <code>swift package archive-source</code>, la gestion des métadonnées de publication (sous forme de JSON conforme à un schéma strict), et la signature numérique des archives et des métadonnées (utilisant le format CMS pour la première version). La solution définit également un contrat de service entre le client SwiftPM et le serveur du <code>registry</code> pour la gestion des signatures et des métadonnées, tout en introduisant un système de configuration de sécurité pour permettre aux utilisateurs de définir des politiques de confiance (TOFU - Trust On First Use) via un fichier <code>registries.json</code>.</p>
+<p>Cette proposition vise à standardiser le processus de publication de paquets vers des registres Swift. Jusqu'à présent, SwiftPM ne proposait aucun outil pour publier, obligeant les auteurs à gérer manuellement l'archivage, la métadonnée et l'interaction avec l'API du registre. La proposition introduit une commande <code>swift package-registry publish</code> qui automatise ces étapes. Elle définit également un standard pour les métadonnées de publication (format JSON via un schéma strict) et introduit un mécanisme de signature des paquets (format CMS) pour garantir l'authenticité du code. Enfin, elle introduit des options de sécurité pour l'utilisateur final, permettant de configurer la manière dont SwiftPM doit réagir face à un paquet non signé ou un certificat non approuvé.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0391" tabindex="-1"><a href="#avant-se-0391" class="header-anchor">Avant SE-0391</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Aucun moyen natif via SwiftPM pour publier vers un registry.</span>
-<span class="token comment">// Un développeur doit :</span>
-<span class="token comment">// 1. Créer manuellement l'archive source (ex: zip).</span>
-<span class="token comment">// 2. Préparer un fichier de métadonnées JSON.</span>
-<span class="token comment">// 3. Utiliser un outil tiers ou des appels API HTTP directs pour l'envoi.</span>
-<span class="token comment">// 4. Gérer manuellement l'authentification et la signature si nécessaire.</span>
-</code></pre>
-<p>La gestion manuelle de l'archivage, de la création des métadonnées et de l'interaction avec l'API du <code>registry</code> augmente le risque d'erreur et complexifie le flux de travail pour l'auteur du package.</p>
-<h3 id="apr%C3%A8s-se-0391" tabindex="-1"><a href="#apr%C3%A8s-se-0391" class="header-anchor">Après SE-0391</a></h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># Publication directe via la CLI SwiftPM</span>
-swift package-registry publish <span class="token operator">&lt;</span>package-id<span class="token operator">&gt;</span> <span class="token operator">&lt;</span>version<span class="token operator">&gt;</span> <span class="token parameter variable">--url</span> <span class="token operator">&lt;</span>registry-url<span class="token operator">&gt;</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// 1. L'auteur doit créer manuellement une archive source</span>
+<span class="token comment">// swift package archive-source --output package.zip</span>
 
-<span class="token comment"># Exemple avec signature</span>
-swift package-registry publish mona.LinkedList <span class="token number">1.1</span>.1 <span class="token punctuation">\</span>
-  <span class="token parameter variable">--url</span> https://packages.example.com <span class="token punctuation">\</span>
-  --signing-identity <span class="token string">"MySigningID"</span>
+<span class="token comment">// 2. L'auteur doit préparer un fichier JSON de métadonnées manuellement</span>
+<span class="token comment">// { "description": "Ma super librairie", "licenseURL": "..." }</span>
+
+<span class="token comment">// 3. L'auteur doit appeler manuellement l'API du registre via une commande HTTP/cURL</span>
+<span class="token comment">// curl -X PUT "https://registry.example.com/user/package/version" -F "archive=@package.zip" ...</span>
 </code></pre>
-<p>La proposition introduit une commande unique qui automatise la création de l'archive, la gestion des métadonnées et l'envoi sécurisé au <code>registry</code>.</p>
-<pre class="language-json" tabindex="0"><code class="language-json">// Exemple de métadonnées package-metadata.json
-{
-  "description": "A simple linked list implementation",
-  "repositoryURLs": ["https://github.com/user/mona.LinkedList.git"],
-  "licenseURL": "https://opensource.org/licenses/MIT"
-}
+<p>La publication est un processus manuel, fragmenté et sujet aux erreurs, car SwiftPM ne gère pas l'interaction directe avec le registre pour la publication.</p>
+<h3 id="apr%C3%A8s-se-0391" tabindex="-1"><a href="#apr%C3%A8s-se-0391" class="header-anchor">Après SE-0391</a></h3>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># Une seule commande automatise tout le processus</span>
+swift package-registry publish <span class="token operator">&lt;</span>id<span class="token operator">&gt;</span> <span class="token operator">&lt;</span>version<span class="token operator">&gt;</span> <span class="token parameter variable">--url</span> <span class="token operator">&lt;</span>registry-url<span class="token operator">&gt;</span>
 </code></pre>
-<pre class="language-json" tabindex="0"><code class="language-json">// Exemple de réponse du registry incluant la signature
-{
-  "id": "mona.LinkedList",
-  "version": "1.1.1",
-  "resources": [
-    {
-      "name": "source-archive",
-      "type": "application/zip",
-      "checksum": "a2ac54cf...",
-      "signing": {
-        "signatureBase64Encoded": "l1TdTeIu...",
-        "signatureFormat": "cms-1.0.0"
-      }
-    }
-  ]
-}
-</code></pre>
-<p>La solution apporte une couche de sécurité et d'automatisation en encapsulant la signature et les métadonnées dans le flux de publication, garantissant que le <code>registry</code> et le client SwiftPM communiquent selon un contrat standardisé.</p>
+<p>La commande <code>publish</code> gère automatiquement la création de l'archive, l'intégration des métadonnées, la signature (si configurée) et l'envoi au registre via l'API standardisée.</p>
 
   </div>
 </article>

@@ -125,7 +125,13 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0301-package-editing-commands.md">SE-0301 - Package Editor Commands</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>La proposition introduit une série de nouvelles subcommands pour l'interface en ligne de commande (CLI) de Swift Package Manager afin d'automatiser les modifications du fichier <code>Package.swift</code>. Le système propose trois commandes principales : <code>add-product</code> pour créer de nouveaux produits (libraries ou executables), <code>add-target</code> pour ajouter des targets (incluant la création automatique de la structure des répertoires <code>Sources</code> et <code>Tests</code>), et <code>add-dependency</code> pour intégrer de nouveaux packages via une URL, un chemin local ou un nom de collection. Ces commandes effectuent des transformations au niveau de la syntaxe sur les manifestes déclaratifs.</p>
+<p>La proposition introduit trois nouvelles sous-commandes pour l'interface en ligne de commande (CLI) <code>swift package</code> afin d'automatiser la modification des fichiers <code>Package.swift</code>. Le langage utilisant <code>PackageDescription</code> (une API Swift) pour définir les packages, l'édition manuelle est sujette à des erreurs et difficile à automatiser par des outils tiers. Les nouvelles commandes sont :</p>
+<ul>
+<li><code>add-product</code> : Permet d'ajouter un nouveau <code>product</code> (library ou executable) et de lier les <code>targets</code> associés.</li>
+<li><code>add-target</code> : Permet de créer un nouveau <code>target</code> (library, executable, test, ou binary), d'ajouter ses <code>dependencies</code> et de générer automatiquement la structure de fichiers nécessaire (répertoires <code>Sources</code> ou <code>Tests</code>).</li>
+<li><code>add-dependency</code> : Permet d'ajouter une dépendance via une URL, un chemin local ou un nom de package, tout en spécifiant les contraintes de version (ex: <code>.upToNextMajor</code>, <code>.exact</code>, etc.).</li>
+</ul>
+<p>Ces commandes opèrent par transformation syntaxique sur les manifestes déclaratifs pour éviter de corrompre le code Swift existant.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0301" tabindex="-1"><a href="#avant-se-0301" class="header-anchor">Avant SE-0301</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// swift-tools-version:5.3</span>
@@ -141,15 +147,15 @@
     <span class="token punctuation">]</span>
 <span class="token punctuation">)</span>
 </code></pre>
-<p>L'ajout d'un nouveau <code>target</code> ou d'une <code>dependency</code> nécessite une modification manuelle du fichier <code>Package.swift</code>. Cette approche est sujette à des erreurs de syntaxe et impose à l'utilisateur de connaître précisément la structure de l'API <code>PackageDescription</code>.</p>
+<p>L'ajout d'une dépendance ou d'un nouveau <code>target</code> nécessite une modification manuelle du fichier <code>Package.swift</code>. Le développeur doit connaître la syntaxe exacte de <code>PackageDescription</code>, s'assurer que les virgules sont correctement placées et créer manuellement les dossiers <code>Sources/</code> ou <code>Tests/</code> pour éviter des erreurs de compilation.</p>
 <h3 id="apr%C3%A8s-se-0301" tabindex="-1"><a href="#apr%C3%A8s-se-0301" class="header-anchor">Après SE-0301</a></h3>
 <pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># Ajout d'une dépendance</span>
 swift package add-dependency https://github.com/apple/swift-argument-parser
 
-<span class="token comment"># Ajout d'un target avec dépendance</span>
-swift package add-target MyExecutable <span class="token parameter variable">--type</span> executable <span class="token parameter variable">--dependencies</span> MyLibrary ArgumentParser
+<span class="token comment"># Ajout d'un nouveau target de test pour MyLibrary</span>
+swift package add-target MyLibraryTests <span class="token parameter variable">--type</span> <span class="token builtin class-name">test</span> <span class="token parameter variable">--dependencies</span> MyLibrary
 
-<span class="token comment"># Ajout d'un produit lié au target</span>
+<span class="token comment"># Ajout d'un nouveau product qui expose MyLibrary</span>
 swift package add-product MyLibrary <span class="token parameter variable">--targets</span> MyLibrary
 </code></pre>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// swift-tools-version:5.3</span>
@@ -158,22 +164,27 @@ swift package add-product MyLibrary <span class="token parameter variable">--tar
 <span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
     name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
     products<span class="token punctuation">:</span> <span class="token punctuation">[</span>
-        <span class="token punctuation">.</span><span class="token function">library</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">,</span> targets<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">.</span><span class="token function">library</span><span class="token punctuation">(</span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">,</span>
+            targets<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">]</span>
+        <span class="token punctuation">)</span><span class="token punctuation">,</span>
     <span class="token punctuation">]</span><span class="token punctuation">,</span>
     dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span>
         <span class="token punctuation">.</span><span class="token function">package</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"swift-argument-parser"</span></span><span class="token punctuation">,</span> url<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"https://github.com/apple/swift-argument-parser"</span></span><span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token function">upToNextMajor</span><span class="token punctuation">(</span>from<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"0.3.1"</span></span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
     <span class="token punctuation">]</span><span class="token punctuation">,</span>
     targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
-        <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">,</span> dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-        <span class="token punctuation">.</span><span class="token function">testTarget</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyLibraryTests"</span></span><span class="token punctuation">,</span> dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
-        <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyExecutable"</span></span><span class="token punctuation">,</span> dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span>
-            <span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">,</span>
-            <span class="token punctuation">.</span><span class="token function">product</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"ArgumentParser"</span></span><span class="token punctuation">,</span> package<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"swift-argument-parser"</span></span><span class="token punctuation">)</span>
-        <span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">,</span>
+            dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+        <span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token punctuation">.</span><span class="token function">testTarget</span><span class="token punctuation">(</span>
+            name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyLibraryTests"</span></span><span class="token punctuation">,</span>
+            dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">]</span>
+        <span class="token punctuation">)</span><span class="token punctuation">,</span>
     <span class="token punctuation">]</span>
 <span class="token punctuation">)</span>
 </code></pre>
-<p>L'utilisation des subcommands permet de modifier le manifeste de manière automatisée et sécurisée. La solution résout le problème en effectuant des transformations syntaxiques qui conservent la structure du code et permettent une intégration fluide des nouveaux éléments (targets, produits et dépendances) sans intervention manuelle complexe.</p>
+<p>L'utilisation des sous-commandes automatise la modification du fichier <code>Package.swift</code> en respectant la syntaxe du langage. De plus, l'outil s'occupe de la gestion du système de fichiers en créant les répertoires requis pour les nouveaux <code>targets</code>, garantissant ainsi une configuration immédiate et sans erreur.</p>
 
   </div>
 </article>

@@ -125,23 +125,24 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0294-package-executable-targets.md">SE-0294 - Declaring executable targets in Package Manifests</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>La proposition introduit la fonction <code>executableTarget</code> dans l'API <code>PackageDescription</code>. Cette modification permet de déclarer explicitement qu'un <code>target</code> est destiné à produire un binaire exécutable. L'introduction de ce nouveau type de <code>target</code> permet au Swift Package Manager de distinguer clairement les modules destinés à être exécutés de ceux destinés à être utilisés comme bibliothèques. Cette modification supporte l'utilisation de l'attribut <code>@main</code> pour définir le point d'entrée de l'exécution et améliore la précision des diagnostics lors de la configuration des <code>product</code>.</p>
+<p>La proposition introduit une méthode explicite pour déclarer un <code>target</code> comme étant exécutable au sein du manifeste d'un package Swift. Cela s'effectue via l'ajout de la fonction <code>executableTarget</code> dans l'API <code>PackageDescription</code>. Ce mécanisme remplace l'inférence basée sur la présence d'un fichier nommé <code>main.swift</code> (ou équivalent pour C/C++) à la racine du répertoire de <code>sources</code>. Cette clarification permet l'utilisation de l'attribut <code>@main</code> pour définir le point d'entrée et améliore la qualité des diagnostics en éliminant l'ambiguïté sur la nature du <code>target</code>.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0294" tabindex="-1"><a href="#avant-se-0294" class="header-anchor">Avant SE-0294</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans Package.swift</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans le Package.swift</span>
 <span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
     name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
     targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
         <span class="token punctuation">.</span><span class="token function">target</span><span class="token punctuation">(</span>
             name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyExecutable"</span></span><span class="token punctuation">,</span>
             dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+            <span class="token comment">// L'exécutabilité est déduite de la présence d'un fichier main.swift dans le répertoire</span>
         <span class="token punctuation">)</span>
     <span class="token punctuation">]</span>
 <span class="token punctuation">)</span>
 </code></pre>
-<p>Le système détermine le caractère exécutable d'un <code>target</code> par l'inférence, en recherchant un fichier source nommé <code>main.swift</code>, <code>main.c</code>, <code>main.m</code> ou <code>main.cpp</code> à la racine du dossier des sources. Cette méthode empêche l'utilisation de l'attribut <code>@main</code> pour définir le point d'entrée et limite la flexibilité du nommage des fichiers sources.</p>
+<p>L'exécutabilité repose sur une convention de nommage de fichier. La présence d'un fichier nommé <code>main.swift</code> dans le répertoire de <code>sources</code> détermine si le <code>target</code> est un exécutable ou une bibliothèque. Cette méthode ne permet pas d'utiliser l'attribut <code>@main</code> et rend le but du <code>target</code> ambigu si le fichier de code source est renommé ou déplacé.</p>
 <h3 id="apr%C3%A8s-se-0294" tabindex="-1"><a href="#apr%C3%A8s-se-0294" class="header-anchor">Après SE-0294</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans Package.swift</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans le Package.swift</span>
 <span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
     name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyPackage"</span></span><span class="token punctuation">,</span>
     targets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
@@ -152,7 +153,7 @@
     <span class="token punctuation">]</span>
 <span class="token punctuation">)</span>
 </code></pre>
-<p>La syntaxe <code>executableTarget</code> permet de spécifier explicitement la nature du <code>target</code>. Cela autorise l'utilisation de l'attribut <code>@main</code> dans n'importe quel fichier source du <code>target</code> et assure que les flags de compilation appropriés sont transmis au compilateur de manière déterministe, indépendamment du nommage des fichiers.</p>
+<p>La fonction <code>executableTarget</code> définit explicitement que le <code>target</code> est destiné à produire un module exécutable. Cette approche supporte l'utilisation de l'attribut <code>@main</code> dans n'importe quel fichier source et garantit que les drapeaux de compilation (comme <code>-parse-as-library</code>) sont appliqués de manière appropriée et prévisible.</p>
 
   </div>
 </article>

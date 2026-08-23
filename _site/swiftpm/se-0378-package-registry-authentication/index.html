@@ -125,32 +125,31 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0378-package-registry-auth.md">SE-0378 - Package Registry Authentication</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit une gestion améliorée de l'authentification pour les registres de packages via Swift Package Manager (SwiftPM). Jusqu'à présent, SwiftPM ne supportait que l'authentification de base (basic authentication).</p>
-<p>La solution introduit :</p>
+<p>Cette proposition introduit une gestion améliorée de l'authentification pour les registres de packages via la commande <code>swift package-registry</code>. Jusqu'à présent, SwiftPM ne supportait que l'authentification de base (Basic Auth).</p>
+<p>La solution apporte :</p>
 <ul>
-<li>Le support de l'authentification par jeton (token authentication) via l'en-tête <code>Authorization: Bearer &lt;token&gt;</code>.</li>
-<li>De nouvelles commandes <code>swift package-registry login</code> et <code>logout</code> pour gérer les identifiants de manière sécurisée.</li>
-<li>L'utilisation du gestionnaire de mots de passe natif du système d'exploitation (ex: Keychain sur macOS) pour stocker les identifiants, avec un repli sur le fichier <code>.netrc</code> si le stockage natif n'est pas disponible.</li>
-<li>Une mise à jour de la configuration utilisateur <code>registries.json</code> pour répertorier les types d'authentification par domaine.</li>
+<li>Le support de l'authentification par jeton (Token) via l'en-tête <code>Bearer</code>.</li>
+<li>L'introduction des sous-commandes <code>login</code> et <code>logout</code> pour gérer les sessions.</li>
+<li>Une gestion sécurisée des identifiants via le gestionnaire de mots de passe natif de l'OS (ex: Keychain sur macOS) avec un repli sur le fichier <code>.netrc</code> de l'utilisateur.</li>
+<li>La mise à jour du fichier de configuration <code>registries.json</code> pour stocker les métadonnées d'authentification par domaine.</li>
 </ul>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0378" tabindex="-1"><a href="#avant-se-0378" class="header-anchor">Avant SE-0378</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// SwiftPM ne supportait que l'authentification de base.</span>
-<span class="token comment">// Les identifiants devaient souvent être gérés manuellement </span>
-<span class="token comment">// ou via des méthodes limitées dans le projet.</span>
+<pre class="language-zsh" tabindex="0"><code class="language-zsh"># SwiftPM ne supportait que l'authentification de base.
+# Il n'y avait pas de commande dédiée pour gérer la session de manière sécurisée.
 </code></pre>
-<p>SwiftPM ne permettait pas d'utiliser des jetons d'accès (access tokens), ce qui limitait l'interaction avec les services de registres modernes utilisant des protocoles comme OAuth ou des jetons API.</p>
+<p>L'impossibilité d'utiliser des jetons d'accès (access tokens) limitait l'utilisation de SwiftPM avec des registres modernes nécessitant des mécanismes de sécurité plus avancés.</p>
 <h3 id="apr%C3%A8s-se-0378" tabindex="-1"><a href="#apr%C3%A8s-se-0378" class="header-anchor">Après SE-0378</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Connexion via utilisateur et mot de passe (Basic)</span>
-<span class="token comment">// swift package-registry login https://example.com --username user --password pass</span>
+<pre class="language-zsh" tabindex="0"><code class="language-zsh"># Connexion via authentification de base
+swift package-registry login https://example.com --username jappleseed --password alpine
 
-<span class="token comment">// Connexion via jeton (Token)</span>
-<span class="token comment">// swift package-registry login https://example.com --token my_secret_token</span>
+# Connexion via jeton (Token)
+swift package-registry login https://example.com --token my_secret_token
 
-<span class="token comment">// Déconnexion</span>
-<span class="token comment">// swift package-registry logout https://example.com</span>
+# Déconnexion
+swift package-registry logout https://example.com
 </code></pre>
-<p>La proposition permet désormais une authentification flexible (Basic ou Token) et sécurise le stockage des secrets en utilisant le Keychain sur macOS ou le fichier <code>.netrc</code> de l'utilisateur, tout en supprimant le support des fichiers <code>.netrc</code> au niveau du projet pour éviter les fuites de données accidentelles.</p>
+<p>L'utilisateur peut désormais s'authentifier de manière flexible (Basic ou Token) et les identifiants sont persistés de façon sécurisée dans le Keychain du système ou le fichier <code>.netrc</code> de l'utilisateur, et non plus dans des fichiers liés au projet.</p>
 
   </div>
 </article>

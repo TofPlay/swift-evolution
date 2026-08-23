@@ -125,26 +125,42 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0339-module-aliasing-for-disambiguation.md">SE-0339 - Module Aliasing For Disambiguation</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>La proposition introduit un mécanisme de "module aliasing" pour résoudre les collisions de noms entre différents modules au sein d'un même programme. Ce problème survient lorsque deux packages distincts utilisent un nom de module identique (par exemple, un module <code>Utils</code>). La solution permet de renommer un module de manière unique pour la compilation et le symbol mangling (ex: <code>GameUtils</code>), tout en conservant l'utilisation du nom original dans le code source via l'utilisation de drapeaux de compilation (<code>-module-alias</code>). Cette fonctionnalité est implémentée via Swift Package Manager (SwiftPM) grâce à une nouvelle configuration <code>moduleAliases</code> dans le manifeste du package. Elle est limitée aux modules Swift purs et nécessite une compilation à partir des sources.</p>
+<p>Cette proposition introduit un mécanisme d'alias de module pour résoudre les collisions de noms lorsque plusieurs modules possèdent le même identifiant dans un même programme (par exemple, deux dépendances différentes incluant un module nommé <code>Utils</code>).</p>
+<p>La solution permet de renommer un module de manière unique (ex: <code>GameUtils</code>) via des paramètres de build (SwiftPM <code>moduleAliases</code>) sans modifier le code source original. Le compilateur gère la redirection des références internes du module vers le nouvel alias via le flag <code>-module-alias</code>, permettant ainsi aux modules dépendants de compiler sans changement syntaxique.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0339" tabindex="-1"><a href="#avant-se-0339" class="header-anchor">Avant SE-0339</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Package A contient un module nommé 'Utils'</span>
-<span class="token comment">// Package B contient un module nommé 'Utils'</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Module Game (provenant de swift-game)</span>
+<span class="token keyword">import</span> <span class="token class-name">Utils</span>
+<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">start</span><span class="token punctuation">(</span>level<span class="token punctuation">:</span> <span class="token class-name">Utils</span><span class="token punctuation">.</span><span class="token class-name">Level</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
 
-<span class="token keyword">import</span> <span class="token class-name">Utils</span> <span class="token comment">// Collision : le compilateur ne sait pas quel module importer</span>
+<span class="token comment">// Module Utils (provenant de swift-game)</span>
+<span class="token keyword">public</span> <span class="token keyword">struct</span> <span class="token class-name">Level</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
+
+<span class="token comment">// Module Utils (provenant de swift-draw)</span>
+<span class="token keyword">public</span> <span class="token keyword">protocol</span> <span class="token class-name">Drawable</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Canvas</span><span class="token punctuation">:</span> <span class="token class-name">Utils</span><span class="token punctuation">.</span><span class="token class-name">Drawable</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
 </code></pre>
-<p>Le système ne permet pas de compiler un programme contenant deux modules partageant le même nom. Cela rend impossible l'utilisation simultanée de deux dépendances qui utilisent un nom de module identique, empêchant ainsi les mises à jour de dépendances ou l'intégration de plusieurs packages indépendants.</p>
+<p>Conflit de nom : L'application ne peut pas importer deux modules différents nommés <code>Utils</code>, empêchant la compilation.</p>
 <h3 id="apr%C3%A8s-se-0339" tabindex="-1"><a href="#apr%C3%A8s-se-0339" class="header-anchor">Après SE-0339</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans le Package.swift de l'application :</span>
-<span class="token comment">// .product(name: "Utils", package: "package-a", moduleAliases: ["Utils": "UtilsA"]),</span>
-<span class="token comment">// .product(name: "Utils", package: "package-b")</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Configuration SwiftPM (App)</span>
+<span class="token comment">// .product(name: "Game", package: "swift-game", moduleAliases: ["Utils": "GameUtils"])</span>
 
-<span class="token keyword">import</span> <span class="token class-name">UtilsA</span> <span class="token comment">// Accès au module de package-a via l'alias</span>
-<span class="token keyword">import</span> <span class="token class-name">Utils</span>  <span class="token comment">// Accès au module de package-b via son nom original</span>
+<span class="token comment">// Module Game (compilé avec l'alias)</span>
+<span class="token keyword">import</span> <span class="token class-name">Utils</span> <span class="token comment">// Le compilateur traite ceci comme GameUtils</span>
+<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">start</span><span class="token punctuation">(</span>level<span class="token punctuation">:</span> <span class="token class-name">Utils</span><span class="token punctuation">.</span><span class="token class-name">Level</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
 
-<span class="token keyword">let</span> value <span class="token operator">=</span> <span class="token class-name">UtilsA</span><span class="token punctuation">.</span>someType <span class="token comment">// Utilisation du type via l'alias</span>
+<span class="token comment">// Module Utils (le module original reste inchangé)</span>
+<span class="token keyword">public</span> <span class="token keyword">protocol</span> <span class="token class-name">Drawable</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
+
+<span class="token comment">// Application (utilisation des deux modules)</span>
+<span class="token keyword">import</span> <span class="token class-name">GameUtils</span>
+<span class="token keyword">import</span> <span class="token class-name">Utils</span>
+
+<span class="token keyword">let</span> level <span class="token operator">=</span> <span class="token class-name">GameUtils</span><span class="token punctuation">.</span><span class="token class-name">Level</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Accès via l'alias</span>
+<span class="token keyword">let</span> drawable<span class="token punctuation">:</span> <span class="token class-name">Utils</span><span class="token punctuation">.</span><span class="token class-name">Drawable</span> <span class="token comment">// Accès via le nom original</span>
 </code></pre>
-<p>La proposition permet de définir un alias unique pour un module conflictuel dans le manifeste du package. Le compilateur traite le module sous son nouveau nom unique lors de la génération du binaire et du symbol mangling, mais permet au code source de continuer à utiliser le nom original grâce à l'option <code>-module-alias</code>.</p>
+<p>Le conflit est résolu en renommant le module <code>Utils</code> de <code>swift-game</code> en <code>GameUtils</code> de manière transparente pour son propre code source, tout en permettant à l'utilisateur d'utiliser les deux modules via leurs noms respectifs.</p>
+<hr>
 
   </div>
 </article>
