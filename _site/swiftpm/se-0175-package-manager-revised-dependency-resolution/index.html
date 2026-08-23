@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0175 - Package Manager Revised Dependency Resolution</title>
+
+    <meta data-pagefind-meta="parent:Swift Package Manager (SwiftPM)">
+    <meta data-pagefind-meta="parent_url:/swiftpm/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swiftpm/se-0175-package-manager-revised-dependency-resolution/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swiftpm/se-0175-package-manager-revised-dependency-resolution/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swiftpm/">
+                  Swift Package Manager (SwiftPM)
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0175 - Package Manager Revised Dependency Resolution</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0175 - Package Manager Revised Dependency Resolution" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0175 - Package Manager Revised Dependency Resolution">
+  
+  <div class="post-body">
+    <h1>SE-0175 - Package Manager Revised Dependency Resolution</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 4.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0175-package-manager-revised-dependency-resolution.md">SE-0175 - Package Manager Revised Dependency Resolution</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition modifie le comportement de résolution des dépendances du <code>package manager</code> pour le rendre plus prévisible et cohérent. Elle remplace le mécanisme de "pinning" (qui utilisait un fichier <code>Package.pins</code>) par un système de "versions résolues" utilisant un fichier <code>Package.resolved</code>. Ce nouveau fichier enregistre systématiquement la version et la révision git de chaque dépendance résolue. La proposition introduit la commande <code>swift package resolve</code> pour remplacer <code>swift package fetch</code>, permettant de synchroniser l'état des dépendances avec les contraintes du <code>Package.swift</code> et le fichier <code>Package.resolved</code>. Ce changement sépare l'objectif de mémoriser les versions résolues (pour la reproductibilité entre développeurs) de l'usage potentiel futur de l'ancrage explicite (pinning) des dépendances.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0175" tabindex="-1"><a href="#avant-se-0175" class="header-anchor">Avant SE-0175</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// L'utilisateur utilise des commandes de pinning qui créent un fichier Package.pins</span>
+<span class="token comment">// Les versions sont mémorisées de manière optionnelle et complexe</span>
+<span class="token comment">// swift package pin &lt;package&gt;</span>
+<span class="token comment">// swift package unpin &lt;package&gt;</span>
+</code></pre>
+<p>Le système utilise un mécanisme d'autopinning qui peut être confus. Les commandes de pinning empêchent la mise à jour sélective de certains packages et la gestion des dépendances peut ne pas détecter automatiquement les changements de versions dans le <code>Package.swift</code> tant qu'une commande <code>update</code> n'est pas explicitement lancée.</p>
+<h3 id="apr%C3%A8s-se-0175" tabindex="-1"><a href="#apr%C3%A8s-se-0175" class="header-anchor">Après SE-0175</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le système génère systématiquement un fichier Package.resolved</span>
+<span class="token comment">// La résolution est explicite et intégrée aux commandes de build</span>
+<span class="token comment">// swift package resolve</span>
+<span class="token comment">// swift package update</span>
+</code></pre>
+<p>Le <code>package manager</code> utilise le fichier <code>Package.resolved</code> pour garantir que chaque membre d'une équipe utilise les mêmes versions de dépendances. La commande <code>swift package resolve</code> assure que le graphe de dépendances respecte les restrictions du <code>Package.swift</code>. Si les contraintes changent, le système résout automatiquement les nouvelles versions compatibles.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

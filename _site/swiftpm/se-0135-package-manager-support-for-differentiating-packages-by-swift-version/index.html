@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0135 - Package Manager Support for Differentiating Packages by Swift version</title>
+
+    <meta data-pagefind-meta="parent:Swift Package Manager (SwiftPM)">
+    <meta data-pagefind-meta="parent_url:/swiftpm/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swiftpm/se-0135-package-manager-support-for-differentiating-packages-by-swift-version/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swiftpm/se-0135-package-manager-support-for-differentiating-packages-by-swift-version/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swiftpm/">
+                  Swift Package Manager (SwiftPM)
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0135 - Package Manager Support for Differentiating Packages by Swift version</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0135 - Package Manager Support for Differentiating Packages by Swift version" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0135 - Package Manager Support for Differentiating Packages by Swift version">
+  
+  <div class="post-body">
+    <h1>SE-0135 - Package Manager Support for Differentiating Packages by Swift version</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 3.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0135-package-manager-support-for-differentiating-packages-by-swift-version.md">SE-0135 - Package Manager Support for Differentiating Packages by Swift version</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit un mécanisme permettant au Swift Package Manager de distinguer les packages en fonction de la version de Swift utilisée par le client. Le système repose sur deux piliers :</p>
+<ol>
+<li><strong>Tags de dépôt versionnés</strong> : Les auteurs de packages peuvent créer des tags de version spécifiques à une version de Swift en utilisant le suffixe <code>@swift-&lt;version&gt;</code>. Le Package Manager sélectionne le tag correspondant à la version de Swift du projet client avant d'appliquer la logique de versionnement sémantique habituelle.</li>
+<li><strong>Manifestes de package multiples</strong> : Pour gérer les changements de syntaxe ou d'API dans le fichier <code>Package.swift</code>, la proposition permet l'existence de fichiers manifestes nommés <code>Package@swift-&lt;version&gt;.swift</code>.</li>
+</ol>
+<p>Ce mécanisme permet de maintenir un même numéro de version sémantique pour un package tout en proposant des implémentations de code différentes selon la version de Swift requise.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0135" tabindex="-1"><a href="#avant-se-0135" class="header-anchor">Avant SE-0135</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le développeur est limité à une seule base de code ou un seul manifest</span>
+<span class="token comment">// Les différences de version de langage ou d'API du Package Description</span>
+<span class="token comment">// doivent être gérées par des directives de compilation #if.</span>
+
+<span class="token comment">// Package.swift (standard)</span>
+<span class="token keyword">let</span> package <span class="token operator">=</span> <span class="token class-name">Package</span><span class="token punctuation">(</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"ExamplePackage"</span></span><span class="token punctuation">,</span>
+    dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+<span class="token punctuation">)</span>
+</code></pre>
+<p>L'utilisation de directives <code>#if</code> dans le code source ou dans le manifeste devient complexe et difficile à maintenir lorsque les changements de syntaxe ou les évolutions de l'API du Package Description sont significatifs entre deux versions de Swift.</p>
+<h3 id="apr%C3%A8s-se-0135" tabindex="-1"><a href="#apr%C3%A8s-se-0135" class="header-anchor">Après SE-0135</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Un tag de dépôt peut être nommé : 1.0@swift-2.3</span>
+<span class="token comment">// Un autre tag pour la même version sémantique : 1.0@swift-3.0</span>
+
+<span class="token comment">// Un manifeste spécifique peut être nommé : Package@swift-2.3.swift</span>
+<span class="token comment">// Le manifeste par défaut reste : Package.swift</span>
+</code></pre>
+<p>Le système permet de fournir des versions distinctes du même package pour différentes versions de Swift. Le Package Manager sélectionne automatiquement la variante la plus précise (ex: <code>@swift-3.1</code> est prioritaire sur <code>@swift-3</code>) correspondant à la version de Swift du projet, évitant ainsi la bifurcation inutile de versions sémantiques ou l'utilisation excessive de directives de compilation.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

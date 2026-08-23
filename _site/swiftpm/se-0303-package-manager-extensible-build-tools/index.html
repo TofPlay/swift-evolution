@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0303 - Package Manager Extensible Build Tools</title>
+
+    <meta data-pagefind-meta="parent:Swift Package Manager (SwiftPM)">
+    <meta data-pagefind-meta="parent_url:/swiftpm/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swiftpm/se-0303-package-manager-extensible-build-tools/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swiftpm/se-0303-package-manager-extensible-build-tools/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swiftpm/">
+                  Swift Package Manager (SwiftPM)
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0303 - Package Manager Extensible Build Tools</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0303 - Package Manager Extensible Build Tools" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0303 - Package Manager Extensible Build Tools">
+  
+  <div class="post-body">
+    <h1>SE-0303 - Package Manager Extensible Build Tools</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 5.6</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0303-swiftpm-extensible-build-tools.md">SE-0303 - Package Manager Extensible Build Tools</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit le support des <code>package plugins</code> dans Swift Package Manager (SwiftPM) pour permettre l'extension des outils de build. Le système repose sur l'introduction de la bibliothèque <code>PackagePlugin</code> et d'un nouveau type de <code>target</code> nommé <code>plugin</code>.</p>
+<p>Le mécanisme fonctionne comme suit :</p>
+<ul>
+<li><strong>Capacités :</strong> La version initiale définit la capacité <code>buildTool</code>, permettant de créer des commandes à exécuter pendant le processus de build.</li>
+<li><strong>Structure :</strong> Un plugin est un script Swift utilisant l'API <code>PackagePlugin</code> pour construire des commandes (<code>Command</code>) basées sur un contexte (<code>TargetBuildContext</code>).</li>
+<li><strong>Types de commandes :</strong>
+<ul>
+<li><code>buildCommand</code> : Intégrée au graphe de dépendances, elle s'exécute si les <code>inputFiles</code> changent ou si les <code>outputFiles</code> sont manquants.</li>
+<li><code>prebuildCommand</code> : S'exécute avant chaque build, utile lorsque les noms des fichiers de sortie ne sont pas prédéfinis.</li>
+</ul>
+</li>
+<li><strong>Exécution :</strong> Les plugins s'exécutent dans un environnement sécurisé (sandbox) avec un accès en lecture seule au répertoire du package et un accès en écriture limité au <code>pluginWorkDirectory</code>.</li>
+<li><strong>Activation :</strong> Les cibles (<code>target</code>, <code>executableTarget</code>, <code>testTarget</code>) peuvent utiliser des plugins via le paramètre <code>plugins</code>.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0303" tabindex="-1"><a href="#avant-se-0303" class="header-anchor">Avant SE-0303</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// SwiftPM ne propose aucun moyen natif d'exécuter des actions personnalisées </span>
+<span class="token comment">// ou de la génération de code durant le build.</span>
+<span class="token comment">// Les développeurs doivent souvent exécuter manuellement des outils </span>
+<span class="token comment">// (comme SwiftGen ou SwiftProtobuf) et committer les sources générées.</span>
+</code></pre>
+<p>L'absence de mécanisme intégré limite l'automatisation des tâches de build, comme la génération de code à partir de fichiers de configuration ou de schémas, obligeant les développeurs à gérer manuellement les outils et les fichiers produits.</p>
+<h3 id="apr%C3%A8s-se-0303" tabindex="-1"><a href="#apr%C3%A8s-se-0303" class="header-anchor">Après SE-0303</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Exemple de définition d'un plugin dans le Package.swift du fournisseur</span>
+<span class="token punctuation">.</span><span class="token function">plugin</span><span class="token punctuation">(</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"SwiftGenPlugin"</span></span><span class="token punctuation">,</span>
+    capability<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token function">buildTool</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    dependencies<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"SwiftGen"</span></span><span class="token punctuation">]</span>
+<span class="token punctuation">)</span>
+
+<span class="token comment">// Utilisation par un client dans son Package.swift</span>
+<span class="token punctuation">.</span><span class="token function">executable</span><span class="token punctuation">(</span>
+    name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyLibrary"</span></span><span class="token punctuation">,</span>
+    plugins<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">.</span><span class="token function">plugin</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"SwiftGenPlugin"</span></span><span class="token punctuation">,</span> package<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"SwiftGen"</span></span><span class="token punctuation">)</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">)</span>
+
+<span class="token comment">// Implémentation du plugin (plugin.swift)</span>
+<span class="token keyword">import</span> <span class="token class-name">PackagePlugin</span>
+
+<span class="token attribute atrule">@main</span>
+<span class="token keyword">struct</span> <span class="token class-name">SwiftGenPlugin</span><span class="token punctuation">:</span> <span class="token class-name">BuildToolPlugin</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">createBuildCommands</span><span class="token punctuation">(</span>context<span class="token punctuation">:</span> <span class="token class-name">TargetBuildContext</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token punctuation">[</span><span class="token class-name">Command</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
+        <span class="token keyword">let</span> genSourcesDir <span class="token operator">=</span> context<span class="token punctuation">.</span>pluginWorkDirectory<span class="token punctuation">.</span><span class="token function">appending</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"GeneratedSources"</span></span><span class="token punctuation">)</span>
+        
+        <span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token punctuation">.</span><span class="token function">prebuildCommand</span><span class="token punctuation">(</span>
+            displayName<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Running SwiftGen"</span></span><span class="token punctuation">,</span>
+            executable<span class="token punctuation">:</span> <span class="token keyword">try</span> context<span class="token punctuation">.</span><span class="token function">tool</span><span class="token punctuation">(</span>named<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"swiftgen"</span></span><span class="token punctuation">)</span><span class="token punctuation">.</span>path<span class="token punctuation">,</span>
+            arguments<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string-literal"><span class="token string">"config"</span></span><span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"run"</span></span><span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"--config"</span></span><span class="token punctuation">,</span> <span class="token string-literal"><span class="token string">"swiftgen.yml"</span></span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+            outputFilesDirectory<span class="token punctuation">:</span> genSourcesDir
+        <span class="token punctuation">)</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition permet de définir des plugins capables de générer des commandes de build de manière programmatique. En utilisant le protocole <code>BuildToolPlugin</code>, le plugin inspecte le <code>context</code> pour identifier les fichiers sources et retourne une commande configurée. Cette commande est ensuite intégrée au cycle de vie de SwiftPM, automatisant la génération de code de façon transparente pour l'utilisateur du package.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

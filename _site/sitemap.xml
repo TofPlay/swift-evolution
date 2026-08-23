@@ -1227,12 +1227,66 @@
     <lastmod>2026-08-05T18:19:52.621Z</lastmod>
   </url>
   <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0038-package-manager-c-language-target-support/</loc>
+    <lastmod>2026-08-23T08:31:08.335Z</lastmod>
+  </url>
+  <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0063-swiftpm-system-module-search-paths/</loc>
     <lastmod>2026-07-07T11:54:50.863Z</lastmod>
   </url>
   <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0082-package-manager-editable-packages/</loc>
+    <lastmod>2026-08-23T08:31:56.555Z</lastmod>
+  </url>
+  <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0085-package-manager-command-names/</loc>
     <lastmod>2026-07-07T11:56:01.105Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0129-package-manager-test-naming-conventions/</loc>
+    <lastmod>2026-08-23T08:32:26.104Z</lastmod>
+  </url>
+  <url>
+    <loc>
+      https://tofplay.github.io/swift-evolution/swiftpm/se-0135-package-manager-support-for-differentiating-packages-by-swift-version/
+    </loc>
+    <lastmod>2026-08-23T08:32:52.118Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0145-package-manager-version-pinning/</loc>
+    <lastmod>2026-08-23T08:33:20.602Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0146-package-manager-product-definitions/</loc>
+    <lastmod>2026-08-23T08:33:44.621Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0149-package-manager-support-for-top-of-tree-development/</loc>
+    <lastmod>2026-08-23T08:34:14.026Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0150-package-manager-support-for-branches/</loc>
+    <lastmod>2026-08-23T08:34:40.734Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0151-package-manager-swift-language-compatibility-version/</loc>
+    <lastmod>2026-08-23T08:35:07.484Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0152-package-manager-tools-version/</loc>
+    <lastmod>2026-08-23T08:35:38.853Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0158-package-manager-manifest-api-redesign/</loc>
+    <lastmod>2026-08-23T08:36:08.250Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0162-package-manager-custom-target-layouts/</loc>
+    <lastmod>2026-08-23T08:36:37.363Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0175-package-manager-revised-dependency-resolution/</loc>
+    <lastmod>2026-08-23T08:37:07.801Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0179-swift-run-command/</loc>
@@ -1257,6 +1311,18 @@
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0219-package-manager-dependency-mirroring/</loc>
     <lastmod>2026-07-07T12:04:09.591Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0226-package-manager-target-based-dependency-resolution/</loc>
+    <lastmod>2026-08-23T08:37:47.851Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0236-package-manager-platform-deployment-settings/</loc>
+    <lastmod>2026-08-23T08:38:26.410Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0238-package-manager-target-specific-build-settings/</loc>
+    <lastmod>2026-08-23T08:39:02.957Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0271-package-manager-resources/</loc>
@@ -1289,6 +1355,14 @@
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0301-package-editor-commands/</loc>
     <lastmod>2026-07-07T12:16:55.755Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0303-package-manager-extensible-build-tools/</loc>
+    <lastmod>2026-08-23T08:39:34.685Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0305-package-manager-binary-target-improvements/</loc>
+    <lastmod>2026-08-23T08:40:09.512Z</lastmod>
   </url>
   <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/se-0321-package-registry-service-publish-endpoint/</loc>
