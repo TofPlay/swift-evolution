@@ -58,9 +58,9 @@ Each evolution proposal is documented with:
 
 ## Internationalization
 
-This site is primarily written in **English**. However, an automatic translation mechanism is available to allow users to view the content in other languages.
+This site is primarily written in **French**. However, an automatic translation mechanism is available to allow users to view the content in other languages.
 
-- **Default Language**: English
+- **Default Language**: French
 - **Automatic Translation**: Enable the language selector in the navigation bar to translate proposals into your language.
 
 ## Source
