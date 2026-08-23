@@ -2,6 +2,8 @@
 
 [![Live Site](https://img.shields.io/badge/Live%20Site-Swift%20Evolution-brightgreen)](https://tofplay.github.io/swift-evolution/)
 
+🇫🇷 **Français** | 🇬🇧 [English](README.en.md)
+
 Ce site web présente l'ensemble des **propositions d'évolution** (Swift Evolution) officielles pour le langage Swift, telles que publiées par la communauté et l'équipe Apple.
 
 ## Objectif
