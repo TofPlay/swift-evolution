@@ -2,7 +2,7 @@
 
 [![Live Site](https://img.shields.io/badge/Live%20Site-Swift%20Evolution-brightgreen)](https://tofplay.github.io/swift-evolution/)
 
-🇫🇷 [Français](README.md) | 🇬🇧 **English**
+🇫🇷 [Français](README.fr.md) | 🇬🇧 [**English**](README.md)
 
 This website presents the complete set of official **Swift Evolution** proposals published by the community and Apple.
 
