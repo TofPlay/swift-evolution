@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0206 - Hashable Enhancements</title>
+
+    <meta data-pagefind-meta="parent:Swift 4.2">
+    <meta data-pagefind-meta="parent_url:/swift-4-2/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-4-2/se-0206-hashable-enhancements/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-4-2/se-0206-hashable-enhancements/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-4-2/">
+                  Swift 4.2
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0206 - Hashable Enhancements</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0206 - Hashable Enhancements" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0206 - Hashable Enhancements">
+  
+  <div class="post-body">
+    <h1>SE-0206 - Hashable Enhancements</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-part-de" tabindex="-1"><a href="#disponible-%C3%A0-part-de" class="header-anchor">Disponible à part de</a></h2>
+<p>Swift 4.2</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0206-hashable-enhancements.md">SE-0206 - Hashable Enhancements</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit un nouveau type <code>Hasher</code> qui représente la fonction de hachage universelle de la bibliothèque standard. Le protocole <code>Hashable</code> est mis à jour pour inclure une nouvelle exigence <code>hash(into:)</code>, qui remplace la propriété <code>hashValue</code> (désormais dépréciée).</p>
+<p>Cette évolution déplace la responsabilité du choix de l'algorithme de hachage du type lui-même vers la bibliothèque standard. Le type <code>Hasher</code> est une <code>struct</code> résiliente qui gère un état interne (utilisant SipHash-1-3) et utilise une graine (seed) aléatoire par exécution pour garantir un non-déterminisme, ce qui protège contre les attaques par collision de hashage. La nouvelle exigence <code>hash(into:)</code> permet une implémentation plus simple et plus performante en permettant de nourrir le <code>Hasher</code> avec les composants essentiels du type via la méthode <code>combine</code>.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0206" tabindex="-1"><a href="#avant-se-0206" class="header-anchor">Avant SE-0206</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">GridPoint</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> x<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+    <span class="token keyword">var</span> y<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">extension</span> <span class="token class-name">GridPoint</span><span class="token punctuation">:</span> <span class="token class-name">Hashable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> hashValue<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> x<span class="token punctuation">.</span>hashValue <span class="token operator">^</span> y<span class="token punctuation">.</span>hashValue <span class="token operator">&amp;*</span> <span class="token number">16777619</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">static</span> <span class="token keyword">func</span> <span class="token operator">==</span> <span class="token punctuation">(</span>lhs<span class="token punctuation">:</span> <span class="token class-name">GridPoint</span><span class="token punctuation">,</span> rhs<span class="token punctuation">:</span> <span class="token class-name">GridPoint</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Bool</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> lhs<span class="token punctuation">.</span>x <span class="token operator">==</span> rhs<span class="token punctuation">.</span>x <span class="token operator">&amp;&amp;</span> lhs<span class="token punctuation">.</span>y <span class="token operator">==</span> rhs<span class="token punctuation">.</span>y
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'implémentation repose sur le calcul manuel d'une valeur entière unique. Le développeur doit choisir comment combiner les composants du type pour produire un entier, ce qui nécessite des connaissances spécifiques en manipulation de bits et en fonctions de hachage pour éviter les collisions ou les problèmes de performance.</p>
+<h3 id="apr%C3%A8s-se-0206" tabindex="-1"><a href="#apr%C3%A8s-se-0206" class="header-anchor">Après SE-0206</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">GridPoint</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> x<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+    <span class="token keyword">var</span> y<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">extension</span> <span class="token class-name">GridPoint</span><span class="token punctuation">:</span> <span class="token class-name">Hashable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">hash</span><span class="token punctuation">(</span>into hasher<span class="token punctuation">:</span> <span class="token keyword">inout</span> <span class="token class-name">Hasher</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        hasher<span class="token punctuation">.</span><span class="token function">combine</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span>
+        hasher<span class="token punctuation">.</span><span class="token function">combine</span><span class="token punctuation">(</span>y<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">static</span> <span class="token keyword">func</span> <span class="token operator">==</span> <span class="token punctuation">(</span>lhs<span class="token punctuation">:</span> <span class="token class-name">GridPoint</span><span class="token punctuation">,</span> rhs<span class="token punctuation">:</span> <span class="token class-name">GridPoint</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Bool</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> lhs<span class="token punctuation">.</span>x <span class="token operator">==</span> rhs<span class="token punctuation">.</span>x <span class="token operator">&amp;&amp;</span> lhs<span class="token punctuation">.</span>y <span class="token operator">==</span> rhs<span class="token punctuation">.</span>y
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition permet de déléguer la complexité du mélange des bits au type <code>Hasher</code>. Il suffit de passer les membres essentiels du type à la méthode <code>combine</code>, et le système garantit une distribution de haute qualité et une protection contre les collisions.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

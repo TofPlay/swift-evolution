@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0163 - String Revision: Collection Conformance, C Interop, Transcoding</title>
+
+    <meta data-pagefind-meta="parent:Swift 4.0">
+    <meta data-pagefind-meta="parent_url:/swift-4-0/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-4-0/se-0163-string-revision-collection-conformance-c-interop-transcoding/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-4-0/se-0163-string-revision-collection-conformance-c-interop-transcoding/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-4-0/">
+                  Swift 4.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0163 - String Revision: Collection Conformance, C Interop, Transcoding</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0163 - String Revision: Collection Conformance, C Interop, Transcoding" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0163 - String Revision: Collection Conformance, C Interop, Transcoding">
+  
+  <div class="post-body">
+    <h1>SE-0163 - String Revision: Collection Conformance, C Interop, Transcoding</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 4.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0163-string-revision-1.md">SE-0163 - String Revision: Collection Conformance, C Interop, Transcoding</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit une refonte majeure du type <code>String</code> pour améliorer la performance et la cohérence du langage. Les points clés incluent :</p>
+<ul>
+<li>L'adhésion de <code>String</code> aux protocoles <code>BidirectionalCollection</code> et <code>RangeReplaceableCollection</code>.</li>
+<li>L'introduction d'un nouveau type <code>Substring</code> pour représenter <code>String.SubSequence</code>.</li>
+<li>La création d'un <code>StringProtocol</code> permettant des opérations génériques sur <code>String</code> et <code>Substring</code>.</li>
+<li>La consolidation de l'interopérabilité avec les chaînes C via un ensemble réduit de méthodes (<code>withCString</code>, <code>init(cString:)</code>).</li>
+<li>L'organisation des fonctionnalités Unicode au sein d'un <code>namespace</code> dédié (<code>Unicode</code>), remplaçant <code>UnicodeCodec</code> par un nouveau protocole <code>Unicode.Encoding</code>.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0163" tabindex="-1"><a href="#avant-se-0163" class="header-anchor">Avant SE-0163</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans Swift 3, le slicing d'une String retournait une String</span>
+<span class="token keyword">let</span> text <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"Hello, Swift"</span></span>
+<span class="token keyword">let</span> slice <span class="token operator">=</span> text<span class="token punctuation">.</span><span class="token keyword">prefix</span><span class="token punctuation">(</span><span class="token number">7</span><span class="token punctuation">)</span> <span class="token comment">// Type : String</span>
+</code></pre>
+<p>Le fait que le slicing retourne une <code>String</code> oblige le système à copier les données ou à partager la mémoire de manière indifférenciée. Le partage de la mémoire entre une petite <code>String</code> (le slice) et une grande <code>String</code> (l'originale) peut entraîner des fuites de mémoire, car l'originale reste en mémoire tant que le slice existe.</p>
+<h3 id="apr%C3%A8s-se-0163" tabindex="-1"><a href="#apr%C3%A8s-se-0163" class="header-anchor">Après SE-0163</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans Swift 4, le slicing retourne un Substring</span>
+<span class="token keyword">let</span> text <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"Hello, Swift"</span></span>
+<span class="token keyword">let</span> slice <span class="token operator">=</span> text<span class="token punctuation">.</span><span class="token keyword">prefix</span><span class="token punctuation">(</span><span class="token number">7</span><span class="token punctuation">)</span> <span class="token comment">// Type : Substring</span>
+
+<span class="token comment">// Introduction de StringProtocol pour le générique</span>
+<span class="token keyword">func</span> <span class="token function-definition function">process</span><span class="token operator">&lt;</span><span class="token class-name">S</span><span class="token punctuation">:</span> <span class="token class-name">StringProtocol</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> input<span class="token punctuation">:</span> <span class="token class-name">S</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span>input<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">process</span><span class="token punctuation">(</span>text<span class="token punctuation">)</span>      <span class="token comment">// Fonctionne avec String</span>
+<span class="token function">process</span><span class="token punctuation">(</span>slice<span class="token punctuation">)</span>     <span class="token comment">// Fonctionne avec Substring</span>
+</code></pre>
+<p>La proposition résout le problème de mémoire en introduisant <code>Substring</code>. Un <code>Substring</code> est un type distinct qui peut partager le stockage de l'original sans empêcher la libération de la mémoire de la chaîne parente si une conversion explicite vers <code>String</code> est effectuée. L'utilisation de <code>StringProtocol</code> permet d'écrire du code générique compatible avec les deux types de manière efficace.</p>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Exemple d'interopérabilité C simplifiée</span>
+<span class="token keyword">let</span> cString<span class="token punctuation">:</span> <span class="token class-name">UnsafePointer</span><span class="token operator">&lt;</span><span class="token class-name">CChar</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token operator">...</span>
+<span class="token keyword">let</span> swiftString <span class="token operator">=</span> <span class="token class-name">String</span><span class="token punctuation">(</span>cString<span class="token punctuation">:</span> cString<span class="token punctuation">)</span>
+swiftString<span class="token punctuation">.</span>withCString <span class="token punctuation">{</span> ptr <span class="token keyword">in</span>
+    <span class="token comment">// Utilisation directe du pointeur</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le code généré par la conversion de Substring en String (si nécessaire)</span>
+<span class="token comment">// String(substringInstance) </span>
+</code></pre>
+<p>L'introduction de <code>Substring</code> et de <code>StringProtocol</code> permet de séparer la gestion du stockage de courte durée (slicing) de la gestion du stockage permanent, tout en offrant une interface unifiée pour le traitement des caractères et des séquences.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - Swift 4.0</title>
+
+    <meta data-pagefind-meta="parent:Swift 4.0">
+    <meta data-pagefind-meta="parent_url:/swift-4-0/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-4-0/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-4-0/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <span aria-current="page">Swift 4.0</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="Swift 4.0" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:Swift 4.0">
+  
+  <div class="post-body">
+    <h1>Swift 4.0</h1>
+<h2 id="introduction" tabindex="-1"><a href="#introduction" class="header-anchor">Introduction</a></h2>
+<p>Ces fichiers correspondent aux documents Swift Evolution relatif à la version Swift 4.0</p>
+<h2 id="liste-des-fichiers" tabindex="-1"><a href="#liste-des-fichiers" class="header-anchor">Liste des fichiers</a></h2>
+<p>Il y a 31 propositions :</p>
+<ul>
+<li><a href="/swift-evolution/swift-4-0/se-0104-protocol-oriented-integers/">SE-0104 Protocol-oriented integers</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0142-permit-where-clauses-to-constrain-associated-types/">SE-0142 Permit where clauses to constrain associated types</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0146-package-manager-product-definitions/">SE-0146 Package Manager Product Definitions</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0148-generic-subscripts/">SE-0148 Generic Subscripts</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0149-package-manager-support-for-top-of-tree-development/">SE-0149 Package Manager Support for Top of Tree development</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0150-package-manager-support-for-branches/">SE-0150 Package Manager Support for branches</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0154-provide-custom-collections-for-dictionary-keys-and-values/">SE-0154 Provide Custom Collections for Dictionary Keys and Values</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0156-class-and-subtype-existentials/">SE-0156 Class and Subtype existentials</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0158-package-manager-manifest-api-redesign/">SE-0158 Package Manager Manifest API Redesign</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0160-limiting-objc-inference/">SE-0160 Limiting @objc inference</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0161-smart-keypaths-better-key-value-coding-for-swift/">SE-0161 Smart KeyPaths: Better Key-Value Coding for Swift</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0162-package-manager-custom-target-layouts/">SE-0162 Package Manager Custom Target Layouts</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0163-string-revision-collection-conformance-c-interop-transcoding/">SE-0163 String Revision: Collection Conformance, C Interop, Transcoding</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0164-remove-final-support-in-protocol-extensions/">SE-0164 Remove final support in protocol extensions</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0165-dictionary-set-enhancements/">SE-0165 Dictionary &amp; Set Enhancements</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0166-swift-archival-serialization/">SE-0166 Swift Archival &amp; Serialization</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0167-swift-encoders/">SE-0167 Swift Encoders</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0168-multi-line-string-literals/">SE-0168 Multi-Line String Literals</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0169-improve-interaction-between-private-declarations-and-extensions/">SE-0169 Improve Interaction Between private Declarations and Extensions</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0170-nsnumber-bridging-and-numeric-types/">SE-0170 NSNumber bridging and Numeric types</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0171-reduce-with-inout/">SE-0171 Reduce with inout</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0172-one-sided-ranges/">SE-0172 One-sided Ranges</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0173-add-mutablecollection-swapat/">SE-0173 Add MutableCollection.swapAt(::)</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0175-package-manager-revised-dependency-resolution/">SE-0175 Package Manager Revised Dependency Resolution</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0176-enforce-exclusive-access-to-memory/">SE-0176 Enforce Exclusive Access to Memory</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0178-add-unicodescalars-property-to-character/">SE-0178 Add unicodeScalars property to Character</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0179-swift-run-command/">SE-0179 swift run Command</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0180-string-index-overhaul/">SE-0180 String Index Overhaul</a></li>
+<li><a href="/swift-evolution/swiftpm/se-0181-package-manager-cc-language-standard-support/">SE-0181 Package Manager C/C++ Language Standard Support</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0182-string-newline-escaping/">SE-0182 String Newline Escaping</a></li>
+<li><a href="/swift-evolution/swift-4-0/se-0183-substring-performance-affordances/">SE-0183 Substring performance affordances</a></li>
+</ul>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

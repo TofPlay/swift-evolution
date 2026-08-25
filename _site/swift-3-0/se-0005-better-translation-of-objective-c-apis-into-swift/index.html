@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0005 - Better Translation of Objective-C APIs Into Swift</title>
+
+    <meta data-pagefind-meta="parent:Swift 3.0">
+    <meta data-pagefind-meta="parent_url:/swift-3-0/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-3-0/se-0005-better-translation-of-objective-c-apis-into-swift/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-3-0/se-0005-better-translation-of-objective-c-apis-into-swift/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-3-0/">
+                  Swift 3.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0005 - Better Translation of Objective-C APIs Into Swift</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0005 - Better Translation of Objective-C APIs Into Swift" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0005 - Better Translation of Objective-C APIs Into Swift">
+  
+  <div class="post-body">
+    <h1>SE-0005 - Better Translation of Objective-C APIs Into Swift</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 3.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0005-objective-c-name-translation.md">SE-0005 - Better Translation of Objective-C APIs Into Swift</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition décrit l'amélioration de l'importateur Clang pour mapper les API Objective-C vers Swift en respectant les <code>Swift API Design Guidelines</code>. L'objectif est de traduire les noms des fonctions, types et méthodes afin qu'ils soient plus "Swifty". Les mécanismes incluent :</p>
+<ul>
+<li>La suppression des noms de types redondants dans les sélecteurs.</li>
+<li>L'ajout de valeurs par défaut pour les arguments (ex: <code>nil</code> pour les types optionnels, <code>[]</code> pour les <code>OptionSet</code>).</li>
+<li>La conversion des méthodes de comparaison en conformité au protocole <code>Comparable</code>.</li>
+<li>La gestion des propriétés booléennes en préfixant le nom par "is".</li>
+<li>La mise en minuscule des déclarations de valeurs (non-types).</li>
+<li>La généralisation de l'attribut <code>swift_name</code> pour un contrôle plus fin lors de l'importation.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0005" tabindex="-1"><a href="#avant-se-0005" class="header-anchor">Avant SE-0005</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de l'API Objective-C telle qu'importée en Swift 2</span>
+<span class="token keyword">let</span> content <span class="token operator">=</span> listItemView<span class="token punctuation">.</span>text<span class="token punctuation">.</span><span class="token function">stringByTrimmingCharactersInSet</span><span class="token punctuation">(</span><span class="token class-name">NSCharacterSet</span><span class="token punctuation">.</span><span class="token function">whitespaceAndNewlineCharacterSet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> path <span class="token operator">=</span> <span class="token class-name">UIBezierPath</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+path<span class="token punctuation">.</span><span class="token function">moveToPoint</span><span class="token punctuation">(</span><span class="token class-name">CGPoint</span><span class="token punctuation">(</span>x<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span> y<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">if</span> path<span class="token punctuation">.</span>empty <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Empty"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Le code utilise des noms verbosités, répétant le type de l'objet dans le nom de la méthode ou de la propriété, ce qui ne respecte pas les principes de concision du langage Swift.</p>
+<h3 id="apr%C3%A8s-se-0005" tabindex="-1"><a href="#apr%C3%A8s-se-0005" class="header-anchor">Après SE-0005</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de l'API Objective-C traduite selon les nouvelles règles</span>
+<span class="token keyword">let</span> content <span class="token operator">=</span> listItemView<span class="token punctuation">.</span>text<span class="token punctuation">.</span><span class="token function">trimming</span><span class="token punctuation">(</span><span class="token punctuation">.</span>whitespaceAndNewlines<span class="token punctuation">)</span>
+<span class="token keyword">let</span> path <span class="token operator">=</span> <span class="token class-name">UIBezierPath</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+path<span class="token punctuation">.</span><span class="token function">move</span><span class="token punctuation">(</span>to<span class="token punctuation">:</span> <span class="token class-name">CGPoint</span><span class="token punctuation">(</span>x<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span> y<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">if</span> path<span class="token punctuation">.</span>isEmpty <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Empty"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition permet une syntaxe plus fluide en supprimant les mots inutiles (comme <code>string</code> ou <code>Point</code> quand le type est déjà explicite) et en adaptant les noms pour qu'ils correspondent aux conventions de nommage de Swift.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0077 - Improved operator declarations</title>
+
+    <meta data-pagefind-meta="parent:Swift 3.0">
+    <meta data-pagefind-meta="parent_url:/swift-3-0/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-3-0/se-0077-improved-operator-declarations/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-3-0/se-0077-improved-operator-declarations/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-3-0/">
+                  Swift 3.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0077 - Improved operator declarations</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0077 - Improved operator declarations" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0077 - Improved operator declarations">
+  
+  <div class="post-body">
+    <h1>SE-0077 - Improved operator declarations</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 3.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0077-operator-precedence.md">SE-0077 - Improved operator declarations</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit une nouvelle syntaxe pour la déclaration des <code>operator</code> et l'utilisation des <code>precedencegroup</code>. Le système passe d'une hiérarchie numérique de priorité à un système de relations partielles (ordering). Désormais, la précédence est définie via des groupes de précédence (<code>precedencegroup</code>) utilisant des mots-clés comme <code>higherThan</code> et <code>lowerThan</code>, permettant ainsi de créer un graphe acyclique dirigé (DAG) de relations entre les opérateurs. Cette approche permet d'isoler les hiérarchies de précédence (par exemple, séparer la précédence arithmétique de la précédence logique) et d'éviter les conflits lors de l'insertion de nouveaux opérateurs. Les <code>operator</code> peuvent désormais être déclarés de manière concise, et l'associativité est définie au sein du <code>precedencegroup</code>.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0077" tabindex="-1"><a href="#avant-se-0077" class="header-anchor">Avant SE-0077</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition avec des valeurs numériques</span>
+<span class="token keyword">infix</span> <span class="token keyword">operator</span> <span class="token operator">&lt;&gt;</span> <span class="token punctuation">{</span>
+    precedence <span class="token number">100</span>
+    <span class="token keyword">associativity</span> <span class="token keyword">left</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de valeurs numériques rend l'insertion d'un nouvel opérateur entre deux opérateurs existants impossible sans modifier les valeurs des opérateurs existants, ce qui constitue une modification cassante (<em>breaking change</em>). De plus, une hiérarchie unique impose à chaque opérateur de définir sa priorité par rapport à tous les autres opérateurs du langage.</p>
+<h3 id="apr%C3%A8s-se-0077" tabindex="-1"><a href="#apr%C3%A8s-se-0077" class="header-anchor">Après SE-0077</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition via des precedencegroup</span>
+<span class="token keyword">precedencegroup</span> <span class="token class-name">ComparisonPrecedence</span> <span class="token punctuation">{</span>
+    <span class="token keyword">associativity</span><span class="token punctuation">:</span> <span class="token keyword">left</span>
+    <span class="token keyword">higherThan</span><span class="token punctuation">:</span> <span class="token class-name">LogicalConjunctionPrecedence</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">infix</span> <span class="token keyword">operator</span> <span class="token operator">&lt;&gt;</span> <span class="token punctuation">:</span> <span class="token class-name">ComparisonPrecedence</span>
+</code></pre>
+<p>La proposition utilise des <code>precedencegroup</code> pour organiser les relations. En définissant que <code>ComparisonPrecedence</code> est <code>higherThan</code> <code>LogicalConjunctionPrecedence</code>, le compilateur comprend l'ordre de priorité sans nécessiter de valeurs numériques globales. Cela permet également d'utiliser des relations <code>lowerThan</code> pour insérer un groupe de précédence au-dessous d'un groupe existant sans modifier le code source de la bibliothèque standard.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

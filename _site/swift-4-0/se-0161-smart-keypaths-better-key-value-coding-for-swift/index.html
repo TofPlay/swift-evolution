@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0161 - Smart KeyPaths: Better Key-Value Coding for Swift</title>
+
+    <meta data-pagefind-meta="parent:Swift 4.0">
+    <meta data-pagefind-meta="parent_url:/swift-4-0/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-4-0/se-0161-smart-keypaths-better-key-value-coding-for-swift/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-4-0/se-0161-smart-keypaths-better-key-value-coding-for-swift/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-4-0/">
+                  Swift 4.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0161 - Smart KeyPaths: Better Key-Value Coding for Swift</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0161 - Smart KeyPaths: Better Key-Value Coding for Swift" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0161 - Smart KeyPaths: Better Key-Value Coding for Swift">
+  
+  <div class="post-body">
+    <h1>SE-0161 - Smart KeyPaths: Better Key-Value Coding for Swift</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 4.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/proposals/0161-key-paths.md">SE-0161 - Smart KeyPaths: Better Key-Value Coding for Swift</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit une hiérarchie de types <code>KeyPath</code> permettant de référencer des propriétés et des <code>subscript</code> de manière non invoquée. Contrairement à la syntaxe <code>#keyPath()</code>, qui retourne une <code>String</code>, les <code>KeyPath</code> sont des objets génériques qui conservent les informations de type du <code>Root</code> et de la valeur finale (<code>Value</code>).</p>
+<p>Le système repose sur une structure de classes organisée par niveau de connaissance du chemin :</p>
+<ul>
+<li><code>AnyKeyPath</code> : Type totalement effacé (type-erased) pour n'importe quel chemin et n'importe quel <code>Root</code>.</li>
+<li><code>PartialKeyPath&lt;Root&gt;</code> : Chemin dont le type de <code>Root</code> est connu, mais dont le type de retour est inconnu.</li>
+<li><code>KeyPath&lt;Root, Value&gt;</code> : Chemin dont le type de <code>Root</code> et la valeur de retour sont connus.</li>
+</ul>
+<p>La proposition inclut des variantes pour la mutation : <code>WritableKeyPath</code> pour les types <code>value</code> (via un accès <code>inout</code>) et <code>ReferenceWritableKeyPath</code> pour les types <code>reference</code>. Les <code>KeyPath</code> supportent la composition, le chaînage optionnel et l'accès aux éléments de collections via des <code>subscript</code>.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0161" tabindex="-1"><a href="#avant-se-0161" class="header-anchor">Avant SE-0161</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">class</span> <span class="token class-name">Person</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> name<span class="token punctuation">:</span> <span class="token class-name">String</span>
+    <span class="token keyword">var</span> friends<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Person</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+    <span class="token keyword">var</span> bestFriend<span class="token punctuation">:</span> <span class="token class-name">Person</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token nil constant">nil</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">self</span><span class="token punctuation">.</span>name <span class="token operator">=</span> name <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> han <span class="token operator">=</span> <span class="token class-name">Person</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Han Solo"</span></span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> luke <span class="token operator">=</span> <span class="token class-name">Person</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Luke Skywalker"</span></span><span class="token punctuation">)</span>
+luke<span class="token punctuation">.</span>friends<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>han<span class="token punctuation">)</span>
+
+<span class="token comment">// Utilisation de #keyPath() pour obtenir une String</span>
+<span class="token keyword">let</span> keyPathString <span class="token operator">=</span> <span class="token other-directive property">#keyPath</span><span class="token punctuation">(</span><span class="token class-name">Person</span><span class="token punctuation">.</span>name<span class="token punctuation">)</span> 
+<span class="token comment">// Le résultat est "name", perdant toute information de type et sécurité.</span>
+</code></pre>
+<p>L'utilisation de <code>#keyPath()</code> sur les plateformes Darwin limite l'usage aux <code>NSObject</code>. La conversion en <code>String</code> entraîne une perte de sécurité de type, nécessite une validation au runtime et est moins performante en raison du parsing de la chaîne. L'accès aux membres de collections n'est pas supporté par ce mécanisme.</p>
+<h3 id="apr%C3%A8s-se-0161" tabindex="-1"><a href="#apr%C3%A8s-se-0161" class="header-anchor">Après SE-0161</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">class</span> <span class="token class-name">Person</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> name<span class="token punctuation">:</span> <span class="token class-name">String</span>
+    <span class="token keyword">var</span> friends<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Person</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+    <span class="token keyword">var</span> bestFriend<span class="token punctuation">:</span> <span class="token class-name">Person</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token nil constant">nil</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">self</span><span class="token punctuation">.</span>name <span class="token operator">=</span> name <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> han <span class="token operator">=</span> <span class="token class-name">Person</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Han Solo"</span></span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> luke <span class="token operator">=</span> <span class="token class-name">Person</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Luke Skywalker"</span></span><span class="token punctuation">)</span>
+luke<span class="token punctuation">.</span>friends<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>han<span class="token punctuation">)</span>
+
+<span class="token comment">// Création d'un KeyPath typé</span>
+<span class="token keyword">let</span> firstFriendsNameKeyPath <span class="token operator">=</span> <span class="token punctuation">\</span><span class="token class-name">Person</span><span class="token punctuation">.</span>friends<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>name
+
+<span class="token comment">// Accès sécurisé et typé</span>
+<span class="token keyword">let</span> firstFriend <span class="token operator">=</span> luke<span class="token punctuation">[</span>keyPath<span class="token punctuation">:</span> firstFriendsNameKeyPath<span class="token punctuation">]</span> <span class="token comment">// Type: String</span>
+
+<span class="token comment">// Mutation sécurisée</span>
+luke<span class="token punctuation">[</span>keyPath<span class="token punctuation">:</span> <span class="token punctuation">\</span><span class="token class-name">Person</span><span class="token punctuation">.</span>name<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"L'astronaute"</span></span>
+
+<span class="token comment">// Support de l'optionnel via le chaînage</span>
+<span class="token keyword">let</span> bestFriendsName <span class="token operator">=</span> luke<span class="token punctuation">[</span>keyPath<span class="token punctuation">:</span> <span class="token punctuation">\</span><span class="token punctuation">.</span>bestFriend<span class="token operator">?</span><span class="token punctuation">.</span>name<span class="token punctuation">]</span>
+</code></pre>
+<p>L'introduction du sigle d'échappement <code>\</code> permet de créer des références de propriétés qui sont des objets <code>KeyPath</code> génériques. Cela garantit la sécurité au niveau du compilateur, permet la composition de chemins complexes (incluant les <code>subscript</code>) et maintient l'intégrité des types du <code>Root</code> et de la <code>Value</code>.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

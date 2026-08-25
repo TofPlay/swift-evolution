@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0044 - Import as member</title>
+
+    <meta data-pagefind-meta="parent:Swift 3.0">
+    <meta data-pagefind-meta="parent_url:/swift-3-0/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-3-0/se-0044-import-as-member/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-3-0/se-0044-import-as-member/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-3-0/">
+                  Swift 3.0
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0044 - Import as member</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0044 - Import as member" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0044 - Import as member">
+  
+  <div class="post-body">
+    <h1>SE-0044 - Import as member</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 3.0</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0044-import-as-member.md">SE-0044 - Import as member</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit un mécanisme permettant d'importer des fonctions et des variables de bibliothèques C directement en tant que <code>member</code> (méthodes, propriétés ou initialiseurs) d'un <code>type</code> Swift.</p>
+<p>Techniquement, cela repose sur l'attribut <code>swift_name</code> utilisé dans les en-têtes C. Cet attribut permet de spécifier :</p>
+<ul>
+<li>Le <code>type</code> sur lequel l'API doit être importée.</li>
+<li>L'utilisation de <code>self</code> pour transformer une fonction C en méthode d'instance ou en <code>subscript</code>.</li>
+<li>L'usage de <code>getter:</code> ou <code>setter:</code> pour transformer des paires de fonctions C en une <code>property</code> Swift.</li>
+</ul>
+<p>La proposition inclut également un système d'inférence automatique (optionnel) qui analyse les conventions de nommage des API C (comme les frameworks de type Core Foundation) pour importer automatiquement les fonctions comme <code>init</code>, <code>methods</code> ou <code>properties</code> sans annotation manuelle systématique. L'implémentation garantit que les appels pointent directement vers l'API C d'origine sans passer par des <code>wrapper</code> ou des <code>overlay</code> intermédiaires.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0044" tabindex="-1"><a href="#avant-se-0044" class="header-anchor">Avant SE-0044</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation d'une API C importée comme fonction globale</span>
+<span class="token keyword">let</span> context<span class="token punctuation">:</span> <span class="token class-name">CGContext</span> <span class="token operator">=</span> <span class="token class-name">UIGraphicsGetCurrentContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">!</span>
+<span class="token keyword">let</span> angle <span class="token operator">=</span> <span class="token class-name">CGFloat</span><span class="token punctuation">(</span><span class="token constant">M_PI</span> <span class="token operator">/</span> <span class="token number">16</span><span class="token punctuation">)</span>
+<span class="token keyword">var</span> transform <span class="token operator">=</span> <span class="token class-name">CGAffineTransformIdentity</span>
+
+<span class="token comment">// L'appel est une fonction globale, ce qui n'est pas naturel en Swift</span>
+transform <span class="token operator">=</span> <span class="token class-name">CGAffineTransformTranslate</span><span class="token punctuation">(</span>transform<span class="token punctuation">,</span> toCenter<span class="token punctuation">.</span>x<span class="token punctuation">,</span> toCenter<span class="token punctuation">.</span>y<span class="token punctuation">)</span>
+transform <span class="token operator">=</span> <span class="token class-name">CGAffineTransformRotate</span><span class="token punctuation">(</span>transform<span class="token punctuation">,</span> angle<span class="token punctuation">)</span>
+</code></pre>
+<p>L'interaction avec les bibliothèques C nécessite l'utilisation de fonctions globales, ce qui rompt la syntaxe orientée objet de Swift et rend le code moins lisible.</p>
+<h3 id="apr%C3%A8s-se-0044" tabindex="-1"><a href="#apr%C3%A8s-se-0044" class="header-anchor">Après SE-0044</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// L'API est importée comme membre du type</span>
+<span class="token keyword">let</span> context<span class="token punctuation">:</span> <span class="token class-name">CGContext</span> <span class="token operator">=</span> <span class="token class-name">UIGraphicsGetCurrentContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">!</span>
+<span class="token keyword">let</span> angle <span class="token operator">=</span> <span class="token class-name">CGFloat</span><span class="token punctuation">.</span>pi <span class="token operator">/</span> <span class="token number">16</span>
+<span class="token keyword">var</span> transform <span class="token operator">=</span> <span class="token class-name">CGAffineTransform</span><span class="token punctuation">.</span>identity
+
+<span class="token comment">// Syntaxe naturelle utilisant des méthodes d'instance</span>
+transform <span class="token operator">=</span> transform<span class="token punctuation">.</span><span class="token function">translated</span><span class="token punctuation">(</span>toX<span class="token punctuation">:</span> toCenter<span class="token punctuation">.</span>x<span class="token punctuation">,</span> toY<span class="token punctuation">:</span> toCenter<span class="token punctuation">.</span>y<span class="token punctuation">)</span>
+transform <span class="token operator">=</span> transform<span class="token punctuation">.</span><span class="token function">rotated</span><span class="token punctuation">(</span>angle<span class="token punctuation">:</span> angle<span class="token punctuation">)</span>
+
+<span class="token comment">// Utilisation de propriétés</span>
+context<span class="token punctuation">.</span>lineWidth <span class="token operator">=</span> bounds<span class="token punctuation">.</span>size<span class="token punctuation">.</span>width <span class="token operator">/</span> <span class="token number">100</span>
+context<span class="token punctuation">.</span>strokeColor <span class="token operator">=</span> <span class="token class-name">CGColor</span><span class="token punctuation">(</span>gray<span class="token punctuation">:</span> <span class="token number">0.5</span><span class="token punctuation">,</span> alpha<span class="token punctuation">:</span> <span class="token number">1.0</span><span class="token punctuation">)</span>
+</code></pre>
+<p>La proposition permet d'utiliser une syntaxe de type <code>method</code> ou <code>property</code> sur l'instance, rendant l'utilisation des bibliothèques C totalement native et cohérente avec le reste du langage Swift.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

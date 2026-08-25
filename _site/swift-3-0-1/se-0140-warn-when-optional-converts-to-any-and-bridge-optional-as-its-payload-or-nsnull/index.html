@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0140 - Warn when Optional converts to Any, and bridge Optional As Its Payload Or NSNull</title>
+
+    <meta data-pagefind-meta="parent:Swift 3.0.1">
+    <meta data-pagefind-meta="parent_url:/swift-3-0-1/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-3-0-1/se-0140-warn-when-optional-converts-to-any-and-bridge-optional-as-its-payload-or-nsnull/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-3-0-1/se-0140-warn-when-optional-converts-to-any-and-bridge-optional-as-its-payload-or-nsnull/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-3-0-1/">
+                  Swift 3.0.1
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0140 - Warn when Optional converts to Any, and bridge Optional As Its Payload Or NSNull</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0140 - Warn when Optional converts to Any, and bridge Optional As Its Payload Or NSNull" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0140 - Warn when Optional converts to Any, and bridge Optional As Its Payload Or NSNull">
+  
+  <div class="post-body">
+    <h1>SE-0140 - Warn when Optional converts to Any, and bridge Optional As Its Payload Or NSNull</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 3.0.1</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0140-bridge-optional-to-nsnull.md">SE-0140 - Warn when Optional converts to Any, and bridge Optional As Its Payload Or NSNull</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition modifie le comportement de conversion des types <code>Optional</code> vers le type <code>Any</code> et leur interopérabilité avec l'Objective-C. Elle introduit deux changements majeurs :</p>
+<ol>
+<li><strong>Avertissement de compilation :</strong> L'insertion implicite d'un <code>Optional</code> dans un type <code>Any</code> déclenche un avertissement pour signaler une conversion potentiellement accidentelle.</li>
+<li><strong>Bridging amélioré :</strong> Lors du passage d'un <code>Optional</code> vers un type <code>id</code> en Objective-C (via <code>Any</code>), si l' <code>Optional</code> contient une valeur, celle-ci est extraite et convertie en son type correspondant (ex: <code>String?</code> devient <code>NSString</code>). Si l' <code>Optional</code> est <code>.none</code>, il est converti en <code>NSNull</code> pour respecter les conventions des collections Cocoa (comme <code>NSArray</code> ou <code>NSDictionary</code>).</li>
+</ol>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0140" tabindex="-1"><a href="#avant-se-0140" class="header-anchor">Avant SE-0140</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@interface</span> <span class="token class-name">ObjCClass</span> <span class="token punctuation">:</span> <span class="token class-name">NSObject</span>
+<span class="token operator">-</span> <span class="token punctuation">(</span>void<span class="token punctuation">)</span>imported<span class="token punctuation">:</span><span class="token punctuation">(</span>id _Nonnull<span class="token punctuation">)</span>value<span class="token punctuation">;</span>
+<span class="token attribute atrule">@end</span>
+
+<span class="token keyword">let</span> s1<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token nil constant">nil</span>
+<span class="token keyword">let</span> s2<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"hello"</span></span>
+
+<span class="token keyword">let</span> obj <span class="token operator">=</span> <span class="token class-name">ObjCClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+obj<span class="token punctuation">.</span><span class="token function">imported</span><span class="token punctuation">(</span>s1<span class="token punctuation">)</span> <span class="token comment">// Résulte en un objet opaque non utilisable par l'API Objective-C</span>
+obj<span class="token punctuation">.</span><span class="token function">imported</span><span class="token punctuation">(</span>s2<span class="token punctuation">)</span> <span class="token comment">// Résulte en un objet opaque non utilisable par l'API Objective-C</span>
+</code></pre>
+<p>L'utilisation d'un <code>Optional</code> dans un contexte <code>Any</code> (comme l'argument d'une méthode Objective-C) produit un objet opaque. Cela rend l'objet inutilisable par la plupart des API Cocoa qui attendent des instances de classes spécifiques ou des sentinelles comme <code>NSNull</code>.</p>
+<h3 id="apr%C3%A8s-se-0140" tabindex="-1"><a href="#apr%C3%A8s-se-0140" class="header-anchor">Après SE-0140</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> s1<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token nil constant">nil</span>
+<span class="token keyword">let</span> s2<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token operator">?</span> <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"hello"</span></span>
+
+<span class="token comment">// Déclenche un avertissement si l'unwrapping n'est pas explicite</span>
+<span class="token keyword">let</span> x<span class="token punctuation">:</span> <span class="token keyword">Any</span> <span class="token operator">=</span> s1 
+
+<span class="token keyword">let</span> obj <span class="token operator">=</span> <span class="token class-name">ObjCClass</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+obj<span class="token punctuation">.</span><span class="token function">imported</span><span class="token punctuation">(</span>s1 <span class="token keyword">as</span> <span class="token keyword">Any</span><span class="token punctuation">)</span> <span class="token comment">// Résulte en NSNull (sémantiquement correct pour NSNull)</span>
+obj<span class="token punctuation">.</span><span class="token function">imported</span><span class="token punctuation">(</span>s2 <span class="token keyword">as</span> <span class="token keyword">Any</span><span class="token punctuation">)</span> <span class="token comment">// Résulte en NSString ("hello")</span>
+</code></pre>
+<p>La proposition introduit un avertissement pour signaler qu'un <code>Optional</code> est placé dans un <code>Any</code> sans être déballé. Elle permet également de convertir un <code>Optional.none</code> en <code>NSNull</code> et de transmettre la valeur contenue dans un <code>Optional.some</code> de manière transparente vers l'API Objective-C.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - Swift 3.0</title>
+
+    <meta data-pagefind-meta="parent:Swift 3.0">
+    <meta data-pagefind-meta="parent_url:/swift-3-0/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-3-0/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-3-0/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <span aria-current="page">Swift 3.0</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="Swift 3.0" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:Swift 3.0">
+  
+  <div class="post-body">
+    <h1>Swift 3.0</h1>
+<h2 id="introduction" tabindex="-1"><a href="#introduction" class="header-anchor">Introduction</a></h2>
+<p>Cette page liste l'ensemble des propositions d'évolution de la version Swift 3.0</p>
+<h2 id="liste-des-fichiers" tabindex="-1"><a href="#liste-des-fichiers" class="header-anchor">Liste des fichiers</a></h2>
+<p>Il y a 89 propositions :</p>
+<ul>
+<li><a href="/swift-evolution/swift-3-0/se-0002-removing-currying-func-declaration-syntax/">SE-0002 Removing currying func declaration syntax</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0003-removing-from-function-parameters/">SE-0003 Removing from Function Parameters</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0004-remove-the-and-operators/">SE-0004 Remove the ++ and -- operators</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0005-better-translation-of-objective-c-apis-into-swift/">SE-0005 Better Translation of Objective-C APIs Into Swift</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0006-apply-api-guidelines-to-the-standard-library/">SE-0006 Apply API Guidelines to the Standard Library</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0007-remove-c-style-for-loops-with-conditions-and-incrementers/">SE-0007 Remove C-style for-loops with conditions and incrementers</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0008-add-a-lazy-flatmap-for-sequences-of-optionals/">SE-0008 Add a Lazy flatMap for Sequences of Optionals</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0016-add-initializers-to-int-and-uint-to-convert-from-unsafepointer-and-unsafemutablepointer/">SE-0016 Add initializers to Int and UInt to convert from UnsafePointer and UnsafeMutablePointer</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0017-change-unmanaged-to-use-unsafepointer/">SE-0017 Change Unmanaged to use UnsafePointer</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0019-swift-testing/">SE-0019 Swift Testing</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0023-api-design-guidelines/">SE-0023 API Design Guidelines</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0025-scoped-access-level/">SE-0025 Scoped Access Level</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0029-remove-implicit-tuple-splat-behavior-from-function-applications/">SE-0029 Remove implicit tuple splat behavior from function applications</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0031-adjusting-inout-declarations-for-type-decoration/">SE-0031 Adjusting inout Declarations for Type Decoration</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0032-add-first-where-method-to-sequence/">SE-0032 Add first(where:) method to Sequence</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0033-import-objective-c-constants-as-swift-types/">SE-0033 Import Objective-C Constants as Swift Types</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0034-disambiguating-line-control-statements-from-debugging-identifiers/">SE-0034 Disambiguating Line Control Statements from Debugging Identifiers</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0035-limiting-inout-capture-to-noescape-contexts/">SE-0035 Limiting inout capture to @noescape contexts</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0036-requiring-leading-dot-prefixes-for-enum-instance-member-implementations/">SE-0036 Requiring Leading Dot Prefixes for Enum Instance Member Implementations</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0037-clarify-comments-and-operators/">SE-0037 clarify comments and operators</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0038-package-manager-c-language-target-support/">SE-0038 Package Manager C Language Target Support</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0039-modernizing-playground-literals/">SE-0039 Modernizing Playground Literals</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0040-replacing-equal-signs-with-colons-for-attribute-arguments/">SE-0040 Replacing Equal Signs with Colons For Attribute Arguments</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0043-declare-variables-in-case-labels-with-multiple-patterns/">SE-0043 Declare variables in 'case' labels with multiple patterns</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0044-import-as-member/">SE-0044 Import as member</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0046-establish-consistent-label-behavior-across-all-parameters-including-first-labels/">SE-0046 Establish consistent label behavior across all parameters including first labels</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0047-defaulting-non-void-functions-so-they-warn-on-unused-results/">SE-0047 Defaulting non-Void functions so they warn on unused results</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0048-generic-type-aliases/">SE-0048 Generic Type Aliases</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0049-move-noescape-and-autoclosure-to-be-type-attributes/">SE-0049 Move @noescape and @autoclosure to be type attributes</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0052-change-iteratortype-post-nil-guarantee/">SE-0052 Change IteratorType post-nil guarantee</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0053-remove-explicit-use-of-let-from-function-parameters/">SE-0053 Remove explicit use of let from Function Parameters</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0055-make-unsafe-pointer-nullability-explicit-using-optional/">SE-0055 Make unsafe pointer nullability explicit using Optional</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0057-importing-objective-c-lightweight-generics/">SE-0057 Importing Objective-C Lightweight Generics</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0059-update-api-naming-guidelines-and-rewrite-set-apis-accordingly/">SE-0059 Update API Naming Guidelines and Rewrite Set APIs Accordingly</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0060-enforcing-order-of-defaulted-parameter/">SE-0060 Enforcing order of defaulted parameter</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0061-add-generic-result-and-error-handling-to-autoreleasepool/">SE-0061 Add Generic Result and Error Handling to autoreleasepool()</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0062-referencing-objective-c-key-paths/">SE-0062 Referencing Objective-C key-paths</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0063-swiftpm-system-module-search-paths/">SE-0063 SwiftPM System Module Search Paths</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0064-referencing-the-objective-c-selector-of-property-getters-and-setters/">SE-0064 Referencing the Objective-C selector of property getters and setters</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0065-a-new-model-for-collections-and-indices/">SE-0065 A New Model for Collections and Indices</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0066-standardize-function-type-argument-syntax-to-require-parentheses/">SE-0066 Standardize function type argument syntax to require parentheses</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0067-enhanced-floating-point-protocols/">SE-0067 Enhanced Floating Point Protocols</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0069-mutability-and-foundation-value-types/">SE-0069 Mutability and Foundation Value Types</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0070-make-optional-requirements-objective-c-only/">SE-0070 Make Optional Requirements Objective-C-only</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0071-allow-most-keywords-in-member-references/">SE-0071 Allow (most) keywords in member references</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0072-fully-eliminate-implicit-bridging-conversions-from-swift/">SE-0072 Fully eliminate implicit bridging conversions from Swift</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0076-add-overrides-taking-an-unsafepointer-source-to-non-destructive-copying-methods-on-unsafemutablepointer/">SE-0076 Add overrides taking an UnsafePointer source to non-destructive copying methods on UnsafeMutablePointer</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0077-improved-operator-declarations/">SE-0077 Improved operator declarations</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0081-move-where-clause-to-end-of-declaration/">SE-0081 Move where clause to end of declaration</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0085-package-manager-command-names/">SE-0085 Package Manager Command Names</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0086-drop-ns-prefix-in-swift-foundation/">SE-0086 Drop NS Prefix in Swift Foundation</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0088-modernize-libdispatch-for-swift-3-naming-conventions/">SE-0088 Modernize libdispatch for Swift 3 naming conventions</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0089-renaming-string-initt/">SE-0089 Renaming String.init<t>(_: T)</t></a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0091-improving-operator-requirements-in-protocols/">SE-0091 Improving operator requirements in protocols</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0092-typealiases-in-protocols-and-protocol-extensions/">SE-0092 Typealiases in protocols and protocol extensions</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0093-adding-a-public-base-property-to-slices/">SE-0093 Adding a public base property to slices</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0094-add-sequence-first-next-and-sequence-state-next-to-the-stdlib/">SE-0094 Add sequence(first:next:) and sequence(state:next:) to the stdlib</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0095-replace-protocol-p1-p2-syntax-with-p1-p2-syntax/">SE-0095 Replace protocol&lt;P1,P2&gt; syntax with P1 &amp; P2 syntax</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0096-converting-dynamictype-from-a-property-to-an-operator/">SE-0096 Converting dynamicType from a property to an operator</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0099-restructuring-condition-clauses/">SE-0099 Restructuring Condition Clauses</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0101-standardizing-sizeof-naming/">SE-0101 Standardizing sizeof naming</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0102-remove-noreturn-attribute-and-introduce-an-empty-never-type/">SE-0102 Remove @noreturn attribute and introduce an empty Never type</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0103-make-non-escaping-closures-the-default/">SE-0103 Make non-escaping closures the default</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0106-add-a-macos-alias-for-the-osx-platform-configuration-test/">SE-0106 Add a macOS Alias for the OSX Platform Configuration Test</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0107-unsaferawpointer-api/">SE-0107 UnsafeRawPointer API</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0109-remove-the-boolean-protocol/">SE-0109 Remove the Boolean protocol</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0111-remove-type-system-significance-of-function-argument-labels/">SE-0111 Remove type system significance of function argument labels</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0112-improved-nserror-bridging/">SE-0112 Improved NSError Bridging</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0113-add-integral-rounding-functions-on-floatingpoint/">SE-0113 Add integral rounding functions on FloatingPoint</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0114-buffer-naming/">SE-0114 Buffer naming</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0115-rename-literal-syntax-protocols/">SE-0115 Rename Literal Syntax Protocols</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0116-import-objective-c-id-as-swift-any-type/">SE-0116 Import Objective-C id as Swift Any type</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0117-allow-distinguishing-between-public-access-and-public-overridability/">SE-0117 Allow distinguishing between public access and public overridability</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0118-closure-parameter-names-and-labels/">SE-0118 Closure Parameter Names and Labels</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0120-revise-partition-method-signature/">SE-0120 Revise partition Method Signature</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0121-remove-optional-comparison-operators/">SE-0121 Remove Optional Comparison Operators</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0124-int-init-objectidentifier-and-uint-init-objectidentifier-should-have-a-bitpattern-label/">SE-0124 Int.init(ObjectIdentifier) and UInt.init(ObjectIdentifier) should have a bitPattern: label</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0125-remove-nonobjectivecbase-and-isuniquelyreferenced/">SE-0125 Remove NonObjectiveCBase and isUniquelyReferenced</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0127-cleaning-up-stdlib-pointer-and-buffer-routines/">SE-0127 Cleaning up stdlib Pointer and Buffer Routines</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0128-change-failable-unicodescalar-initializers-to-failable/">SE-0128 Change failable UnicodeScalar initializers to failable</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0129-package-manager-test-naming-conventions/">SE-0129 Package Manager Test Naming Conventions</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0130-replace-repeating-character-and-unicodescalar-forms-of-string-init/">SE-0130 Replace repeating Character and UnicodeScalar forms of String.init</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0131-add-anyhashable-to-the-standard-library/">SE-0131 Add AnyHashable to the standard library</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0133-rename-flatten-to-joined/">SE-0133 Rename flatten() to joined()</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0134-rename-string-properties/">SE-0134 Rename string properties</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0135-package-manager-support-for-differentiating-packages-by-swift-version/">SE-0135 Package Manager Support for Differentiating Packages by Swift version</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0136-memory-layout-of-values/">SE-0136 Memory layout of values</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0137-avoiding-lock-in-to-legacy-protocol-designs/">SE-0137 Avoiding Lock-In to Legacy Protocol Designs</a></li>
+<li><a href="/swift-evolution/swift-3-0/se-0155-normalize-enum-case-representation/">SE-0155 Normalize Enum Case Representation</a></li>
+</ul>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

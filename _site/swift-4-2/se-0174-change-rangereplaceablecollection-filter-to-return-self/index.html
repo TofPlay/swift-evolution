@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0174 - Change RangeReplaceableCollection.filter to return Self</title>
+
+    <meta data-pagefind-meta="parent:Swift 4.2">
+    <meta data-pagefind-meta="parent_url:/swift-4-2/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-4-2/se-0174-change-rangereplaceablecollection-filter-to-return-self/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Acceuil">
+<meta property="og:description" content="Encore un site dédié à Swift">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-4-2/se-0174-change-rangereplaceablecollection-filter-to-return-self/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Encore un site dédié à Swift">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-4-2/">
+                  Swift 4.2
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0174 - Change RangeReplaceableCollection.filter to return Self</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0174 - Change RangeReplaceableCollection.filter to return Self" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0174 - Change RangeReplaceableCollection.filter to return Self">
+  
+  <div class="post-body">
+    <h1>SE-0174 - Change RangeReplaceableCollection.filter to return Self</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 4.2</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0174-filter-range-replaceable.md">SE-0174 - Change RangeReplaceableCollection.filter to return Self</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition modifie l'implémentation de l'opération <code>filter</code> pour les types conformes au protocole <code>RangeReplaceableCollection</code>. Au lieu de retourner un <code>Array</code> (le comportement standard de l'extension sur <code>Sequence</code>), la méthode retourne désormais <code>Self</code>. L'implémentation repose sur l'utilisation de <code>init()</code> pour créer une nouvelle instance vide et de <code>append(_:)</code> pour ajouter les éléments satisfaisant le prédicat. Ce changement améliore l'efficacité et l'ergonomie en évitant des conversions de types coûteuses entre une collection et un tableau.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0174" tabindex="-1"><a href="#avant-se-0174" class="header-anchor">Avant SE-0174</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> string <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"abcd"</span></span>
+<span class="token keyword">let</span> filtered <span class="token operator">=</span> string<span class="token punctuation">.</span>filter <span class="token punctuation">{</span> <span class="token short-argument">$0</span> <span class="token operator">==</span> <span class="token string-literal"><span class="token string">"a"</span></span> <span class="token punctuation">}</span>
+<span class="token comment">// Le type de 'filtered' est [Character]</span>
+</code></pre>
+<p>L'utilisation de <code>filter</code> sur une collection remplaçable par plage comme <code>String</code> produit un tableau d'éléments au lieu de maintenir le type d'origine. Cela impose une conversion manuelle si le type original est requis.</p>
+<h3 id="apr%C3%A8s-se-0174" tabindex="-1"><a href="#apr%C3%A8s-se-0174" class="header-anchor">Après SE-0174</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> string <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"abcd"</span></span>
+<span class="token keyword">let</span> filtered <span class="token operator">=</span> string<span class="token punctuation">.</span>filter <span class="token punctuation">{</span> <span class="token short-argument">$0</span> <span class="token operator">==</span> <span class="token string-literal"><span class="token string">"a"</span></span> <span class="token punctuation">}</span>
+<span class="token comment">// Le type de 'filtered' est String</span>
+</code></pre>
+<p>La méthode retourne une instance du même type que l'objet appelant, préservant ainsi les spécificités du type original sans conversion additionnelle.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>
