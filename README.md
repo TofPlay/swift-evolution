@@ -50,6 +50,13 @@ Ce site documente les propositions d'évolution pour les versions suivantes de S
 | **Swift 5.2**                       | ✅      |
 | **Swift 5.1**                       | ✅      |
 | **Swift 5.0**                       | ✅      |
+| **Swift 4.2**                       | ✅      |
+| **Swift 4.1**                       | ✅      |
+| **Swift 4.0**                       | ✅      |
+| **Swift 3.1**                       | ✅      |
+| **Swift 3.0.1**                     | ✅      |
+| **Swift 3.0**                       | ✅      |
+| **Swift 2.2**                       | ✅      |
 | **Swift Package Manager (SwiftPM)** | ✅      |
 
 ## Comment naviguer
@@ -123,6 +130,13 @@ This site documents evolution proposals for the following Swift versions:
 | **Swift 5.2**                       | ✅      |
 | **Swift 5.1**                       | ✅      |
 | **Swift 5.0**                       | ✅      |
+| **Swift 4.2**                       | ✅      |
+| **Swift 4.1**                       | ✅      |
+| **Swift 4.0**                       | ✅      |
+| **Swift 3.1**                       | ✅      |
+| **Swift 3.0.1**                     | ✅      |
+| **Swift 3.0**                       | ✅      |
+| **Swift 2.2**                       | ✅      |
 | **Swift Package Manager (SwiftPM)** | ✅      |
 
 ## How to Navigate
