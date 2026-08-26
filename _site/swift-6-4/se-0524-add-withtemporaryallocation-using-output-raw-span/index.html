@@ -133,24 +133,40 @@
     <span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token number">0</span><span class="token operator">..&lt;</span>capacity <span class="token punctuation">{</span>
         buffer<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token class-name">Float</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span>
     <span class="token punctuation">}</span>
-    <span class="token comment">// L'utilisateur doit s'assurer que tout est correctement initialisé</span>
-    <span class="token comment">// et gérer manuellement la complexité si des types non-bitwisely-copyable sont utilisés.</span>
     <span class="token keyword">return</span> buffer<span class="token punctuation">.</span><span class="token function">reduce</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token operator">+</span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
 <p>L'utilisation de <code>withUnsafeTemporaryAllocation</code> exige que l'utilisateur gère manuellement l'initialisation et la désinitialisation des éléments, ce qui est sujet aux erreurs, particulièrement en cas d'erreurs (throws) durant l'exécution de la closure.</p>
 <h3 id="apr%C3%A8s-se-0524" tabindex="-1"><a href="#apr%C3%A8s-se-0524" class="header-anchor">Après SE-0524</a></h3>
+<h4 id="allocation-de-types-(typed-allocation)" tabindex="-1"><a href="#allocation-de-types-(typed-allocation)" class="header-anchor">Allocation de types (Typed Allocation)</a></h4>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> capacity <span class="token operator">=</span> <span class="token number">42</span>
-<span class="token keyword">let</span> result <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token function">withTemporaryAllocation</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> <span class="token class-name">Float</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">,</span> capacity<span class="token punctuation">:</span> capacity<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">(</span>output<span class="token punctuation">:</span> <span class="token keyword">inout</span> <span class="token class-name">OutputSpan</span><span class="token operator">&lt;</span><span class="token class-name">Float</span><span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">Int</span> <span class="token keyword">in</span>
-    <span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token number">0</span><span class="token operator">..&lt;</span>capacity <span class="token punctuation">{</span>
-        output<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token class-name">Float</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">)</span>
-    <span class="token punctuation">}</span>
-    <span class="token keyword">var</span> mutableSpan <span class="token operator">=</span> output<span class="token punctuation">.</span>mutableSpan
-    <span class="token comment">// Effectuer des opérations sur la mémoire</span>
-    <span class="token keyword">return</span> output<span class="token punctuation">.</span>span<span class="token punctuation">.</span><span class="token function">reduce</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token operator">+</span><span class="token punctuation">)</span>
-<span class="token punctuation">}</span>
-<span class="token comment">// La mémoire est automatiquement désinitialisée et libérée en toute sécurité.</span>
+<span class="token keyword">let</span> result <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token function">withTemporaryAllocation</span><span class="token punctuation">(</span> of<span class="token punctuation">:</span> <span class="token class-name">Float</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">,</span> capacity<span class="token punctuation">:</span> capacity <span class="token punctuation">)</span> <span class="token punctuation">{</span> output <span class="token operator">-&gt;</span> <span class="token class-name">Int</span> <span class="token keyword">in</span> 
+    <span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token number">0</span><span class="token operator">..&lt;</span>capacity <span class="token punctuation">{</span> 
+        output<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token class-name">Float</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">)</span> 
+    <span class="token punctuation">}</span> 
+    <span class="token keyword">var</span> mutableSpan <span class="token operator">=</span> output<span class="token punctuation">.</span>mutableSpan 
+    <span class="token comment">// updateInPlace(&amp;mutableSpan)</span>
+    <span class="token keyword">return</span> <span class="token function">aggregate</span><span class="token punctuation">(</span>output<span class="token punctuation">.</span>span<span class="token punctuation">)</span> 
+<span class="token punctuation">}</span> 
+<span class="token comment">// `OutputSpan` passé à cette closure est désinitialisé et désalloué </span>
+<span class="token comment">// par `withTemporaryAllocation` après la sortie de la closure</span>
 </code></pre>
+<p><strong>Explication :</strong> Cette méthode est utilisée pour travailler avec des allocations temporaires d'un type spécifique et homogène. Elle utilise <code>OutputSpan</code> pour suivre le nombre d'éléments initialisés.</p>
+<h4 id="allocation-d'octets-bruts-(raw-bytes-allocation)" tabindex="-1"><a href="#allocation-d'octets-bruts-(raw-bytes-allocation)" class="header-anchor">Allocation d'octets bruts (Raw Bytes Allocation)</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> byteCount <span class="token operator">=</span> <span class="token number">16</span>
+<span class="token keyword">let</span> result <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token function">withTemporaryAllocation</span><span class="token punctuation">(</span> 
+    byteCount<span class="token punctuation">:</span> byteCount<span class="token punctuation">,</span> 
+    alignment<span class="token punctuation">:</span> <span class="token number">4</span> 
+<span class="token punctuation">)</span> <span class="token punctuation">{</span> rawSpan <span class="token operator">-&gt;</span> <span class="token class-name">Int</span> <span class="token keyword">in</span> 
+    rawSpan<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>repeating<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span> count<span class="token punctuation">:</span> byteCount<span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">UInt8</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span> 
+    <span class="token comment">// var mutableBytes = rawSpan.mutableBytes </span>
+    <span class="token comment">// updateInPlace(&amp;mutableBytes)</span>
+    <span class="token keyword">return</span> <span class="token function">aggregate</span><span class="token punctuation">(</span>rawSpan<span class="token punctuation">.</span>bytes<span class="token punctuation">)</span> 
+<span class="token punctuation">}</span> 
+<span class="token comment">// `OutputRawSpan` passé à cette closure est désalloué </span>
+<span class="token comment">// par `withTemporaryAllocation` après la sortie de la closure</span>
+</code></pre>
+<p><strong>Explication :</strong> Cette méthode est utilisée pour manipuler des tampons de mémoire brute (octets). Elle utilise <code>OutputRawSpan</code> pour gérer la zone mémoire sans nécessiter de désinitialisation explicite des éléments (car les octets sont considérés comme <code>BitwiseCopyable</code>).</p>
 <p>La nouvelle API <code>withTemporaryAllocation</code> délègue la gestion de l'état d'initialisation à <code>OutputSpan</code>. L'utilisation de <code>append</code> permet d'initialiser la mémoire de manière sûre, et la fonction garantit que la désinitialisation des éléments est effectuée correctement à la sortie de la portée, même si une erreur est lancée.</p>
 
   </div>

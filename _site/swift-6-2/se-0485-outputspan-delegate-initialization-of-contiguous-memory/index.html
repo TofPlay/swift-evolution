@@ -141,18 +141,48 @@
 </code></pre>
 <p>L'utilisation de <code>unsafeUninitializedCapacity</code> est potentiellement dangereuse car elle repose sur des types <code>unsafe</code> et nécessite de gérer manuellement le nombre d'éléments initialisés via un paramètre <code>inout</code>, ce qui est sujet à l'erreur humaine et peut compromettre la sécurité mémoire si l'invariant n'est pas respecté.</p>
 <h3 id="apr%C3%A8s-se-0485" tabindex="-1"><a href="#apr%C3%A8s-se-0485" class="header-anchor">Après SE-0485</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de OutputSpan via un nouvel initialisateur sécurisé</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// --- 1. Initialisation de conteneurs ---</span>
+<span class="token comment">// Utilisation de OutputSpan via un nouvel initialisateur sécurisé</span>
 <span class="token keyword">let</span> array <span class="token operator">=</span> <span class="token class-name">Array</span><span class="token punctuation">(</span>capacity<span class="token punctuation">:</span> <span class="token number">10</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token punctuation">(</span>span<span class="token punctuation">:</span> <span class="token keyword">inout</span> <span class="token class-name">OutputSpan</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token keyword">in</span>
     <span class="token keyword">for</span> i <span class="token keyword">in</span> <span class="token number">0</span><span class="token operator">..&lt;</span><span class="token number">10</span> <span class="token punctuation">{</span>
         <span class="token keyword">try</span> span<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 
-<span class="token comment">// Utilisation de OutputRawSpan pour de la mémoire brute</span>
+<span class="token comment">// --- 2. Manipulation de OutputSpan ---</span>
+<span class="token keyword">var</span> span <span class="token operator">=</span> <span class="token class-name">OutputSpan</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>buffer<span class="token punctuation">:</span> buffer<span class="token punctuation">,</span> initializedCount<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Ajouter des éléments</span>
+span<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>
+span<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>repeating<span class="token punctuation">:</span> <span class="token number">20</span><span class="token punctuation">,</span> count<span class="token punctuation">:</span> <span class="token number">3</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Supprimer des éléments</span>
+span<span class="token punctuation">.</span><span class="token function">removeLast</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+span<span class="token punctuation">.</span><span class="token function">removeLast</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span>
+span<span class="token punctuation">.</span><span class="token function">removeAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Accéder aux éléments initialisés</span>
+<span class="token keyword">let</span> first <span class="token operator">=</span> span<span class="token punctuation">.</span>span<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token comment">// Accès en lecture seule</span>
+span<span class="token punctuation">.</span>mutableSpan<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">50</span> <span class="token comment">// Accès en modification (mutable)</span>
+
+<span class="token comment">// --- 3. Manipulation de OutputRawSpan ---</span>
 <span class="token keyword">var</span> rawSpan <span class="token operator">=</span> <span class="token class-name">OutputRawSpan</span><span class="token punctuation">(</span>capacity<span class="token punctuation">:</span> <span class="token number">64</span><span class="token punctuation">)</span>
 rawSpan<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
+rawSpan<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">0xAA</span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">UInt8</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
+rawSpan<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>repeating<span class="token punctuation">:</span> <span class="token number">0xBB</span><span class="token punctuation">,</span> count<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">UInt8</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
 </code></pre>
-<p>La proposition résout le problème en fournissant une abstraction sécurisée (<code>OutputSpan</code>) qui gère elle-même l'état d'initialisation. Le développeur interagit avec un type qui garantit l'exclusivité de l'accès et vérifie les limites de mémoire, tout en éliminant le besoin de manipuler directement des pointeurs non sécurisés dans la plupart des cas d'usage.</p>
+<p><strong>Explications des méthodes :</strong></p>
+<ul>
+<li><strong>Initialisateurs de conteneurs :</strong> Permettent de créer un <code>Array</code> ou une <code>String</code> en passant une closure qui reçoit un <code>OutputSpan</code>. Le conteneur gère la mémoire et le développeur se contente de remplir le span.</li>
+<li><strong><code>append(_:)</code> :</strong> Ajoute un élément au span. Cela initialise la mémoire nécessaire et incrémente automatiquement le nombre d'éléments initialisés (<code>count</code>).</li>
+<li><strong><code>append(repeating:count:)</code> :</strong> Ajoute plusieurs copies d'un même élément de manière efficace.</li>
+<li><strong><code>removeLast()</code> / <code>removeLast(_:)</code> :</strong> Réduit le nombre d'éléments initialisés, remettant la mémoire correspondante dans un état non initialisé.</li>
+<li><strong><code>removeAll()</code> :</strong> Réinitialise le span en remettant tous les éléments dans l'état non initialisé.</li>
+<li><strong><code>span</code> (propriété) :</strong> Fournit une vue en lecture seule (<code>Span</code>) sur la partie déjà initialisée de la mémoire.</li>
+<li><strong><code>mutableSpan</code> (propriété) :</strong> Fournit une vue permettant de modifier les éléments déjà initialisés (<code>MutableSpan</code>).</li>
+<li><strong><code>append(_:as:)</code> (sur <code>OutputRawSpan</code>) :</strong> Ajoute les octets d'une valeur de type spécifique dans la mémoire brute.</li>
+<li><strong><code>finalize(for:)</code> :</strong> Une méthode cruciale qui consomme le <code>OutputSpan</code> pour retourner le nombre d'éléments réellement initialisés, permettant ainsi au conteneur de mettre à jour sa propre taille interne.</li>
+</ul>
 
   </div>
 </article>
