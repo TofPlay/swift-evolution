@@ -125,7 +125,7 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0464-utf8span-safe-utf8-processing.md">SE-0464 - UTF8Span: Safe UTF-8 Processing Over Contiguous Bytes</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>La proposition introduit <code>UTF8Span</code>, un type structuré et non-escapable permettant un traitement efficace et sécurisé de données UTF-8 stockées de manière contiguë en mémoire. <code>UTF8Span</code> agit comme une vue ("view") sur un tampon de données (<code>Span&lt;UInt8&gt;</code>) et garantit que les données sont valides selon le standard UTF-8 lors de l'initialisation. Il fournit des outils avancés pour l'itération des <code>Unicode.Scalar</code> et des <code>Character</code>, ainsi que des mécanismes de détection et de classification des erreurs d'encodage (tels que les <code>overlong encoding</code> ou les <code>surrogate code point</code>). Ce type permet d'accéder aux performances de traitement Unicode de la bibliothèque standard sans les coûts de gestion de mémoire (allocation et <code>reference counting</code>) associés aux instances de <code>String</code>.</p>
+<p>La proposition introduit <code>UTF8Span</code>, un type structuré et non-escapable permettant un traitement efficace et sécurisé de données UTF-8 stockées de manière contiguë en mémoire. <code>UTF8Span</code> agit comme une vue sur un tampon de données (<code>Span&lt;UInt8&gt;</code>) et garantit que les données sont valides selon le standard UTF-8 lors de l'initialisation. Il fournit des outils avancés pour l'itération des <code>Unicode.Scalar</code> et des <code>Character</code>, ainsi que des mécanismes de détection et de classification des erreurs d'encodage (tels que les <code>overlong encoding</code> ou les <code>surrogate code point</code>). Ce type permet d'accéder aux performances de traitement Unicode de la bibliothèque standard sans les coûts de gestion de mémoire (allocation et <code>reference counting</code>) associés aux instances de <code>String</code>.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0464" tabindex="-1"><a href="#avant-se-0464" class="header-anchor">Avant SE-0464</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Si un développeur possède un tampon de bytes (Span&lt;UInt8&gt;) </span>
@@ -141,29 +141,57 @@
 </code></pre>
 <p>Le code actuel nécessite de convertir les bytes en <code>String</code> pour bénéficier des fonctionnalités Unicode. Cela est coûteux en performance car cela implique une allocation mémoire et une copie des données, ce qui est inefficace pour des flux de données volumineux ou des systèmes à ressources limitées (embedded).</p>
 <h3 id="apr%C3%A8s-se-0464" tabindex="-1"><a href="#apr%C3%A8s-se-0464" class="header-anchor">Après SE-0464</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de UTF8Span pour un traitement efficace</span>
-<span class="token keyword">let</span> bytes<span class="token punctuation">:</span> <span class="token class-name">Span</span><span class="token operator">&lt;</span><span class="token class-name">UInt8</span><span class="token operator">&gt;</span> <span class="token operator">=</span> <span class="token operator">...</span>
+<h4 id="1.-cr%C3%A9ation-et-validation" tabindex="-1"><a href="#1.-cr%C3%A9ation-et-validation" class="header-anchor">1. Création et Validation</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Création avec validation (sécurisée)</span>
+<span class="token keyword">let</span> span <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token class-name">UTF8Span</span><span class="token punctuation">(</span>validating<span class="token punctuation">:</span> bytes<span class="token punctuation">)</span>
 
-<span class="token keyword">do</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Validation et création d'une vue sécurisée</span>
-    <span class="token keyword">let</span> span <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token class-name">UTF8Span</span><span class="token punctuation">(</span>validating<span class="token punctuation">:</span> bytes<span class="token punctuation">)</span>
-    
-    <span class="token comment">// Itération efficace des scalars sans allocation supplémentaire</span>
-    <span class="token keyword">var</span> iterator <span class="token operator">=</span> span<span class="token punctuation">.</span><span class="token function">makeUnicodeScalarIterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-    <span class="token keyword">while</span> <span class="token keyword">let</span> scalar <span class="token operator">=</span> iterator<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token function">print</span><span class="token punctuation">(</span>scalar<span class="token punctuation">)</span>
-    <span class="token punctuation">}</span>
-    
-    <span class="token comment">// Vérification rapide de l'ASCII</span>
-    <span class="token keyword">if</span> span<span class="token punctuation">.</span>isKnownASCII <span class="token punctuation">{</span>
-        <span class="token comment">// Traitement accéléré</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token keyword">let</span> error <span class="token keyword">as</span> <span class="token class-name">Unicode</span><span class="token punctuation">.</span>UTF8<span class="token punctuation">.</span><span class="token class-name">EncodingError</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Gestion précise de l'erreur (ex: erreur à l'offset X)</span>
-    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Erreur d'encodage : </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">error</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
-<span class="token punctuation">}</span>
+<span class="token comment">// Création sans validation (rapide, risque de comportement indéfini)</span>
+<span class="token keyword">let</span> unsafeSpan <span class="token operator">=</span> <span class="token class-name">UTF8Span</span><span class="token punctuation">(</span>unsafeAssumingValidUTF8<span class="token punctuation">:</span> bytes<span class="token punctuation">)</span>
+
+<span class="token comment">// Conversion directe vers String (sans re-validation)</span>
+<span class="token keyword">let</span> stringFromSpan <span class="token operator">=</span> <span class="token class-name">String</span><span class="token punctuation">(</span>copying<span class="token punctuation">:</span> span<span class="token punctuation">)</span>
 </code></pre>
-<p>La proposition résout le problème en permettant de travailler directement sur la mémoire existante via une vue (<code>Span</code>-like). <code>UTF8Span</code> offre une interface riche pour parcourir les caractères et les scalaires sans les surcoûts de l'objet <code>String</code>, tout en maintenant la sécurité grâce à la validation lors de la création du <code>struct</code>.</p>
+<ul>
+<li><code>init(validating:)</code> : Vérifie que les bytes sont un UTF-8 valide ; lance une erreur si ce n'est pas le cas.</li>
+<li><code>init(unsafeAssumingValidUTF8:)</code> : Crée la vue immédiatement sans vérifier les données pour une performance maximale.</li>
+<li><code>String(copying:)</code> : Permet de transformer la vue en une véritable <code>String</code> sans refaire les tests de validation.</li>
+</ul>
+<h4 id="2.-it%C3%A9ration-des-scalaires-(unicodescalariterator)" tabindex="-1"><a href="#2.-it%C3%A9ration-des-scalaires-(unicodescalariterator)" class="header-anchor">2. Itération des Scalaires (<code>UnicodeScalarIterator</code>)</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">var</span> scalarIter <span class="token operator">=</span> span<span class="token punctuation">.</span><span class="token function">makeUnicodeScalarIterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> nextScalar <span class="token operator">=</span> scalarIter<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span>    <span class="token comment">// Récupère le prochain scalaire</span>
+<span class="token keyword">let</span> prevScalar <span class="token operator">=</span> scalarIter<span class="token punctuation">.</span><span class="token function">previous</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Récupère le scalaire précédent</span>
+scalarIter<span class="token punctuation">.</span><span class="token function">skipForward</span><span class="token punctuation">(</span><span class="token punctuation">)</span>               <span class="token comment">// Avance au prochain scalaire</span>
+scalarIter<span class="token punctuation">.</span><span class="token function">skipBack</span><span class="token punctuation">(</span><span class="token punctuation">)</span>                  <span class="token comment">// Recule au scalaire précédent</span>
+scalarIter<span class="token punctuation">.</span><span class="token function">reset</span><span class="token punctuation">(</span>roundingBackwardsFrom<span class="token punctuation">:</span> <span class="token number">10</span><span class="token punctuation">)</span> <span class="token comment">// Aligne l'index sur le début du scalaire précédent</span>
+</code></pre>
+<ul>
+<li><code>next()</code> / <code>previous()</code> : Permet de parcourir les <code>Unicode.Scalar</code> dans les deux sens.</li>
+<li><code>skipForward()</code> / <code>skipBack()</code> : Avance ou recule au scalaire suivant/précédent sans décoder le contenu.</li>
+<li><code>reset(rounding...)</code> : Aligne l'index de l'itérateur sur une limite de scalaire saine pour éviter les erreurs de découpage.</li>
+</ul>
+<h4 id="3.-it%C3%A9ration-des-caract%C3%A8res-(characteriterator)" tabindex="-1"><a href="#3.-it%C3%A9ration-des-caract%C3%A8res-(characteriterator)" class="header-anchor">3. Itération des Caractères (<code>CharacterIterator</code>)</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">var</span> charIter <span class="token operator">=</span> span<span class="token punctuation">.</span><span class="token function">makeCharacterIterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> nextChar <span class="token operator">=</span> charIter<span class="token punctuation">.</span><span class="token function">next</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Décode le prochain caractère (grapheme cluster)</span>
+charIter<span class="token punctuation">.</span><span class="token function">skipForward</span><span class="token punctuation">(</span><span class="token punctuation">)</span>         <span class="token comment">// Avance au prochain caractère</span>
+charIter<span class="token punctuation">.</span><span class="token function">reset</span><span class="token punctuation">(</span>roundingBackwardsFrom<span class="token punctuation">:</span> <span class="token number">5</span><span class="token punctuation">)</span> <span class="token comment">// Aligne sur la limite du caractère précédent</span>
+</code></pre>
+<ul>
+<li><code>next()</code> / <code>previous()</code> : Gère la complexité des "grapheme clusters" (un caractère peut être composé de plusieurs scalaires).</li>
+<li><code>skipForward()</code> / <code>skipBack()</code> : Permet de naviguer entre les caractères sans les décoder individuellement.</li>
+</ul>
+<h4 id="4.-comparaisons-et-requ%C3%AAtes" tabindex="-1"><a href="#4.-comparaisons-et-requ%C3%AAtes" class="header-anchor">4. Comparaisons et Requêtes</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> isEqual <span class="token operator">=</span> span<span class="token punctuation">.</span><span class="token function">bytesEqual</span><span class="token punctuation">(</span>to<span class="token punctuation">:</span> otherSpan<span class="token punctuation">)</span>          <span class="token comment">// Comparaison octet par octet</span>
+<span class="token keyword">let</span> isSameText <span class="token operator">=</span> span<span class="token punctuation">.</span><span class="token function">charactersEqual</span><span class="token punctuation">(</span>to<span class="token punctuation">:</span> otherSpan<span class="token punctuation">)</span> <span class="token comment">// Comparaison Unicode (equivalence canonique)</span>
+<span class="token keyword">let</span> isASCII <span class="token operator">=</span> span<span class="token punctuation">.</span>isKnownASCII                        <span class="token comment">// Vérification si tout est ASCII</span>
+<span class="token keyword">let</span> isNFC <span class="token operator">=</span> span<span class="token punctuation">.</span>isKnownNFC                            <span class="token comment">// Vérification de la forme de normalisation NFC</span>
+</code></pre>
+<ul>
+<li><code>bytesEqual</code> : Vérifie si les séquences de bytes sont identiques.</li>
+<li><code>charactersEqual</code> : Vérifie si le texte est identique selon les règles Unicode (ignore les différences de normalisation).</li>
+<li><code>isKnownASCII</code> / <code>isKnownNFC</code> : Accélère le traitement en mémorisant des propriétés de l'encodage.</li>
+</ul>
+<hr>
+<p>Ce SE apporte une couche de performance critique pour le traitement de données textuelles brutes. En introduisant <code>UTF8Span</code>, Swift permet aux développeurs de manipuler des séquences de bytes comme du texte (avec gestion des erreurs et des caractères Unicode) sans subir le coût de l'allocation mémoire et de la copie de données propre à <code>String</code>. C'est une avancée majeure pour les bibliothèques de parsing, les moteurs de recherche (Regex) et les systèmes embarqués où la gestion efficace de la mémoire est primordiale.</p>
 
   </div>
 </article>
