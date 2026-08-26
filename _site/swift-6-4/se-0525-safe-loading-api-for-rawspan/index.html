@@ -131,7 +131,6 @@
 <li><code>ConvertibleToBytes</code> : Garantit qu'un type n'a aucun padding mémoire (la taille est égale à la marche/stride), permettant une conversion sûre vers des octets.</li>
 <li><code>ConvertibleFromBytes</code> : Garantit que n'importe quelle combinaison de bits des propriétés du type est sémantiquement valide (absence de contraintes de valeur).</li>
 </ul>
-<p>La proposition ajoute également la fonction <code>bitCast&lt;T, U&gt;</code> pour la réinterprétation de types de même taille, ainsi que des accès par sous-scripts pour <code>UInt8</code>.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0525" tabindex="-1"><a href="#avant-se-0525" class="header-anchor">Avant SE-0525</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> pointer <span class="token operator">=</span> <span class="token class-name">UnsafeRawPointer</span><span class="token punctuation">(</span>buffer<span class="token punctuation">)</span>
@@ -170,7 +169,17 @@ oSpan<span class="token punctuation">.</span><span class="token function">append
 <span class="token comment">// 8. Accès par sous-script pour UInt8</span>
 <span class="token keyword">let</span> byte <span class="token operator">=</span> span<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
 </code></pre>
-<p>L'API offre des méthodes <code>load(as:)</code> et <code>storeBytes(...)</code> sur les types <code>Span</code> qui effectuent des vérifications de limites (bounds-check) et gèrent l'alignement de manière sûre, tout en permettant de spécifier l'ordre des octets pour les entiers.</p>
+<p>La proposition résout la limitation par l'introduction de plusieurs mécanismes :</p>
+<ul>
+<li><strong><code>load(as:)</code></strong> : Permet de lire une valeur typée à partir d'un décalage donné dans un <code>RawSpan</code> avec une vérification systématique des limites de mémoire.</li>
+<li><strong><code>load(as: _ byteOrder:)</code></strong> : Une variante de la méthode précédente qui permet de spécifier l'endianité (big ou little endian) pour les types conformes à <code>FixedWidthInteger</code>.</li>
+<li><strong><code>storeBytes(of:toByteOffset:as:...)</code></strong> : Permet d'écrire une valeur dans un <code>MutableRawSpan</code> de manière sécurisée, avec une gestion de l'ordre des octets.</li>
+<li><strong><code>append(_:as:...)</code></strong> : Permet d'ajouter une valeur à un <code>OutputRawSpan</code> en convertissant les données en octets.</li>
+<li><strong><code>Span(viewing:)</code></strong> : Permet de créer une vue typée (<code>Span</code> ou <code>MutableSpan</code>) à partir d'une mémoire brute, après vérification de l'alignement et des limites.</li>
+<li><strong><code>bytes</code> / <code>mutableBytes</code></strong> : Propriétés permettant de passer d'une vue typée vers une vue brute pour manipuler la mémoire à bas niveau.</li>
+<li><strong><code>bitCast&lt;T, U&gt;</code></strong> : Permet de réinterpréter les bits d'un objet vers un autre type, à condition que les deux types aient la même représentation mémoire et respectent les protocoles de sécurité.</li>
+<li><strong>Sous-scripts <code>UInt8</code></strong> : Fournissent un accès simplifié et direct aux octets individuels au sein des spans.</li>
+</ul>
 
   </div>
 </article>
