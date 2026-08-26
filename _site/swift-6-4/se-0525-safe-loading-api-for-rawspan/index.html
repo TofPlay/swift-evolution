@@ -125,33 +125,52 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0525-rawspan-safe-loading-api.md">SE-0525 - Safe loading API for RawSpan</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit une API sûre pour charger et stocker des valeurs de types spécifiques à partir de la mémoire représentée par <code>RawSpan</code>, <code>MutableSpan</code>, <code>MutableRawSpan</code> et <code>OutputRawSpan</code>. L'objectif est de fournir des primitives de construction fiables pour les utilitaires d'analyse (parsing) et pour l'échange de données entre processus via des tampons non typés.</p>
-<p>Elle repose sur deux nouveaux protocoles :</p>
+<p>La proposition introduit une API sécurisée pour charger et stocker des valeurs de types spécifiques depuis la mémoire représentée par <code>RawSpan</code>, <code>MutableSpan</code>, <code>MutableRawSpan</code> et <code>OutputRawSpan</code>. Cette évolution vise à fournir des primitives robustes pour le parsing et l'échange de données entre processus via des tampons non typés.</p>
+<p>Le mécanisme repose sur deux nouveaux protocoles de marquage :</p>
 <ul>
-<li><code>ConvertibleToBytes</code> : Pour les types pouvant être lus sans ambiguïté comme des octets bruts (sans padding mémoire).</li>
-<li><code>ConvertibleFromBytes</code> : Pour les types dont chaque combinaison possible de bits des propriétés est sémantiquement valide (sans contraintes de valeur).</li>
+<li><code>ConvertibleToBytes</code> : Garantit qu'un type n'a aucun padding mémoire (la taille est égale à la marche/stride), permettant une conversion sûre vers des octets.</li>
+<li><code>ConvertibleFromBytes</code> : Garantit que n'importe quelle combinaison de bits des propriétés du type est sémantiquement valide (absence de contraintes de valeur).</li>
 </ul>
-<p>La proposition inclut également une fonction <code>bitCast&lt;T, U&gt;</code> sécurisée pour réinterpréter les types si <code>T</code> et <code>U</code> ont la même représentation mémoire.</p>
+<p>La proposition ajoute également la fonction <code>bitCast&lt;T, U&gt;</code> pour la réinterprétation de types de même taille, ainsi que des accès par sous-scripts pour <code>UInt8</code>.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0525" tabindex="-1"><a href="#avant-se-0525" class="header-anchor">Avant SE-0525</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> rawPointer <span class="token operator">=</span> <span class="token class-name">UnsafeRawPointer</span><span class="token punctuation">(</span>someBuffer<span class="token punctuation">)</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> pointer <span class="token operator">=</span> <span class="token class-name">UnsafeRawPointer</span><span class="token punctuation">(</span>buffer<span class="token punctuation">)</span>
 <span class="token comment">// L'accès est marqué comme unsafe et nécessite une gestion manuelle de l'alignement</span>
-<span class="token keyword">let</span> value <span class="token operator">=</span> rawPointer<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> value <span class="token operator">=</span> pointer<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
 </code></pre>
-<p>L'utilisation des fonctions <code>load</code> sur les pointeurs bruts introduit un doute sur la sécurité pour les utilisateurs de la bibliothèque standard, notamment à cause de l'annotation <code>unsafe</code> et des contraintes d'alignement.</p>
+<p>L'utilisation des fonctions <code>load</code> sur les pointeurs bruts introduit une incertitude pour les utilisateurs de la bibliothèque standard, en raison des annotations <code>unsafe</code> et de la gestion complexe de l'alignement et de la sécurité des bornes.</p>
 <h3 id="apr%C3%A8s-se-0525" tabindex="-1"><a href="#apr%C3%A8s-se-0525" class="header-anchor">Après SE-0525</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> rawSpan <span class="token operator">=</span> <span class="token class-name">RawSpan</span><span class="token punctuation">(</span>someBuffer<span class="token punctuation">)</span>
-<span class="token comment">// Chargement sûr, sans restriction d'alignement et avec vérification des bornes</span>
-<span class="token keyword">let</span> value <span class="token operator">=</span> rawSpan<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// 1. Utilisation de load(as:) sur RawSpan (vérification des bornes incluse)</span>
+<span class="token keyword">let</span> span <span class="token operator">=</span> <span class="token class-name">RawSpan</span><span class="token punctuation">(</span>buffer<span class="token punctuation">)</span>
+<span class="token keyword">let</span> value <span class="token operator">=</span> span<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
 
-<span class="token comment">// Chargement avec gestion de l'ordre des octets (Endianness)</span>
-<span class="token keyword">let</span> leValue <span class="token operator">=</span> rawSpan<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">,</span> <span class="token omit keyword">_</span><span class="token punctuation">:</span> <span class="token punctuation">.</span>littleEndian<span class="token punctuation">)</span>
+<span class="token comment">// 2. Utilisation de load(as: _ byteOrder:) pour les entiers</span>
+<span class="token keyword">let</span> leValue <span class="token operator">=</span> span<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">,</span> <span class="token omit keyword">_</span><span class="token punctuation">:</span> <span class="token punctuation">.</span>littleEndian<span class="token punctuation">)</span>
 
-<span class="token comment">// Utilisation d'un bitCast sécurisé</span>
-<span class="token keyword">struct</span> <span class="token class-name">Pair</span> <span class="token punctuation">{</span> <span class="token keyword">var</span> a<span class="token punctuation">,</span> b<span class="token punctuation">:</span> <span class="token class-name">Int16</span> <span class="token punctuation">}</span> <span class="token comment">// Conforme à ConvertibleToBytes</span>
-<span class="token keyword">let</span> bits <span class="token operator">=</span> <span class="token function">bitCast</span><span class="token punctuation">(</span>somePair<span class="token punctuation">,</span> to<span class="token punctuation">:</span> <span class="token class-name">Pair</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
+<span class="token comment">// 3. Utilisation de storeBytes sur MutableRawSpan</span>
+<span class="token keyword">var</span> mSpan <span class="token operator">=</span> <span class="token class-name">MutableRawSpan</span><span class="token punctuation">(</span>buffer<span class="token punctuation">)</span>
+mSpan<span class="token punctuation">.</span><span class="token function">storeBytes</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> <span class="token number">42</span><span class="token punctuation">,</span> toByteOffset<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">,</span> <span class="token punctuation">.</span>littleEndian<span class="token punctuation">)</span>
+
+<span class="token comment">// 4. Utilisation de l'append() sur OutputRawSpan</span>
+<span class="token keyword">var</span> oSpan <span class="token operator">=</span> <span class="token class-name">OutputRawSpan</span><span class="token punctuation">(</span>capacity<span class="token punctuation">:</span> <span class="token number">1024</span><span class="token punctuation">)</span>
+oSpan<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">123</span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">,</span> <span class="token punctuation">.</span>bigEndian<span class="token punctuation">)</span>
+
+<span class="token comment">// 5. Conversion de Span en RawSpan (via la propriété bytes)</span>
+<span class="token keyword">let</span> typedSpan <span class="token operator">=</span> <span class="token class-name">Span</span><span class="token punctuation">(</span>viewing<span class="token punctuation">:</span> span<span class="token punctuation">)</span>
+<span class="token keyword">let</span> rawFromSpan <span class="token operator">=</span> typedSpan<span class="token punctuation">.</span>bytes
+
+<span class="token comment">// 6. Conversion de RawSpan en Span (via l'initialiseur)</span>
+<span class="token keyword">let</span> spanFromRaw <span class="token operator">=</span> <span class="token class-name">Span</span><span class="token punctuation">(</span>viewing<span class="token punctuation">:</span> span<span class="token punctuation">)</span>
+
+<span class="token comment">// 7. Utilisation du bitCast sécurisé</span>
+<span class="token keyword">struct</span> <span class="token class-name">Data</span><span class="token punctuation">:</span> <span class="token class-name">ConvertibleToBytes</span><span class="token punctuation">,</span> <span class="token class-name">ConvertibleFromBytes</span> <span class="token punctuation">{</span> <span class="token keyword">var</span> val<span class="token punctuation">:</span> <span class="token class-name">Int32</span> <span class="token punctuation">}</span>
+<span class="token keyword">let</span> original <span class="token operator">=</span> <span class="token class-name">Data</span><span class="token punctuation">(</span>val<span class="token punctuation">:</span> <span class="token number">10</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> casted <span class="token operator">=</span> <span class="token function">bitCast</span><span class="token punctuation">(</span>original<span class="token punctuation">,</span> to<span class="token punctuation">:</span> <span class="token class-name">Data</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
+
+<span class="token comment">// 8. Accès par sous-script pour UInt8</span>
+<span class="token keyword">let</span> byte <span class="token operator">=</span> span<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
 </code></pre>
-<p>L'API fournit des méthodes <code>load(as:)</code> et <code>storeBytes(...)</code> sur les types <code>Span</code> qui effectuent des vérifications de limites (bounds-check) et gèrent l'alignement de manière sûre, tout en permettant de spécifier l'ordre des octets pour les entiers.</p>
+<p>L'API offre des méthodes <code>load(as:)</code> et <code>storeBytes(...)</code> sur les types <code>Span</code> qui effectuent des vérifications de limites (bounds-check) et gèrent l'alignement de manière sûre, tout en permettant de spécifier l'ordre des octets pour les entiers.</p>
 
   </div>
 </article>
