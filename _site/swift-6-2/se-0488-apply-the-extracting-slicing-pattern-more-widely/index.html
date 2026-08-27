@@ -144,47 +144,43 @@
 </code></pre>
 <p>Le pattern de découpage établi par le protocole <code>Collection</code> ne peut pas être généralisé pour les éléments non-copiables ou les conteneurs non-échappables.</p>
 <h3 id="apr%C3%A8s-se-0488" tabindex="-1"><a href="#apr%C3%A8s-se-0488" class="header-anchor">Après SE-0488</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> buffer <span class="token operator">=</span> <span class="token class-name">UnsafeBufferPointer</span><span class="token punctuation">(</span>buffer<span class="token punctuation">:</span> <span class="token punctuation">[</span>element1<span class="token punctuation">,</span> element2<span class="token punctuation">,</span> element3<span class="token punctuation">]</span><span class="token punctuation">)</span>
-
-<span class="token comment">// 1. Découpage par plage (Range)</span>
-<span class="token keyword">let</span> slice <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token operator">..&lt;</span><span class="token number">2</span><span class="token punctuation">)</span>
-
-<span class="token comment">// 2. Découpage par plage (RangeExpression)</span>
-<span class="token keyword">let</span> sliceExpr <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token operator">..&lt;</span><span class="token number">2</span><span class="token punctuation">)</span>
-
-<span class="token comment">// 3. Découpage de la totalité (UnboundedRange)</span>
-<span class="token keyword">let</span> all <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span><span class="token punctuation">.</span>unbounded<span class="token punctuation">)</span>
-
-<span class="token comment">// 4. Découpage non sécurisé par plage (Unchecked Range)</span>
-<span class="token keyword">let</span> unsafeSlice <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span>unchecked<span class="token punctuation">:</span> <span class="token number">0</span><span class="token operator">..&lt;</span><span class="token number">2</span><span class="token punctuation">)</span>
-
-<span class="token comment">// 5. Découpage non sécurisé par plage fermée (Unchecked ClosedRange)</span>
-<span class="token keyword">let</span> unsafeSliceClosed <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span>unchecked<span class="token punctuation">:</span> <span class="token number">0</span><span class="token operator">...</span><span class="token number">1</span><span class="token punctuation">)</span>
-
-<span class="token comment">// 6. Extraction des n premiers éléments</span>
-<span class="token keyword">let</span> firstTwo <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span>first<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span>
-
-<span class="token comment">// 7. Extraction en supprimant les n derniers éléments</span>
-<span class="token keyword">let</span> droppedLast <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span>droppingLast<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span>
-
-<span class="token comment">// 8. Extraction des n derniers éléments</span>
-<span class="token keyword">let</span> lastTwo <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span>last<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span>
-
-<span class="token comment">// 9. Extraction en supprimant les n premiers éléments</span>
-<span class="token keyword">let</span> droppedFirst <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span>droppingFirst<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span>
+<h4 id="d%C3%A9coupage-par-plage-d'indices-(range)" tabindex="-1"><a href="#d%C3%A9coupage-par-plage-d'indices-(range)" class="header-anchor">Découpage par plage d'indices (Range)</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> slice <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token operator">..&lt;</span><span class="token number">2</span><span class="token punctuation">)</span>
 </code></pre>
-<p>La proposition introduit une syntaxe explicite pour contourner les limitations du protocole <code>Collection</code> sur les types non-copiables :</p>
-<ul>
-<li><code>extracting(_ bounds: Range&lt;Index&gt;)</code> : Retourne une tranche sur la plage spécifiée (valide les bornes).</li>
-<li><code>extracting(_ bounds: some RangeExpression&lt;Index&gt;)</code> : Version générique acceptant toute expression de plage.</li>
-<li><code>extracting(_: UnboundedRange)</code> : Retourne une tranche contenant tous les éléments du conteneur.</li>
-<li><code>extracting(unchecked bounds: Range&lt;Index&gt;)</code> : Découpage sans validation des bornes (version <code>@unsafe</code>).</li>
-<li><code>extracting(unchecked bounds: ClosedRange&lt;Index&gt;)</code> : Découpage sans validation des bornes via une plage fermée (version <code>@unsafe</code>).</li>
-<li><code>extracting(first maxLength: Int)</code> : Retourne une tranche contenant les éléments initiaux jusqu'à la longueur maximale spécifiée.</li>
-<li><code>extracting(droppingLast k: Int)</code> : Retourne une tranche en excluant les <code>k</code> derniers éléments.</li>
-<li><code>extracting(last maxLength: Int)</code> : Retourne une tranche contenant les derniers éléments jusqu'à la longueur maximale spécifiée.</li>
-<li><code>extracting(droppingFirst k: Int)</code> : Retourne une tranche en excluant les <code>k</code> premiers éléments.</li>
-</ul>
+<p>Retourne une tranche sur les éléments compris dans la plage spécifiée. La méthode valide que la plage est valide dans le conteneur.</p>
+<h4 id="d%C3%A9coupage-par-plage-d'indices-%C3%A9tendue-(rangeexpression)" tabindex="-1"><a href="#d%C3%A9coupage-par-plage-d'indices-%C3%A9tendue-(rangeexpression)" class="header-anchor">Découpage par plage d'indices étendue (RangeExpression)</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> slice <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token operator">...</span><span class="token number">1</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Permet l'utilisation de toute expression de plage (comme une plage fermée) pour définir la tranche à extraire.</p>
+<h4 id="d%C3%A9coupage-de-la-totalit%C3%A9-du-conteneur-(unboundedrange)" tabindex="-1"><a href="#d%C3%A9coupage-de-la-totalit%C3%A9-du-conteneur-(unboundedrange)" class="header-anchor">Découpage de la totalité du conteneur (UnboundedRange)</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> entireBuffer <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span><span class="token punctuation">\</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Retourne une tranche contenant l'intégralité des éléments du conteneur.</p>
+<h4 id="d%C3%A9coupage-non-s%C3%A9curis%C3%A9-par-plage-(unchecked-range)" tabindex="-1"><a href="#d%C3%A9coupage-non-s%C3%A9curis%C3%A9-par-plage-(unchecked-range)" class="header-anchor">Découpage non sécurisé par plage (Unchecked Range)</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> unsafeSlice <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span>unchecked<span class="token punctuation">:</span> <span class="token number">0</span><span class="token operator">..&lt;</span><span class="token number">5</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Effectue un découpage sans vérifier si la plage est valide. Cette opération est marquée <code>@unsafe</code> car elle peut provoquer un crash si les bornes dépassent la taille du buffer.</p>
+<h4 id="d%C3%A9coupage-non-s%C3%A9curis%C3%A9-par-plage-ferm%C3%A9e-(unchecked-closedrange)" tabindex="-1"><a href="#d%C3%A9coupage-non-s%C3%A9curis%C3%A9-par-plage-ferm%C3%A9e-(unchecked-closedrange)" class="header-anchor">Découpage non sécurisé par plage fermée (Unchecked ClosedRange)</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> unsafeSlice <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span>unchecked<span class="token punctuation">:</span> <span class="token number">0</span><span class="token operator">...</span><span class="token number">5</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Similaire au découpage non sécurisé par plage, mais accepte une <code>ClosedRange</code>.</p>
+<h4 id="d%C3%A9coupage-par-nombre-d'%C3%A9l%C3%A9ments-(first)" tabindex="-1"><a href="#d%C3%A9coupage-par-nombre-d'%C3%A9l%C3%A9ments-(first)" class="header-anchor">Découpage par nombre d'éléments (First)</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> firstTwo <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span>first<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Extrait les $n$ premiers éléments du conteneur.</p>
+<h4 id="d%C3%A9coupage-en-supprimant-les-derniers-%C3%A9l%C3%A9ments-(dropping-last)" tabindex="-1"><a href="#d%C3%A9coupage-en-supprimant-les-derniers-%C3%A9l%C3%A9ments-(dropping-last)" class="header-anchor">Découpage en supprimant les derniers éléments (Dropping Last)</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> droppedLast <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span>droppingLast<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Extrait une tranche en ignorant les $k$ éléments situés à la fin du conteneur.</p>
+<h4 id="d%C3%A9coupage-par-nombre-d'%C3%A9l%C3%A9ments-%C3%A0-la-fin-(last)" tabindex="-1"><a href="#d%C3%A9coupage-par-nombre-d'%C3%A9l%C3%A9ments-%C3%A0-la-fin-(last)" class="header-anchor">Découpage par nombre d'éléments à la fin (Last)</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> lastTwo <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span>last<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Extrait les $n$ derniers éléments du conteneur.</p>
+<h4 id="d%C3%A9coupage-en-supprimant-les-premiers-%C3%A9l%C3%A9ments-(dropping-first)" tabindex="-1"><a href="#d%C3%A9coupage-en-supprimant-les-premiers-%C3%A9l%C3%A9ments-(dropping-first)" class="header-anchor">Découpage en supprimant les premiers éléments (Dropping First)</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> droppedFirst <span class="token operator">=</span> buffer<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span>droppingFirst<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Extrait une tranche en ignorant les $k$ éléments situés au début du conteneur.</p>
+<p>Cette proposition comble une lacune de la bibliothèque standard en fournissant une syntaxe cohérente pour le découpage des types <code>Span</code> et des pointeurs de buffers bruts. Elle permet de manipuler des conteneurs avec des types non-copiables sans entrer en conflit avec les règles de gestion de la durée de vie des objets (ownership), garantissant ainsi que l'opération de découpage respecte les garanties de mémoire de Swift.</p>
 
   </div>
 </article>

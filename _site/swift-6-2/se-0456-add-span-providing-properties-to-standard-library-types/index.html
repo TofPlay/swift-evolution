@@ -146,8 +146,23 @@
     <span class="token keyword">return</span> myResult
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'utilisation de fonctions prenant une closure est difficile à faire évoluer (par exemple, pour ajouter du support pour la concurrence ou les erreurs typées) et limite la composition du code car la variable <code>buffer</code> ne peut être utilisée qu'à l'intérieur de la portée de la closure.</p>
+<p>L'utilisation de fonctions prenant une closure est difficile à faire évoluer (par exemple, pour ajouter du support pour la concurrence ou les erreurs typées) et limite la composition du code.</p>
 <h3 id="apr%C3%A8s-se-0456" tabindex="-1"><a href="#apr%C3%A8s-se-0456" class="header-anchor">Après SE-0456</a></h3>
+<h4 id="comportement-de-borrowing-avec-les-types-non-copyable" tabindex="-1"><a href="#comportement-de-borrowing-avec-les-types-non-copyable" class="header-anchor">Comportement de borrowing avec les types non-copyable</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">A</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span><span class="token punctuation">,</span> <span class="token class-name">Escapable</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token keyword">struct</span> <span class="token class-name">B</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Escapable</span><span class="token punctuation">,</span> <span class="token class-name">Copyable</span> <span class="token punctuation">{</span> <span class="token keyword">init</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> a<span class="token punctuation">:</span> borrowing <span class="token class-name">A</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token punctuation">}</span>
+<span class="token keyword">extension</span> <span class="token class-name">A</span> <span class="token punctuation">{</span> <span class="token keyword">var</span> b<span class="token punctuation">:</span> <span class="token class-name">B</span> <span class="token punctuation">{</span> <span class="token class-name">B</span><span class="token punctuation">(</span><span class="token keyword">self</span><span class="token punctuation">)</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> a <span class="token operator">=</span> <span class="token class-name">A</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">var</span> b <span class="token operator">=</span> a<span class="token punctuation">.</span>b <span class="token comment">// access to `a` begins here</span>
+    <span class="token comment">// read(b)</span>
+    <span class="token comment">// `b` has ended here, ending access to `a`</span>
+    <span class="token function">modify</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>a<span class="token punctuation">)</span> <span class="token comment">// `modify()` can have exclusive access to `a`</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Cet exemple illustre comment une propriété calculée peut établir une relation de "borrowing" (emprunt) : l'instance <code>b</code> emprunte l'instance <code>a</code>, et le compilateur empêche toute mutation de <code>a</code> tant que <code>b</code> est active.</p>
+<h4 id="am%C3%A9lioration-de-la-composabilit%C3%A9" tabindex="-1"><a href="#am%C3%A9lioration-de-la-composabilit%C3%A9" class="header-anchor">Amélioration de la composabilité</a></h4>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code illustrant l'état APRÈS la proposition</span>
 <span class="token keyword">let</span> span <span class="token operator">=</span> myArray<span class="token punctuation">.</span>span
 <span class="token keyword">let</span> indices <span class="token operator">=</span> <span class="token function">findElements</span><span class="token punctuation">(</span>span<span class="token punctuation">)</span>
@@ -156,48 +171,8 @@
     <span class="token keyword">try</span> myResult<span class="token punctuation">.</span><span class="token function">modify</span><span class="token punctuation">(</span>span<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'utilisation d'une propriété <code>span</code> rend le code plus propre, plus facile à composer et permet une évolution plus aisée vers des fonctionnalités modernes sans les contraintes de portée de la closure.</p>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Exemple de relation de borrowing (emprunt)</span>
-<span class="token keyword">struct</span> <span class="token class-name">A</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span><span class="token punctuation">,</span> <span class="token class-name">Escapable</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
-<span class="token keyword">struct</span> <span class="token class-name">B</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Escapable</span><span class="token punctuation">,</span> <span class="token class-name">Copyable</span> <span class="token punctuation">{</span> <span class="token keyword">init</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> a<span class="token punctuation">:</span> borrowing <span class="token class-name">A</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token punctuation">}</span>
-<span class="token keyword">extension</span> <span class="token class-name">A</span> <span class="token punctuation">{</span> <span class="token keyword">var</span> b<span class="token punctuation">:</span> <span class="token class-name">B</span> <span class="token punctuation">{</span> <span class="token class-name">B</span><span class="token punctuation">(</span><span class="token keyword">self</span><span class="token punctuation">)</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span>
-
-<span class="token keyword">func</span> <span class="token function-definition function">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> a <span class="token operator">=</span> <span class="token class-name">A</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-    <span class="token keyword">var</span> b <span class="token operator">=</span> a<span class="token punctuation">.</span>b <span class="token comment">// access to `a` begins here</span>
-    <span class="token comment">// b has ended here, ending access to `a`</span>
-    <span class="token function">modify</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>a<span class="token punctuation">)</span> <span class="token comment">// `modify()` can have exclusive access to `a`</span>
-<span class="token punctuation">}</span>
-</code></pre>
-<p>Cet exemple illustre comment le langage gère les relations de durée de vie : l'instance <code>B</code> emprunte l'instance <code>A</code>. Le compilateur empêche de réutiliser <code>b</code> après l'appel à <code>modify(&amp;a)</code> pour éviter un accès simultané non sécurisé (overlapping access).</p>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Accès aux octets bruts via RawSpan</span>
-<span class="token keyword">extension</span> <span class="token class-name">Span</span> <span class="token keyword">where</span> <span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token class-name">BitwiseCopyable</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> bytes<span class="token punctuation">:</span> <span class="token class-name">RawSpan</span> <span class="token punctuation">{</span> <span class="token keyword">get</span> <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
-</code></pre>
-<p>Lorsque l'élément d'un <code>Span</code> est <code>BitwiseCopyable</code>, une nouvelle propriété <code>bytes</code> permet de voir la mémoire sous forme d'octets bruts via un <code>RawSpan</code>.</p>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Conversion depuis les types de buffers non sécurisés existants</span>
-<span class="token keyword">extension</span> <span class="token class-name">UnsafeBufferPointer</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> span<span class="token punctuation">:</span> <span class="token class-name">Span</span><span class="token operator">&lt;</span><span class="token class-name">Element</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span> <span class="token keyword">get</span> <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
-<span class="token keyword">extension</span> <span class="token class-name">UnsafeMutableBufferPointer</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> span<span class="token punctuation">:</span> <span class="token class-name">Span</span><span class="token operator">&lt;</span><span class="token class-name">Element</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span> <span class="token keyword">get</span> <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
-<span class="token keyword">extension</span> <span class="token class-name">UnsafeRawBufferPointer</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> bytes<span class="token punctuation">:</span> <span class="token class-name">RawSpan</span> <span class="token punctuation">{</span> <span class="token keyword">get</span> <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
-<span class="token keyword">extension</span> <span class="token class-name">UnsafeMutableRawBufferPointer</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> bytes<span class="token punctuation">:</span> <span class="token class-name">RawSpan</span> <span class="token punctuation">{</span> <span class="token keyword">get</span> <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
-</code></pre>
-<p>Ces extensions permettent de faire le pont entre l'ancien système de pointeurs non sécurisés (<code>UnsafeBufferPointer</code>) et le nouveau système de <code>Span</code>, facilitant la migration progressive du code.</p>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Extensions pour Foundation.Data</span>
-<span class="token keyword">extension</span> <span class="token class-name">Foundation</span><span class="token punctuation">.</span><span class="token class-name">Data</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> span<span class="token punctuation">:</span> <span class="token class-name">Span</span><span class="token operator">&lt;</span><span class="token class-name">UInt8</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span> <span class="token keyword">get</span> <span class="token punctuation">}</span>
-    <span class="token keyword">var</span> bytes<span class="token punctuation">:</span> <span class="token class-name">RawSpan</span> <span class="token punctuation">{</span> <span class="token keyword">get</span> <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
-</code></pre>
-<p>La proposition étend également <code>Foundation.Data</code> pour fournir à la fois un <code>Span&lt;UInt8&gt;</code> et un <code>RawSpan</code> directement, rendant l'accès aux données de <code>Data</code> plus moderne et cohérent avec la bibliothèque standard.</p>
+<p>L'utilisation d'une propriété <code>span</code> rend le code plus propre, plus facile à composer et permet une évolution plus aisée vers des fonctionnalités modernes comme les <code>typed throws</code> ou la concurrence, sans les contraintes de portée de la closure.</p>
+<p>Cette proposition transforme l'accès à la mémoire contiguë en une interface moderne et sûre. En remplaçant les fonctions basées sur des closures par des propriétés retournant des types non-échappables, Swift améliore la composabilité du code tout en maintenant des garanties de sécurité strictes via le système de gestion des durées de vie (lifetimes). Cela permet notamment une transition plus fluide vers des fonctionnalités de langage avancées comme la concurrence et les types non-copiables, tout en offrant une alternative élégante aux types "unsafe" pour manipuler les buffers.</p>
 
   </div>
 </article>

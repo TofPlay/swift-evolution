@@ -131,6 +131,7 @@
 <li><code>ConvertibleToBytes</code> : Garantit qu'un type n'a aucun padding mémoire (la taille est égale à la marche/stride), permettant une conversion sûre vers des octets.</li>
 <li><code>ConvertibleFromBytes</code> : Garantit que n'importe quelle combinaison de bits des propriétés du type est sémantiquement valide (absence de contraintes de valeur).</li>
 </ul>
+<p>La proposition ajoute également la fonction <code>bitCast&lt;T, U&gt;</code> pour la réinterprétation de types de même taille, ainsi que des accès par sous-scripts pour <code>UInt8</code>.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0525" tabindex="-1"><a href="#avant-se-0525" class="header-anchor">Avant SE-0525</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> pointer <span class="token operator">=</span> <span class="token class-name">UnsafeRawPointer</span><span class="token punctuation">(</span>buffer<span class="token punctuation">)</span>
@@ -139,47 +140,58 @@
 </code></pre>
 <p>L'utilisation des fonctions <code>load</code> sur les pointeurs bruts introduit une incertitude pour les utilisateurs de la bibliothèque standard, en raison des annotations <code>unsafe</code> et de la gestion complexe de l'alignement et de la sécurité des bornes.</p>
 <h3 id="apr%C3%A8s-se-0525" tabindex="-1"><a href="#apr%C3%A8s-se-0525" class="header-anchor">Après SE-0525</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// 1. Utilisation de load(as:) sur RawSpan (vérification des bornes incluse)</span>
-<span class="token keyword">let</span> span <span class="token operator">=</span> <span class="token class-name">RawSpan</span><span class="token punctuation">(</span>buffer<span class="token punctuation">)</span>
+<h4 id="chargement-s%C3%A9curis%C3%A9-depuis-un-rawspan" tabindex="-1"><a href="#chargement-s%C3%A9curis%C3%A9-depuis-un-rawspan" class="header-anchor">Chargement sécurisé depuis un RawSpan</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> span <span class="token operator">=</span> <span class="token class-name">RawSpan</span><span class="token punctuation">(</span>buffer<span class="token punctuation">)</span>
 <span class="token keyword">let</span> value <span class="token operator">=</span> span<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
-
-<span class="token comment">// 2. Utilisation de load(as: _ byteOrder:) pour les entiers</span>
-<span class="token keyword">let</span> leValue <span class="token operator">=</span> span<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">,</span> <span class="token omit keyword">_</span><span class="token punctuation">:</span> <span class="token punctuation">.</span>littleEndian<span class="token punctuation">)</span>
-
-<span class="token comment">// 3. Utilisation de storeBytes sur MutableRawSpan</span>
-<span class="token keyword">var</span> mSpan <span class="token operator">=</span> <span class="token class-name">MutableRawSpan</span><span class="token punctuation">(</span>buffer<span class="token punctuation">)</span>
+</code></pre>
+<p>La méthode <code>load(as:)</code> permet de lire une valeur depuis un décalage donné dans le <code>RawSpan</code> avec une vérification des limites, sans contrainte d'alignement.</p>
+<h4 id="chargement-avec-sp%C3%A9cification-de-l'ordre-des-octets" tabindex="-1"><a href="#chargement-avec-sp%C3%A9cification-de-l'ordre-des-octets" class="header-anchor">Chargement avec spécification de l'ordre des octets</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> leValue <span class="token operator">=</span> span<span class="token punctuation">.</span><span class="token function">load</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">,</span> fromByteOffset<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token omit keyword">_</span> byteOrder<span class="token punctuation">:</span> <span class="token punctuation">.</span>littleEndian<span class="token punctuation">)</span>
+</code></pre>
+<p>Pour les types conformes à <code>FixedWidthInteger</code>, il est possible de spécifier si la lecture doit suivre l'ordre des octets <code>bigEndian</code> ou <code>littleEndian</code>.</p>
+<h4 id="acc%C3%A8s-direct-par-sous-script-pour-uint8" tabindex="-1"><a href="#acc%C3%A8s-direct-par-sous-script-pour-uint8" class="header-anchor">Accès direct par sous-script pour UInt8</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> byte <span class="token operator">=</span> span<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+</code></pre>
+<p>Les membres <code>RawSpan</code>, <code>MutableRawSpan</code> et <code>OutputRawSpan</code> permettent un accès rapide par sous-script pour le type <code>UInt8</code>.</p>
+<h4 id="stockage-de-valeurs-dans-un-mutablerawspan" tabindex="-1"><a href="#stockage-de-valeurs-dans-un-mutablerawspan" class="header-anchor">Stockage de valeurs dans un MutableRawSpan</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">var</span> mSpan <span class="token operator">=</span> <span class="token class-name">MutableRawSpan</span><span class="token punctuation">(</span>buffer<span class="token punctuation">)</span>
 mSpan<span class="token punctuation">.</span><span class="token function">storeBytes</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> <span class="token number">42</span><span class="token punctuation">,</span> toByteOffset<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">,</span> <span class="token punctuation">.</span>littleEndian<span class="token punctuation">)</span>
-
-<span class="token comment">// 4. Utilisation de l'append() sur OutputRawSpan</span>
-<span class="token keyword">var</span> oSpan <span class="token operator">=</span> <span class="token class-name">OutputRawSpan</span><span class="token punctuation">(</span>capacity<span class="token punctuation">:</span> <span class="token number">1024</span><span class="token punctuation">)</span>
+</code></pre>
+<p>La méthode <code>storeBytes(of:toByteOffset:as:_byteOrder:)</code> permet d'écrire une valeur de manière sûre dans un tampon mutable en gérant l'ordre des octets.</p>
+<h4 id="r%C3%A9p%C3%A9tition-de-stockage-dans-un-mutablerawspan" tabindex="-1"><a href="#r%C3%A9p%C3%A9tition-de-stockage-dans-un-mutablerawspan" class="header-anchor">Répétition de stockage dans un MutableRawSpan</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift">mSpan<span class="token punctuation">.</span><span class="token function">storeBytes</span><span class="token punctuation">(</span>repeating<span class="token punctuation">:</span> <span class="token number">42</span><span class="token punctuation">,</span> count<span class="token punctuation">:</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Cette méthode permet de remplir une portion du tampon avec la même valeur de manière répétitive.</p>
+<h4 id="ajout-de-valeurs-dans-un-outputrawspan" tabindex="-1"><a href="#ajout-de-valeurs-dans-un-outputrawspan" class="header-anchor">Ajout de valeurs dans un OutputRawSpan</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">var</span> oSpan <span class="token operator">=</span> <span class="token class-name">OutputRawSpan</span><span class="token punctuation">(</span>capacity<span class="token punctuation">:</span> <span class="token number">1024</span><span class="token punctuation">)</span>
 oSpan<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">123</span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">,</span> <span class="token punctuation">.</span>bigEndian<span class="token punctuation">)</span>
-
-<span class="token comment">// 5. Conversion de Span en RawSpan (via la propriété bytes)</span>
+</code></pre>
+<p>La méthode <code>append</code> permet d'ajouter une valeur à la fin du tampon de sortie en contrôlant l'ordre des octets.</p>
+<h4 id="r%C3%A9p%C3%A9tition-d'ajout-dans-un-outputrawspan" tabindex="-1"><a href="#r%C3%A9p%C3%A9tition-d'ajout-dans-un-outputrawspan" class="header-anchor">Répétition d'ajout dans un OutputRawSpan</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift">oSpan<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>repeating<span class="token punctuation">:</span> <span class="token number">42</span><span class="token punctuation">,</span> count<span class="token punctuation">:</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">,</span> <span class="token punctuation">.</span>bigEndian<span class="token punctuation">)</span>
+</code></pre>
+<p>Cette méthode permet d'ajouter plusieurs copies successives d'une même valeur dans le tampon de sortie.</p>
+<h4 id="conversion-d'un-span-vers-un-rawspan" tabindex="-1"><a href="#conversion-d'un-span-vers-un-rawspan" class="header-anchor">Conversion d'un Span vers un RawSpan</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">Data</span><span class="token punctuation">:</span> <span class="token class-name">ConvertibleToBytes</span><span class="token punctuation">,</span> <span class="token class-name">ConvertibleFromBytes</span> <span class="token punctuation">{</span> <span class="token keyword">var</span> val<span class="token punctuation">:</span> <span class="token class-name">Int32</span> <span class="token punctuation">}</span>
 <span class="token keyword">let</span> typedSpan <span class="token operator">=</span> <span class="token class-name">Span</span><span class="token punctuation">(</span>viewing<span class="token punctuation">:</span> span<span class="token punctuation">)</span>
 <span class="token keyword">let</span> rawFromSpan <span class="token operator">=</span> typedSpan<span class="token punctuation">.</span>bytes
-
-<span class="token comment">// 6. Conversion de RawSpan en Span (via l'initialiseur)</span>
-<span class="token keyword">let</span> spanFromRaw <span class="token operator">=</span> <span class="token class-name">Span</span><span class="token punctuation">(</span>viewing<span class="token punctuation">:</span> span<span class="token punctuation">)</span>
-
-<span class="token comment">// 7. Utilisation du bitCast sécurisé</span>
-<span class="token keyword">struct</span> <span class="token class-name">Data</span><span class="token punctuation">:</span> <span class="token class-name">ConvertibleToBytes</span><span class="token punctuation">,</span> <span class="token class-name">ConvertibleFromBytes</span> <span class="token punctuation">{</span> <span class="token keyword">var</span> val<span class="token punctuation">:</span> <span class="token class-name">Int32</span> <span class="token punctuation">}</span>
+</code></pre>
+<p>La propriété <code>bytes</code> permet d'obtenir une vue <code>RawSpan</code> à partir d'un <code>Span</code> typé, lorsque l'élément respecte les conditions de conversion.</p>
+<h4 id="conversion-d'un-rawspan-vers-un-span" tabindex="-1"><a href="#conversion-d'un-rawspan-vers-un-span" class="header-anchor">Conversion d'un RawSpan vers un Span</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> spanFromRaw <span class="token operator">=</span> <span class="token class-name">Span</span><span class="token punctuation">(</span>viewing<span class="token punctuation">:</span> span<span class="token punctuation">)</span>
+</code></pre>
+<p>Un <code>RawSpan</code> peut être transformé en <code>Span</code> typé via l'initialiseur <code>init(viewing:)</code>, avec une vérification de l'alignement et des bornes.</p>
+<h4 id="conversion-mutuable-d'un-mutablerawspan-vers-un-mutablespan" tabindex="-1"><a href="#conversion-mutuable-d'un-mutablerawspan-vers-un-mutablespan" class="header-anchor">Conversion mutuable d'un MutableRawSpan vers un MutableSpan</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">var</span> mutableSpan <span class="token operator">=</span> <span class="token class-name">MutableSpan</span><span class="token punctuation">(</span><span class="token keyword">mutating</span><span class="token punctuation">:</span> mSpan<span class="token punctuation">)</span>
+</code></pre>
+<p>L'initialiseur permet de manipuler la mémoire brute comme un <code>MutableSpan</code> typé, sous réserve de conformité aux protocoles de conversion.</p>
+<h4 id="r%C3%A9interpr%C3%A9tation-de-type-avec-bitcast" tabindex="-1"><a href="#r%C3%A9interpr%C3%A9tation-de-type-avec-bitcast" class="header-anchor">Réinterprétation de type avec bitCast</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">Data</span><span class="token punctuation">:</span> <span class="token class-name">ConvertibleToBytes</span><span class="token punctuation">,</span> <span class="token class-name">ConvertibleFromBytes</span> <span class="token punctuation">{</span> <span class="token keyword">var</span> val<span class="token punctuation">:</span> <span class="token class-name">Int32</span> <span class="token punctuation">}</span>
 <span class="token keyword">let</span> original <span class="token operator">=</span> <span class="token class-name">Data</span><span class="token punctuation">(</span>val<span class="token punctuation">:</span> <span class="token number">10</span><span class="token punctuation">)</span>
 <span class="token keyword">let</span> casted <span class="token operator">=</span> <span class="token function">bitCast</span><span class="token punctuation">(</span>original<span class="token punctuation">,</span> to<span class="token punctuation">:</span> <span class="token class-name">Data</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
-
-<span class="token comment">// 8. Accès par sous-script pour UInt8</span>
-<span class="token keyword">let</span> byte <span class="token operator">=</span> span<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
 </code></pre>
-<p>La proposition résout la limitation par l'introduction de plusieurs mécanismes :</p>
-<ul>
-<li><strong><code>load(as:)</code></strong> : Permet de lire une valeur typée à partir d'un décalage donné dans un <code>RawSpan</code> avec une vérification systématique des limites de mémoire.</li>
-<li><strong><code>load(as: _ byteOrder:)</code></strong> : Une variante de la méthode précédente qui permet de spécifier l'endianité (big ou little endian) pour les types conformes à <code>FixedWidthInteger</code>.</li>
-<li><strong><code>storeBytes(of:toByteOffset:as:...)</code></strong> : Permet d'écrire une valeur dans un <code>MutableRawSpan</code> de manière sécurisée, avec une gestion de l'ordre des octets.</li>
-<li><strong><code>append(_:as:...)</code></strong> : Permet d'ajouter une valeur à un <code>OutputRawSpan</code> en convertissant les données en octets.</li>
-<li><strong><code>Span(viewing:)</code></strong> : Permet de créer une vue typée (<code>Span</code> ou <code>MutableSpan</code>) à partir d'une mémoire brute, après vérification de l'alignement et des limites.</li>
-<li><strong><code>bytes</code> / <code>mutableBytes</code></strong> : Propriétés permettant de passer d'une vue typée vers une vue brute pour manipuler la mémoire à bas niveau.</li>
-<li><strong><code>bitCast&lt;T, U&gt;</code></strong> : Permet de réinterpréter les bits d'un objet vers un autre type, à condition que les deux types aient la même représentation mémoire et respectent les protocoles de sécurité.</li>
-<li><strong>Sous-scripts <code>UInt8</code></strong> : Fournissent un accès simplifié et direct aux octets individuels au sein des spans.</li>
-</ul>
+<p>La fonction <code>bitCast</code> permet de réinterpréter les bits d'une instance vers un autre type de même taille, de manière sécurisée si les types respectent les protocoles de conversion.</p>
+<p>Cette proposition renforce la sécurité du langage en remplaçant les opérations de manipulation de mémoire non sécurisées par des abstractions typées et vérifiées. En introduisant les protocoles <code>ConvertibleToBytes</code> et <code>ConvertibleFromBytes</code>, Swift permet de distinguer clairement les types dont le layout mémoire est sans padding et ceux dont les représentations binaires sont toujours sémantiquement valides. Cela facilite le développement d'outils de parsing performants et l'échange de données entre processus tout en garantissant que les opérations de lecture et d'écriture respectent les limites de la mémoire allouée.</p>
 
   </div>
 </article>

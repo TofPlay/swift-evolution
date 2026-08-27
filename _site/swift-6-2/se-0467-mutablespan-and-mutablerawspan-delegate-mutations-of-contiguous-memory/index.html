@@ -120,7 +120,7 @@
     <h1>SE-0467 - MutableSpan and MutableRawSpan: delegate mutations of contiguous memory</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
-<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<h2 id="disponible-%C3%A0-part-de" tabindex="-1"><a href="#disponible-%C3%A0-part-de" class="header-anchor">Disponible à part de</a></h2>
 <p>Swift 6.2</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0467-MutableRawSpan.md">SE-0467 - MutableSpan and MutableRawSpan: delegate mutations of contiguous memory</a></p>
@@ -135,36 +135,66 @@
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0467" tabindex="-1"><a href="#avant-se-0467" class="header-anchor">Avant SE-0467</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">var</span> array <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">]</span>
-<span class="token comment">// La mutation nécessite une closure et un type unsafe qui peut s'échapper</span>
 array<span class="token punctuation">.</span>withUnsafeMutableBufferPointer <span class="token punctuation">{</span> buffer <span class="token keyword">in</span>
     buffer<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">10</span>
     buffer<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">20</span>
 <span class="token punctuation">}</span>
-<span class="token comment">// Le lien entre le buffer et l'array n'est pas strictement géré par le système de types pour la mutation</span>
 </code></pre>
 <p>L'utilisation de fonctions prenant des closures pour la mutation de la mémoire est difficile à composer et oblige souvent à travailler avec des types <code>Unsafe</code> qui ne garantissent pas intrinsèquement l'exclusivité de manière aussi robuste que les nouveaux types non-copiables.</p>
 <h3 id="apr%C3%A8s-se-0467" tabindex="-1"><a href="#apr%C3%A8s-se-0467" class="header-anchor">Après SE-0467</a></h3>
+<h4 id="acc%C3%A8s-et-mutation-de-base" tabindex="-1"><a href="#acc%C3%A8s-et-mutation-de-base" class="header-anchor">Accès et mutation de base</a></h4>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">var</span> array <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">]</span>
-
-<span class="token comment">// Accès via une propriété qui représente une mutation de l'instance</span>
 <span class="token keyword">var</span> ms <span class="token operator">=</span> array<span class="token punctuation">.</span>mutableSpan 
-
-<span class="token comment">// Utilisation directe avec sécurité</span>
 ms<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">10</span>
 ms<span class="token punctuation">.</span><span class="token function">swapAt</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
-
-<span class="token comment">// Découpage sécurisé (extraction)</span>
-<span class="token keyword">let</span> subSpan <span class="token operator">=</span> ms<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token operator">..&lt;</span><span class="token number">4</span><span class="token punctuation">)</span>
-subSpan<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">100</span>
-
-<span class="token comment">// Fin de la durée de vie de l'accès mutable</span>
 <span class="token omit keyword">_</span> <span class="token operator">=</span> consume ms
-<span class="token omit keyword">_</span> <span class="token operator">=</span> consume subSpan
-
-<span class="token comment">// L'accès à l'array d'origine est à nouveau autorisé ici</span>
-<span class="token function">print</span><span class="token punctuation">(</span>array<span class="token punctuation">)</span> 
 </code></pre>
-<p>La proposition résout le problème en introduisant des types qui capturent l'exclusivité de la mémoire. En utilisant des types <code>~Copyable</code>, le compilateur empêche l'accès simultané à l'objet d'origine (comme <code>array</code>) pendant que le <code>MutableSpan</code> est utilisé, garantissant ainsi une sécurité maximale contre les violations d'exclusivité sans dépendre uniquement de closures.</p>
+<p>L'utilisation de la propriété <code>mutableSpan</code> permet d'obtenir un accès mutable. Le fait de <code>consume</code> le <code>MutableSpan</code> indique explicitement la fin de la période de mutation exclusive, permettant ensuite de réutiliser <code>array</code>.</p>
+<h4 id="d%C3%A9coupage-d'un-mutablespan" tabindex="-1"><a href="#d%C3%A9coupage-d'un-mutablespan" class="header-anchor">Découpage d'un MutableSpan</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">var</span> array <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">]</span>
+<span class="token keyword">var</span> span1 <span class="token operator">=</span> array<span class="token punctuation">.</span>mutableSpan 
+<span class="token keyword">var</span> span2 <span class="token operator">=</span> span1<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token operator">..&lt;</span><span class="token number">5</span><span class="token punctuation">)</span> 
+
+span2<span class="token punctuation">.</span><span class="token function">swapAt</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span> 
+
+<span class="token omit keyword">_</span> <span class="token operator">=</span> consume span2
+span1<span class="token punctuation">.</span><span class="token function">swapAt</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span> 
+<span class="token omit keyword">_</span> <span class="token operator">=</span> consume span1
+<span class="token function">print</span><span class="token punctuation">(</span>array<span class="token punctuation">)</span> <span class="token comment">// [2, 1, 3, 5, 4]</span>
+</code></pre>
+<p>La méthode <code>extracting</code> permet de créer un sous-ensemble de la mémoire. L'exclusivité est transférée au sous-segment : tant que <code>span2</code> existe, l'accès à <code>span1</code> ou <code>array</code> est interdit.</p>
+<h4 id="acc%C3%A8s-non-v%C3%A9rifi%C3%A9-(unchecked)-pour-la-performance" tabindex="-1"><a href="#acc%C3%A8s-non-v%C3%A9rifi%C3%A9-(unchecked)-pour-la-performance" class="header-anchor">Accès non vérifié (Unchecked) pour la performance</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Accès au subscript sans vérification des bornes</span>
+ms<span class="token punctuation">[</span>unchecked<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">]</span>
+
+<span class="token comment">// Swap sans vérification des bornes</span>
+ms<span class="token punctuation">.</span><span class="token function">swapAt</span><span class="token punctuation">(</span>unchecked<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span> unchecked<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Extraction sans vérification des bornes</span>
+<span class="token keyword">let</span> sub <span class="token operator">=</span> ms<span class="token punctuation">.</span><span class="token function">extracting</span><span class="token punctuation">(</span>unchecked<span class="token punctuation">:</span> <span class="token number">1</span><span class="token operator">..&lt;</span><span class="token number">3</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Pour les algorithmes haute performance où les bornes sont déjà validées, des versions <code>unchecked</code> permettent d'éviter le coût du <em>bounds checking</em>.</p>
+<h4 id="interop%C3%A9rabilit%C3%A9-avec-le-code-unsafe" tabindex="-1"><a href="#interop%C3%A9rabilit%C3%A9-avec-le-code-unsafe" class="header-anchor">Interopérabilité avec le code unsafe</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">modify</span><span class="token operator">&lt;</span><span class="token class-name">E</span><span class="token punctuation">:</span> <span class="token class-name">Error</span><span class="token punctuation">,</span> <span class="token class-name">Result</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>
+    <span class="token omit keyword">_</span> body<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token omit keyword">_</span> buffer<span class="token punctuation">:</span> <span class="token class-name">UnsafeMutableBufferPointer</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token keyword">throws</span><span class="token punctuation">(</span><span class="token class-name">E</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Result</span>
+<span class="token punctuation">)</span> <span class="token keyword">throws</span><span class="token punctuation">(</span><span class="token class-name">E</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
+
+<span class="token comment">// Utilisation du pont vers l'ancien système</span>
+<span class="token keyword">var</span> ms <span class="token operator">=</span> array<span class="token punctuation">.</span>mutableSpan
+ms<span class="token punctuation">.</span>withUnsafeMutableBufferPointer <span class="token punctuation">{</span> buffer <span class="token keyword">in</span>
+    <span class="token comment">// Utilisation de l'API unsafe traditionnelle</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Il est possible de passer de la nouvelle API sécurisée vers les anciens types <code>UnsafeMutableBufferPointer</code> pour assurer une transition fluide.</p>
+<h4 id="mutation-de-m%C3%A9moire-brute-avec-mutablerawspan" tabindex="-1"><a href="#mutation-de-m%C3%A9moire-brute-avec-mutablerawspan" class="header-anchor">Mutation de mémoire brute avec MutableRawSpan</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">var</span> ms <span class="token operator">=</span> array<span class="token punctuation">.</span>mutableSpan
+<span class="token comment">// Accès aux octets bruts si l'élément est BitwiseCopyable</span>
+<span class="token keyword">var</span> bytes <span class="token operator">=</span> ms<span class="token punctuation">.</span>mutableBytes
+bytes<span class="token punctuation">.</span><span class="token function">storeBytes</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> <span class="token number">42</span><span class="token punctuation">,</span> toByteOffset<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">)</span>
+<span class="token omit keyword">_</span> <span class="token operator">=</span> consume bytes
+</code></pre>
+<p>Si le type est <code>BitwiseCopyable</code>, on peut accéder à la vue brute (<code>MutableRawSpan</code>) pour manipuler directement les octets, ce qui est utile pour l'encodage de données.</p>
+<p>Ce SE apporte une alternative sûre, composable et moderne aux fonctions de mutation de mémoire basées sur des closures. En utilisant les types non-copiables, Swift permet de déléguer la gestion de la mutation de la mémoire à des types dédiés qui intègrent nativement les règles d'exclusivité du langage. Cela élimine le besoin de recourir systématiquement à des blocs de code complexes et permet une gestion fine du cycle de vie de la mémoire, rendant le code plus lisible et moins sujet aux erreurs de corruption de données.</p>
 
   </div>
 </article>
