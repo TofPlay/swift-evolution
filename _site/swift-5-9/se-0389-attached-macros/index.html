@@ -154,7 +154,6 @@
 <p>Le développement d'une version utilisant des callbacks (completion handler) nécessite la réécriture manuelle de la fonction, augmentant le risque d'erreur.</p>
 <h3 id="apr%C3%A8s-se-0389" tabindex="-1"><a href="#apr%C3%A8s-se-0389" class="header-anchor">Après SE-0389</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// La définition du macro</span>
-
 <span class="token attribute atrule">@attached</span><span class="token punctuation">(</span>peer<span class="token punctuation">,</span> names<span class="token punctuation">:</span> overloaded<span class="token punctuation">)</span>
 <span class="token keyword">public</span> macro <span class="token class-name">AddAsync</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyMacros"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"AddAsyncMacro"</span></span><span class="token punctuation">)</span>
 </code></pre>
