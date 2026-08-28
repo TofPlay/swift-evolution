@@ -125,9 +125,8 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0440-debug-description-macro.md">SE-0440 - DebugDescription Macro</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>La proposition introduit la macro <code>@DebugDescription</code>, destinée à améliorer l'expérience de débogage en permettant aux types de spécifier un résumé personnalisé directement utilisable par le debugger (LLDB).</p>
-<p>L'affichage d'un résumé personnalisé via la commande <code>po</code> dans le terminal du debugger nécessite une évaluation d'expression, ce qui est lent et peut causer des effets secondaires. À l'inverse, les interfaces graphiques des IDE (comme Xcode) utilisent la réflexion, laquelle ne permet pas d'exécuter du code personnalisé.</p>
-<p>La macro <code>@DebugDescription</code> résout ce problème en convertissant une implémentation <code>debugDescription</code> (écrite en Swift) en un "LLDB Summary String" (un format de texte simple que le debugger peut lire sans exécuter de code). Pour que cela fonctionne, la propriété utilisée doit se limiter à une seule expression de concaténation de chaînes utilisant uniquement l'interpolation de <code>stored properties</code>, sans appels de fonctions ou calculs complexes.</p>
+<p>La proposition introduit la macro <code>@DebugDescription</code>, destinée à la bibliothèque standard, pour permettre aux types de spécifier un résumé personnalisé lisible par le debugger. Cette macro traduit les implémentations de <code>debugDescription</code> (conforme à <code>CustomDebugStringConvertible</code>) ou <code>description</code> en "LLDB Summary Strings".</p>
+<p>L'avantage technique majeur est de permettre au debugger (comme LLDB) d'afficher des résumés personnalisés dans l'interface utilisateur (Variable View) sans avoir recours à l'évaluation d'expressions (expression evaluation). L'évaluation d'expressions dans un debugger peut entraîner des effets de bord, une instabilité ou une consommation de ressources importante car elle nécessite une compilation JIT et une exécution dans le contexte de l'application. La macro exige que l'expression de la propriété soit une simple interpolation de chaînes faisant référence uniquement à des <code>stored properties</code>, garantissant ainsi la compatibilité avec la syntaxe de résumé de LLDB qui ne permet pas l'appel de fonctions ou de <code>computed properties</code>.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0440" tabindex="-1"><a href="#avant-se-0440" class="header-anchor">Avant SE-0440</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">Organization</span><span class="token punctuation">:</span> <span class="token class-name">CustomDebugStringConvertible</span> <span class="token punctuation">{</span>
@@ -141,7 +140,7 @@
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'affichage via la commande <code>po</code> dans la console fonctionne car il exécute du code, mais l'affichage dans la vue "Variables" de l'IDE reste une arborescence complexe et verbeuse de toutes les propriétés, car l'interface ne peut pas exécuter la logique de <code>debugDescription</code>.</p>
+<p>L'utilisation de <code>CustomDebugStringConvertible</code> permet de définir une chaîne via la propriété <code>debugDescription</code>. Cependant, le debugger ne peut utiliser cette propriété que via la commande <code>po</code> dans la console (ce qui déclenche une évaluation d'expression). Dans la vue des variables de l'IDE, le debugger affiche une structure d'arbre exhaustive (tree of properties), ce qui est peu pratique pour des types complexes ou de grande taille.</p>
 <h3 id="apr%C3%A8s-se-0440" tabindex="-1"><a href="#apr%C3%A8s-se-0440" class="header-anchor">Après SE-0440</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@DebugDescription</span>
 <span class="token keyword">struct</span> <span class="token class-name">Organization</span><span class="token punctuation">:</span> <span class="token class-name">CustomDebugStringConvertible</span> <span class="token punctuation">{</span>
@@ -154,17 +153,12 @@
         <span class="token string-literal"><span class="token string">"#</span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">id</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string"> </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">name</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string"> (</span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">manager<span class="token punctuation">.</span>name</span><span class="token interpolation-punctuation punctuation">)</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
+
+<span class="token comment">// L'expansion de la macro génère un attribut de membre pour le debugger</span>
+<span class="token comment">// formatée pour LLDB comme suit (exemple conceptuel) :</span>
+<span class="token comment">// #$var.id $var.name ($var.manager.name)</span>
 </code></pre>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le macro génère une extension contenant une propriété statique </span>
-<span class="token comment">// compatible avec le format de résumé de LLDB.</span>
-<span class="token comment">// lldb_summary: "#${var.id} ${var.name} (${var.manager.name})"</span>
-</code></pre>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation</span>
-<span class="token keyword">let</span> org <span class="token operator">=</span> <span class="token class-name">Organization</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"15"</span></span><span class="token punctuation">,</span> name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Shipping"</span></span><span class="token punctuation">,</span> manager<span class="token punctuation">:</span> <span class="token class-name">Person</span><span class="token punctuation">(</span>name<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"Francis"</span></span><span class="token punctuation">)</span><span class="token punctuation">,</span> members<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-<span class="token comment">// Dans l'interface du debugger (Variable View), l'objet s'affiche désormais </span>
-<span class="token comment">// directement comme : "#15 Shipping (Francis)" au lieu de l'arbre complet.</span>
-</code></pre>
-<p>La macro <code>@DebugDescription</code> automatise la création de métadonnées pour le debugger. Elle extrait les propriétés utilisées dans la chaîne de caractères via l'interpolation et les transforme en une syntaxe de résumé que LLDB peut interpréter nativement sans avoir besoin de compiler ou d'exécuter du code Swift au moment du débogage. Cela permet une inspection rapide, sûre et visuelle directement dans l'interface de l'IDE.</p>
+<p>La macro <code>@DebugDescription</code> génère automatiquement une métadonnologie dans le binaire que LLDB peut charger directement. Cela permet au debugger d'afficher le résumé personnalisé (ex: "#15 Shipping (Francis Carlson)") directement dans l'interface utilisateur sans exécuter de code, de manière sécurisée et performante.</p>
 
   </div>
 </article>
