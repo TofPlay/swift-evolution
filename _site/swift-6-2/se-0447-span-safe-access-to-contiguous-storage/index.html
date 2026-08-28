@@ -137,56 +137,42 @@ data<span class="token punctuation">.</span>withUnsafeBufferPointer <span class=
 </code></pre>
 <p>L'accès à la mémoire contiguë nécessite l'utilisation de closures (<code>withUnsafeBufferPointer</code>) pour limiter la durée de vie du pointeur, ce qui peut être verbeux. De plus, l'usage de types unsafe peut entraîner des erreurs de sécurité mémoire si le pointeur s'échappe de la closure.</p>
 <h3 id="apr%C3%A8s-se-0447" tabindex="-1"><a href="#apr%C3%A8s-se-0447" class="header-anchor">Après SE-0447</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Accès aux éléments via Span</span>
-<span class="token keyword">let</span> array <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">]</span>
+<h4 id="acc%C3%A8s-basique-et-s%C3%A9curis%C3%A9" tabindex="-1"><a href="#acc%C3%A8s-basique-et-s%C3%A9curis%C3%A9" class="header-anchor">Accès basique et sécurisé</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> array <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">]</span>
 <span class="token keyword">let</span> span <span class="token operator">=</span> array<span class="token punctuation">.</span>span 
 <span class="token keyword">let</span> element <span class="token operator">=</span> span<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> 
 <span class="token keyword">let</span> elementUnsafe <span class="token operator">=</span> span<span class="token punctuation">[</span>unchecked<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">]</span>
 </code></pre>
-<ul>
-<li><code>span[index]</code> : Accès sécurisé avec vérification systématique des limites (bounds-checking).</li>
-<li><code>span[unchecked: index]</code> : Accès haute performance sans vérification des limites, pour les boucles critiques.</li>
-</ul>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Comparaison et identification de sous-ranges</span>
-<span class="token keyword">let</span> span1 <span class="token operator">=</span> <span class="token operator">...</span>
+<p>L'accès via l'indice standard <code>span[index]</code> effectue une vérification systématique des limites pour éviter les dépassements de mémoire. L'utilisation de l'indice <code>unchecked</code> permet de s'affranchir de cette vérification pour des raisons de performance dans des boucles extrêmement serrées, à condition que l'index soit garanti valide.</p>
+<h4 id="identification-de-sous-ranges" tabindex="-1"><a href="#identification-de-sous-ranges" class="header-anchor">Identification de sous-ranges</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> span1 <span class="token operator">=</span> <span class="token operator">...</span>
 <span class="token keyword">let</span> span2 <span class="token operator">=</span> <span class="token operator">...</span>
 <span class="token keyword">let</span> isSame <span class="token operator">=</span> span1<span class="token punctuation">.</span><span class="token function">isIdentical</span><span class="token punctuation">(</span>to<span class="token punctuation">:</span> span2<span class="token punctuation">)</span>
 <span class="token keyword">let</span> overlappingRange <span class="token operator">=</span> span1<span class="token punctuation">.</span><span class="token function">indices</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> span2<span class="token punctuation">)</span>
 </code></pre>
-<ul>
-<li><code>isIdentical(to:)</code> : Vérifie si deux <code>Span</code> représentent exactement la même région mémoire.</li>
-<li><code>indices(of:)</code> : Retourne l'intervalle d'indices de la mémoire dans le Span d'origine si le second est un sous-ensemble du premier.</li>
-</ul>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Interopérabilité avec le code unsafe</span>
-span<span class="token punctuation">.</span>withUnsafeBufferPointer <span class="token punctuation">{</span> buffer <span class="token keyword">in</span>
+<p>La méthode <code>isIdentical(to:)</code> permet de savoir si deux instances de <code>Span</code> pointent vers exactement la même zone mémoire. <code>indices(of:)</code> est crucial pour déterminer où un sous-ensemble de mémoire (le second span) se situe par rapport au span d'origine.</p>
+<h4 id="interop%C3%A9rabilit%C3%A9-avec-l'api-unsafe" tabindex="-1"><a href="#interop%C3%A9rabilit%C3%A9-avec-l'api-unsafe" class="header-anchor">Interopérabilité avec l'API Unsafe</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift">span<span class="token punctuation">.</span>withUnsafeBufferPointer <span class="token punctuation">{</span> buffer <span class="token keyword">in</span>
     <span class="token comment">// Accès via UnsafeBufferPointer traditionnel</span>
 <span class="token punctuation">}</span>
 span<span class="token punctuation">.</span>withUnsafeBytes <span class="token punctuation">{</span> buffer <span class="token keyword">in</span>
     <span class="token comment">// Accès via UnsafeRawBufferPointer pour les types BitwiseCopyable</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<ul>
-<li><code>withUnsafeBufferPointer</code> : Permet de passer temporairement du type <code>Span</code> vers l'API unsafe existante.</li>
-<li><code>withUnsafeBytes</code> : Permet d'accéder aux octets bruts pour les types <code>BitwiseCopyable</code>.</li>
-</ul>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de RawSpan pour le parsing</span>
-<span class="token keyword">let</span> rawSpan<span class="token punctuation">:</span> <span class="token class-name">RawSpan</span> <span class="token operator">=</span> <span class="token operator">...</span>
+<p>Ces méthodes permettent de faire le pont avec l'écosystème Swift existant. <code>withUnsafeBufferPointer</code> fournit un accès typé via <code>UnsafeBufferPointer</code>, tandis que <code>withUnsafeBytes</code> permet d'accéder aux octets bruts via <code>UnsafeRawBufferPointer</code> pour les types supportant la copie bit à bit.</p>
+<h4 id="chargement-de-donn%C3%A9es-brutes-avec-rawspan" tabindex="-1"><a href="#chargement-de-donn%C3%A9es-brutes-avec-rawspan" class="header-anchor">Chargement de données brutes avec RawSpan</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> rawSpan<span class="token punctuation">:</span> <span class="token class-name">RawSpan</span> <span class="token operator">=</span> <span class="token operator">...</span>
 <span class="token keyword">let</span> value <span class="token operator">=</span> rawSpan<span class="token punctuation">.</span><span class="token function">unsafeLoad</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">UInt32</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
 <span class="token keyword">let</span> valueUnaligned <span class="token operator">=</span> rawSpan<span class="token punctuation">.</span><span class="token function">unsafeLoadUnaligned</span><span class="token punctuation">(</span><span class="token keyword">as</span><span class="token punctuation">:</span> <span class="token class-name">UInt32</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
 </code></pre>
-<ul>
-<li><code>unsafeLoad(as:)</code> : Charge un type à partir de la mémoire (nécessite un alignement correct).</li>
-<li><code>unsafeLoadUnaligned(as:)</code> : Charge un type même si l'adresse mémoire n'est pas alignée sur la taille du type.</li>
-</ul>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Parsing avancé avec Cursor</span>
-<span class="token keyword">var</span> cursor <span class="token operator">=</span> <span class="token class-name">Cursor</span><span class="token punctuation">(</span>base<span class="token punctuation">:</span> rawSpan<span class="token punctuation">)</span>
+<p><code>RawSpan</code> est utilisé pour interpréter des octets bruts comme des types Swift. <code>unsafeLoad(as:)</code> suppose que la mémoire est correctement alignée pour le type demandé, tandis que <code>unsafeLoadUnaligned(as:)</code> permet de lire des données même si leur adresse ne respecte pas les contraintes d'alignement du type.</p>
+<h4 id="parsing-avec-cursor" tabindex="-1"><a href="#parsing-avec-cursor" class="header-anchor">Parsing avec Cursor</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">var</span> cursor <span class="token operator">=</span> <span class="token class-name">Cursor</span><span class="token punctuation">(</span>base<span class="token punctuation">:</span> rawSpan<span class="token punctuation">)</span>
 <span class="token keyword">let</span> length <span class="token operator">=</span> <span class="token keyword">try</span> cursor<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token class-name">UInt32</span><span class="token punctuation">.</span><span class="token keyword">self</span><span class="token punctuation">)</span>
 <span class="token keyword">let</span> data <span class="token operator">=</span> <span class="token keyword">try</span> cursor<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>numBytes<span class="token punctuation">:</span> length<span class="token punctuation">)</span>
 </code></pre>
-<ul>
-<li><code>parse&lt;T&gt;()</code> : Lit un type <code>T</code> et avance automatiquement la position du curseur.</li>
-<li><code>parse(numBytes:)</code> : Avance le curseur d'un nombre spécifique d'octets.</li>
-</ul>
+<p>L'objet <code>Cursor</code> facilite le parsing séquentiel. La méthode <code>parse&lt;T&gt;()</code> lit une valeur et déplace le curseur vers l'élément suivant, tandis que <code>parse(numBytes:)</code> permet de sauter une section précise de la mémoire pour avancer dans le flux de données.</p>
+<p>L'introduction de <code>Span</code> et <code>RawSpan</code> résout le problème de l'interface entre les bibliothèques de traitement de données. En offrant une alternative sûre et non-échappable aux pointeurs bruts, Swift permet d'écrire du code de haute performance (similaire au C++) tout en maintenant les garanties de sécurité mémoire (bounds-checking, type-safety). Cela élimine le besoin de passer par des types coûteux comme <code>Array</code> pour de simples opérations de lecture, tout en évitant la complexité et le danger des APIs <code>Unsafe</code> traditionnelles.</p>
 
   </div>
 </article>
