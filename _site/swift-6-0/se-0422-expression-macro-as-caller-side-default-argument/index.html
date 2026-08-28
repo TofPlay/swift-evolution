@@ -150,46 +150,31 @@
 <h3 id="apr%C3%A8s-se-0422" tabindex="-1"><a href="#apr%C3%A8s-se-0422" class="header-anchor">Après SE-0422</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Définition du macro</span>
 <span class="token attribute atrule">@freestanding</span><span class="token punctuation">(</span>expression<span class="token punctuation">)</span>
-macro <span class="token class-name">MyFileID</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token punctuation">:</span> <span class="token class-name">ExpressibleByStringLiteral</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">T</span> <span class="token operator">=</span> <span class="token operator">...</span>
+macro <span class="token class-name">MyFileID</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token punctuation">:</span> <span class="token class-name">ExpressibleByStringLiteral</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">T</span> <span class="token operator">=</span> <span class="token other-directive property">#externalMacro</span><span class="token punctuation">(</span>module<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyMacros"</span></span><span class="token punctuation">,</span> type<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"MyFileIDMacro"</span></span><span class="token punctuation">)</span>
 </code></pre>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Implémentation du macro</span>
+<span class="token keyword">import</span> <span class="token class-name">SwiftSyntax</span>
+<span class="token keyword">import</span> <span class="token class-name">SwiftSyntaxMacros</span>
+
 <span class="token keyword">public</span> <span class="token keyword">struct</span> <span class="token class-name">MyFileIDMacro</span><span class="token punctuation">:</span> <span class="token class-name">ExpressionMacro</span> <span class="token punctuation">{</span>
     <span class="token keyword">public</span> <span class="token keyword">static</span> <span class="token keyword">func</span> <span class="token function-definition function">expansion</span><span class="token punctuation">(</span>
         of node<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">FreestandingMacroExpansionSyntax</span><span class="token punctuation">,</span>
         <span class="token keyword">in</span> context<span class="token punctuation">:</span> <span class="token keyword">some</span> <span class="token class-name">MacroExpansionContext</span>
-    <span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">ExprSyntax</span> <span class="token punctuation">{</span>
-        context<span class="token punctuation">.</span><span class="token function">location</span><span class="token punctuation">(</span>
-            of<span class="token punctuation">:</span> node<span class="token punctuation">,</span>
-            at<span class="token punctuation">:</span> <span class="token punctuation">.</span>afterLeadingTrivia<span class="token punctuation">,</span>
-            filePathMode<span class="token punctuation">:</span> <span class="token punctuation">.</span>fileID
-        <span class="token punctuation">)</span><span class="token operator">!</span><span class="token punctuation">.</span>file
+    <span class="token punctuation">)</span> <span class="token keyword">throws</span> <span class="token operator">-&gt;</span> <span class="token class-name">ExprSyntax</span> <span class="token punctuation">{</span>
+        context<span class="token punctuation">.</span><span class="token function">location</span><span class="token punctuation">(</span>of<span class="token punctuation">:</span> node<span class="token punctuation">,</span> at<span class="token punctuation">:</span> <span class="token punctuation">.</span>afterLeadingTrivia<span class="token punctuation">,</span> filePathMode<span class="token punctuation">:</span> <span class="token punctuation">.</span>fileID<span class="token punctuation">)</span><span class="token operator">!</span><span class="token punctuation">.</span>file
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation du macro</span>
 <span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">callSiteFile</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> file<span class="token punctuation">:</span> <span class="token class-name">String</span> <span class="token operator">=</span> <span class="token other-directive property">#MyFileID</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    file
+    <span class="token function">print</span><span class="token punctuation">(</span>file<span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 
-<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">declarationSiteFile</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> file<span class="token punctuation">:</span> <span class="token class-name">String</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token other-directive property">#MyFileID</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    file
-<span class="token punctuation">}</span>
-
-<span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">alsoDeclarationSiteFile</span><span class="token punctuation">(</span>
-    file<span class="token punctuation">:</span> <span class="token class-name">String</span> <span class="token operator">=</span> <span class="token function">callSiteFile</span><span class="token punctuation">(</span><span class="token other-directive property">#MyFileID</span><span class="token punctuation">)</span>
-<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    file
-<span class="token punctuation">}</span>
-
-<span class="token comment">// in main.swift</span>
-<span class="token function">print</span><span class="token punctuation">(</span><span class="token function">callSiteFile</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> 
-<span class="token function">print</span><span class="token punctuation">(</span><span class="token function">declarationSiteFile</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-<span class="token function">print</span><span class="token punctuation">(</span><span class="token function">alsoDeclarationSiteFile</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// Dans main.swift</span>
+<span class="token function">callSiteFile</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 </code></pre>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Code généré par la macro (Expansion)</span>
-<span class="token comment">// print("main.swift") </span>
-<span class="token comment">// print("MyLibrary.swift")</span>
-<span class="token comment">// print("MyLibrary.swift")</span>
+<span class="token function">callSiteFile</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"main.swift"</span></span><span class="token punctuation">)</span>
 </code></pre>
 <p>La proposition permet aux macros d'expression d'être utilisées comme arguments par défaut. Si la macro est utilisée directement comme argument (<code>callSiteFile()</code>), elle est expansée au niveau de l'appelant (ex: "main.swift"). Si elle est utilisée comme sous-expression (<code>declarationSiteFile()</code>), elle est expansée au niveau de la déclaration (ex: "MyLibrary.swift").</p>
 
