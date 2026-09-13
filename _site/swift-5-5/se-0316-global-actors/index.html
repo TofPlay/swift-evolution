@@ -120,15 +120,15 @@
     <h1>SE-0316 - Global actors</h1>
 <h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
 <p>LM Studio/Gemma 4</p>
-<h2 id="disponible-%C3%A0-partir" tabindex="-1"><a href="#disponible-%C3%A0-partir" class="header-anchor">Disponible à partir</a></h2>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
 <p>Swift 5.5</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0316-global-actors.md">SE-0316 - Global actors</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
 <p>La proposition introduit les <code>global actors</code>, qui étendent l'isolation des <code>actor</code> au-delà d'une instance unique pour couvrir l'état global du programme. Un <code>global actor</code> est un type unique identifié par un attribut (comme <code>@MainActor</code>) qui permet de synchroniser l'accès à des fonctions, des variables ou des types entiers, même lorsqu'ils sont dispersés dans différents modules. Techniquement, un type est un <code>global actor</code> s'il possède l'attribut <code>@globalActor</code> et contient une propriété <code>static let shared</code> renvoyant une instance de type <code>actor</code>. Le mécanisme garantit que tout accès synchrone est restreint au même <code>global actor</code>, tandis que les accès depuis d'autres contextes nécessitent un appel <code>async</code> avec un "hop" (saut) vers l'acteur concerné.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
-<h3 id="isolement-des-variables-et-fonctions-globales" tabindex="-1"><a href="#isolement-des-variables-et-fonctions-globales" class="header-anchor"><strong>Isolement des variables et fonctions globales</strong></a></h3>
-<h4 id="avant-se-0316" tabindex="-1"><a href="#avant-se-0316" class="header-anchor"><strong>Avant SE-0316</strong></a></h4>
+<h3 id="isolement-des-variables-et-fonctions-globales" tabindex="-1"><a href="#isolement-des-variables-et-fonctions-globales" class="header-anchor">Isolement des variables et fonctions globales</a></h3>
+<h4 id="avant-se-0316" tabindex="-1"><a href="#avant-se-0316" class="header-anchor">Avant SE-0316</a></h4>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// État de base sans isolation de l'état global</span>
 <span class="token keyword">var</span> globalCounter <span class="token operator">=</span> <span class="token number">0</span>
 
@@ -141,7 +141,7 @@
 <span class="token punctuation">}</span>
 </code></pre>
 <p>L'absence d'isolation sur les variables globales et statiques expose le programme à des <code>data races</code> si plusieurs threads tentent d'accéder ou de modifier ces données simultanément.</p>
-<h4 id="apr%C3%A8s-se-0316" tabindex="-1"><a href="#apr%C3%A8s-se-0316" class="header-anchor"><strong>Après SE-0316</strong></a></h4>
+<h4 id="apr%C3%A8s-se-0316" tabindex="-1"><a href="#apr%C3%A8s-se-0316" class="header-anchor">Après SE-0316</a></h4>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@globalActor</span>
 <span class="token keyword">struct</span> <span class="token class-name">MyGlobalActor</span> <span class="token punctuation">{</span>
     <span class="token keyword">actor</span> <span class="token class-name">MyActor</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
@@ -166,8 +166,8 @@
 <span class="token punctuation">}</span>
 </code></pre>
 <p>La proposition permet de définir un attribut personnalisé qui isole les déclarations à un <code>actor</code> unique et partagé. L'utilisation de <code>@MyGlobalActor</code> garantit que l'accès à <code>globalCounter</code> et <code>increment()</code> est synchronisé via l'instance <code>shared</code>, transformant les accès potentiellement dangereux en appels sécurisés et vérifiés par le compilateur.</p>
-<h3 id="isolement-des-types-et-des-classes" tabindex="-1"><a href="#isolement-des-types-et-des-classes" class="header-anchor"><strong>Isolement des types et des classes</strong></a></h3>
-<h4 id="avant-se-0316-1" tabindex="-1"><a href="#avant-se-0316-1" class="header-anchor"><strong>Avant SE-0316</strong></a></h4>
+<h3 id="isolement-des-types-et-des-classes" tabindex="-1"><a href="#isolement-des-types-et-des-classes" class="header-anchor">Isolement des types et des classes</a></h3>
+<h4 id="avant-se-0316-1" tabindex="-1"><a href="#avant-se-0316-1" class="header-anchor">Avant SE-0316</a></h4>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">class</span> <span class="token class-name">IconViewController</span> <span class="token punctuation">{</span>
     <span class="token keyword">var</span> icons<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token class-name">String</span><span class="token punctuation">:</span> <span class="token keyword">Any</span><span class="token punctuation">]</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
     
@@ -177,7 +177,7 @@
 <span class="token punctuation">}</span>
 </code></pre>
 <p>Les propriétés et méthodes d'une <code>class</code> sont accessibles depuis n'importe quel contexte, ce qui oblige le développeur à gérer manuellement la synchronisation (via des <code>DispatchQueue</code> par exemple) pour éviter les conflits lors des mises à jour d'interface.</p>
-<h4 id="apr%C3%A8s-se-0316-1" tabindex="-1"><a href="#apr%C3%A8s-se-0316-1" class="header-anchor"><strong>Après SE-0316</strong></a></h4>
+<h4 id="apr%C3%A8s-se-0316-1" tabindex="-1"><a href="#apr%C3%A8s-se-0316-1" class="header-anchor">Après SE-0316</a></h4>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@MainActor</span>
 <span class="token keyword">class</span> <span class="token class-name">IconViewController</span> <span class="token punctuation">{</span>
     <span class="token keyword">var</span> icons<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token class-name">String</span><span class="token punctuation">:</span> <span class="token keyword">Any</span><span class="token punctuation">]</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
@@ -192,8 +192,8 @@
 <span class="token punctuation">}</span>
 </code></pre>
 <p>L'application de <code>@MainActor</code> sur une <code>class</code> propage l'isolation à toutes ses propriétés et méthodes par défaut. Cela garantit que l'objet et ses membres sont toujours manipulés sur le thread principal. La possibilité d'utiliser <code>nonisolated</code> permet d'excepter certaines méthodes de cette règle si elles n'ont pas besoin de protection.</p>
-<h3 id="utilisation-des-closures" tabindex="-1"><a href="#utilisation-des-closures" class="header-anchor"><strong>Utilisation des closures</strong></a></h3>
-<h4 id="avant-se-0316-1-1" tabindex="-1"><a href="#avant-se-0316-1-1" class="header-anchor"><strong>Avant SE-0316</strong></a></h4>
+<h3 id="utilisation-des-closures" tabindex="-1"><a href="#utilisation-des-closures" class="header-anchor">Utilisation des closures</a></h3>
+<h4 id="avant-se-0316-1-1" tabindex="-1"><a href="#avant-se-0316-1-1" class="header-anchor">Avant SE-0316</a></h4>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">performWork</span><span class="token punctuation">(</span>completion<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token function">completion</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
@@ -206,7 +206,7 @@ performWork <span class="token punctuation">{</span> value <span class="token ke
 <span class="token punctuation">}</span>
 </code></pre>
 <p>Le développeur doit explicitement utiliser des mécanismes de dispatching pour s'assurer qu'une closure s'exécute dans un contexte spécifique, ce qui augmente la complexité et le risque d'erreur.</p>
-<h4 id="apr%C3%A8s-se-0316-1-1" tabindex="-1"><a href="#apr%C3%A8s-se-0316-1-1" class="header-anchor"><strong>Après SE-0316</strong></a></h4>
+<h4 id="apr%C3%A8s-se-0316-1-1" tabindex="-1"><a href="#apr%C3%A8s-se-0316-1-1" class="header-anchor">Après SE-0316</a></h4>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">performWork</span><span class="token punctuation">(</span>completion<span class="token punctuation">:</span> <span class="token attribute atrule">@MainActor</span> <span class="token punctuation">(</span><span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token class-name">Task</span> <span class="token punctuation">{</span>
         <span class="token function">completion</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">)</span>
