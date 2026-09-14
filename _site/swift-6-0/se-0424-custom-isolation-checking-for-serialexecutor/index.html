@@ -131,14 +131,14 @@
 <li>Il tente d'identifier l'exécuteur via le stockage local de la <code>Task</code> (thread-local storage).</li>
 <li>Si cette identification échoue (par exemple, si le code s'exécute sur une file d'attente <code>DispatchQueue</code> sans être lié à une <code>Task</code> Swift), le runtime appelle la méthode <code>checkIsolated()</code> de l'exécuteur attendu comme ultime recours.</li>
 </ol>
-<p>Cette amélioration permet une migration plus fluide du code utilisant <code>DispatchQueue</code> vers le modèle de concurrence Swift, en permettant aux types comme <code>DispatchSerialQueue</code> de prouver leur isolation sans nécessiter une réécriture complète vers des <code>Task</code>.</p>
+<p>Cette amélioration permet une migration plus fluide du code utilisant <code>DispatchQueue</code> vers le modèle de concurrence Swift, en permettant à des types comme <code>DispatchSerialQueue</code> de prouver leur isolation sans nécessiter une réécriture complète vers des <code>Task</code>.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0424" tabindex="-1"><a href="#avant-se-0424" class="header-anchor">Avant SE-0424</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">Dispatch</span>
 
 <span class="token keyword">actor</span> <span class="token class-name">Caplin</span> <span class="token punctuation">{</span>
     <span class="token keyword">let</span> queue<span class="token punctuation">:</span> <span class="token class-name">DispatchSerialQueue</span> <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token keyword">init</span><span class="token punctuation">(</span>label<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"CoolQueue"</span></span><span class="token punctuation">)</span>
-    <span class="token keyword">var</span> num<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token comment">// état isolé de l'actor</span>
+    <span class="token keyword">var</span> num<span class="token punctuation">:</span> <span class="token class-name">Int</span> 
     
     <span class="token keyword">nonisolated</span> <span class="token keyword">var</span> unownedExecutor<span class="token punctuation">:</span> <span class="token class-name">UnownedSerialExecutor</span> <span class="token punctuation">{</span>
         queue<span class="token punctuation">.</span><span class="token function">asUnownedExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -160,36 +160,81 @@
 <p>L'utilisation d'un exécuteur personnalisé comme une <code>DispatchQueue</code> pour gérer l'isolation d'un <code>actor</code> pose problème car le runtime Swift ne peut pas vérifier l'isolation si le code est exécuté via des API non liées à Swift Concurrency (comme <code>queue.async</code>). Les fonctions de sécurité comme <code>assumeIsolated</code> échouent car elles ne voient pas de <code>Task</code> en cours, même si le code est séquentiellement exécuté sur le bon thread.</p>
 <h3 id="apr%C3%A8s-se-0424" tabindex="-1"><a href="#apr%C3%A8s-se-0424" class="header-anchor">Après SE-0424</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">Dispatch</span>
+<span class="token keyword">import</span> <span class="token class-name">Foundation</span>
 
-<span class="token comment">// Extension pour permettre à DispatchSerialQueue de répondre à la vérification</span>
-<span class="token keyword">extension</span> <span class="token class-name">DispatchSerialQueue</span> <span class="token punctuation">{</span>
-    <span class="token keyword">public</span> <span class="token keyword">func</span> <span class="token function-definition function">checkIsolated</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment">// Utilise l'API système pour vérifier si on est bien sur la queue</span>
-        <span class="token function">dispatchPrecondition</span><span class="token punctuation">(</span>condition<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token function">onQueue</span><span class="token punctuation">(</span><span class="token keyword">self</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// Définition de SerialExecutor</span>
+<span class="token keyword">protocol</span> <span class="token class-name">SerialExecutor</span> <span class="token punctuation">:</span> <span class="token class-name">Executor</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Méthode principale de SE-0424</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">checkIsolated</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    
+    <span class="token comment">// Méthodes déjà présentes (SE-0392 + évolutions)</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">enqueue</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> job<span class="token punctuation">:</span> consuming <span class="token class-name">ExecutorJob</span><span class="token punctuation">)</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">asUnownedSerialExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">UnownedSerialExecutor</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">isSameExclusiveExecutionContext</span><span class="token punctuation">(</span>other<span class="token punctuation">:</span> <span class="token keyword">Self</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Bool</span>
+    
+    <span class="token comment">// Ajouté plus tard (SE-0471) – optionnel mais recommandé</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">isIsolatingCurrentContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Bool</span><span class="token operator">?</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// 1. Implémentation du custom SerialExecutor</span>
+<span class="token keyword">final</span> <span class="token keyword">class</span> <span class="token class-name">MySerialQueueExecutor</span><span class="token punctuation">:</span> <span class="token class-name">SerialExecutor</span><span class="token punctuation">,</span> <span class="token attribute atrule">@unchecked</span> <span class="token class-name">Sendable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token keyword">let</span> queue<span class="token punctuation">:</span> <span class="token class-name">DispatchSerialQueue</span>
+    
+    <span class="token keyword">init</span><span class="token punctuation">(</span>label<span class="token punctuation">:</span> <span class="token class-name">String</span> <span class="token operator">=</span> <span class="token string-literal"><span class="token string">"MySerialQueueExecutor"</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span>queue <span class="token operator">=</span> <span class="token class-name">DispatchSerialQueue</span><span class="token punctuation">(</span>label<span class="token punctuation">:</span> label<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">func</span> <span class="token function-definition function">enqueue</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> job<span class="token punctuation">:</span> consuming <span class="token class-name">ExecutorJob</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">let</span> unownedJob <span class="token operator">=</span> <span class="token class-name">UnownedJob</span><span class="token punctuation">(</span>job<span class="token punctuation">)</span>
+        <span class="token keyword">let</span> unownedExecutor <span class="token operator">=</span> <span class="token keyword">self</span><span class="token punctuation">.</span><span class="token function">asUnownedSerialExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        queue<span class="token punctuation">.</span><span class="token keyword">async</span> <span class="token punctuation">{</span>
+            unownedJob<span class="token punctuation">.</span><span class="token function">runSynchronously</span><span class="token punctuation">(</span>on<span class="token punctuation">:</span> unownedExecutor<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token keyword">func</span> <span class="token function-definition function">asUnownedSerialExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">UnownedSerialExecutor</span> <span class="token punctuation">{</span>
+        <span class="token class-name">UnownedSerialExecutor</span><span class="token punctuation">(</span>ordinary<span class="token punctuation">:</span> <span class="token keyword">self</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token comment">// SE-0424 : Le hook qui résout le problème</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">checkIsolated</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// On prouve l'isolation en vérifiant que nous sommes sur la queue dédiée</span>
+        <span class="token function">dispatchPrecondition</span><span class="token punctuation">(</span>condition<span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token function">onQueue</span><span class="token punctuation">(</span>queue<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token keyword">func</span> <span class="token function-definition function">isSameExclusiveExecutionContext</span><span class="token punctuation">(</span>other<span class="token punctuation">:</span> <span class="token class-name">MySerialQueueExecutor</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Bool</span> <span class="token punctuation">{</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span>queue <span class="token operator">===</span> other<span class="token punctuation">.</span>queue
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 
+<span class="token comment">// 2. Utilisation dans un Actor</span>
 <span class="token keyword">actor</span> <span class="token class-name">Caplin</span> <span class="token punctuation">{</span>
-    <span class="token keyword">let</span> queue<span class="token punctuation">:</span> <span class="token class-name">DispatchSerialQueue</span> <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token keyword">init</span><span class="token punctuation">(</span>label<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"CoolQueue"</span></span><span class="token punctuation">)</span>
-    <span class="token keyword">var</span> num<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+    <span class="token keyword">private</span> <span class="token keyword">let</span> executor<span class="token punctuation">:</span> <span class="token class-name">MySerialQueueExecutor</span>
+    <span class="token keyword">var</span> counter<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token operator">=</span> <span class="token number">0</span>
     
-    <span class="token keyword">nonisolated</span> <span class="token keyword">var</span> unownedExecutor<span class="token punctuation">:</span> <span class="token class-name">UnownedSerialExecutor</span> <span class="token punctuation">{</span>
-        queue<span class="token punctuation">.</span><span class="token function">asUnownedExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span>executor<span class="token punctuation">:</span> <span class="token class-name">MySerialQueueExecutor</span> <span class="token operator">=</span> <span class="token class-name">MySerialQueueExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span>executor <span class="token operator">=</span> executor
     <span class="token punctuation">}</span>
     
-    <span class="token keyword">nonisolated</span> <span class="token keyword">func</span> <span class="token function-definition function">connect</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        queue<span class="token punctuation">.</span><span class="token keyword">async</span> <span class="token punctuation">{</span>
-            <span class="token comment">// Maintenant, le runtime appelle checkIsolated() sur la queue.</span>
-            <span class="token comment">// La vérification réussit.</span>
-            <span class="token keyword">self</span><span class="token punctuation">.</span>queue<span class="token punctuation">.</span><span class="token function">assertIsolated</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
-            <span class="token keyword">self</span><span class="token punctuation">.</span>assumeIsolated <span class="token punctuation">{</span> caplin <span class="token keyword">in</span>
-                caplin<span class="token punctuation">.</span>num <span class="token operator">+=</span> <span class="token number">1</span>
-            <span class="token punctuation">}</span>
+    <span class="token keyword">nonisolated</span> <span class="token keyword">var</span> unownedExecutor<span class="token punctuation">:</span> <span class="token class-name">UnownedSerialExecutor</span> <span class="token punctuation">{</span>
+        executor<span class="token punctuation">.</span><span class="token function">asUnownedSerialExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token keyword">nonisolated</span> <span class="token keyword">func</span> <span class="token function-definition function">connectFromOutside</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Appel direct via Dispatch (Hors Task Swift)</span>
+        executor<span class="token punctuation">.</span><span class="token function">asUnownedSerialExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">asUnownedExecutor</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>enqueue <span class="token punctuation">{</span> <span class="token omit keyword">_</span> <span class="token keyword">in</span> 
+            <span class="token comment">// On simule ici un accès via la queue</span>
+        <span class="token punctuation">}</span>
+        
+        <span class="token comment">// Exemple concret de l'usage de l'API</span>
+        <span class="token comment">// Grâce à checkIsolated(), l'appel suivant ne crashera pas</span>
+        <span class="token keyword">self</span><span class="token punctuation">.</span>assumeIsolated <span class="token punctuation">{</span> <span class="token keyword">actor</span> <span class="token keyword">in</span>
+            <span class="token keyword">actor</span><span class="token punctuation">.</span>counter <span class="token operator">+=</span> <span class="token number">10</span>
         <span class="token punctuation">}</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>La proposition résout le problème en ajoutant un point d'ancrage (<code>checkIsolated</code>) que l'exécuteur peut implémenter. Cela permet au runtime de demander à l'exécuteur : "Même si je ne vois pas de <code>Task</code>, peux-tu me confirmer que ce thread est bien celui qui garantit l'isolation de cet <code>actor</code> ?".</p>
+<p>La proposition résout le problème en ajoutant un point d'ancrage (<code>checkIsolated</code>) que l'exécuteur peut implémenter. Cela permet au runtime de demander à l'exécuteur : "Même si je ne vois pas de <code>Task</code>, peux-tu me confirmer que ce thread est bien celui qui garantit l'isolation de cet <code>actor</code> ?". L'exécuteur peut alors utiliser ses propres mécanismes (comme <code>dispatchPrecondition</code>) pour valider cette hypothèse.</p>
 
   </div>
 </article>

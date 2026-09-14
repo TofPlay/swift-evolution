@@ -140,8 +140,6 @@
         <span class="token punctuation">}</span>
     <span class="token punctuation">}</span>
     
-    <span class="token comment">// Problème : l'argument 'operation' ne peut pas exprimer </span>
-    <span class="token comment">// que sa fonction est isolée à 'self' de manière dynamique.</span>
     <span class="token keyword">func</span> <span class="token function-definition function">execute</span><span class="token punctuation">(</span>operation<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
         <span class="token class-name">Task</span> <span class="token punctuation">{</span>
             <span class="token keyword">await</span> <span class="token function">operation</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -151,24 +149,93 @@
 </code></pre>
 <p>L'utilisation de types de fonctions standards comme <code>() async -&gt; Void</code> pour des fonctions dont l'isolation dépend d'une capture (comme <code>self</code>) force le système à "effacer" l'isolation. Cela oblige la fonction à être <code>async</code> pour gérer le changement d'isolation et empêche le récepteur de savoir sur quel <code>executor</code> exécuter le code, entraînant un surcoût de synchronisation inutile.</p>
 <h3 id="apr%C3%A8s-se-0431" tabindex="-1"><a href="#apr%C3%A8s-se-0431" class="header-anchor">Après SE-0431</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">actor</span> <span class="token class-name">WorldModelObject</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> position<span class="token punctuation">:</span> <span class="token class-name">Point3D</span>
+<h4 id="d%C3%A9finition-des-structures-de-base" tabindex="-1"><a href="#d%C3%A9finition-des-structures-de-base" class="header-anchor">Définition des structures de base</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">Foundation</span>
+
+<span class="token comment">// Acteur simple</span>
+<span class="token keyword">actor</span> <span class="token class-name">Counter</span> <span class="token punctuation">{</span>
+    <span class="token keyword">private</span> <span class="token keyword">var</span> value <span class="token operator">=</span> <span class="token number">0</span>
     
-    <span class="token comment">// L'argument est maintenant capable de porter l'isolation de 'self' dynamiquement</span>
-    <span class="token keyword">func</span> <span class="token function-definition function">execute</span><span class="token punctuation">(</span>operation<span class="token punctuation">:</span> <span class="token attribute atrule">@isolated</span><span class="token punctuation">(</span>any<span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment">// Le Task peut maintenant utiliser l'isolation de 'operation'</span>
-        <span class="token comment">// pour s'enquêter directement sur le bon executor.</span>
-        <span class="token class-name">Task</span> <span class="token punctuation">{</span>
-            <span class="token keyword">await</span> <span class="token function">operation</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-        <span class="token punctuation">}</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">increment</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        value <span class="token operator">+=</span> <span class="token number">1</span>
+        <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Counter: </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">value</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string"> on </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation"><span class="token class-name">Thread</span><span class="token punctuation">.</span>current</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
     <span class="token punctuation">}</span>
     
-    <span class="token keyword">func</span> <span class="token function-definition function">gradually</span><span class="token punctuation">(</span>over<span class="token punctuation">:</span> <span class="token class-name">Duration</span><span class="token punctuation">,</span> operation<span class="token punctuation">:</span> <span class="token attribute atrule">@isolated</span><span class="token punctuation">(</span>any<span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token class-name">Double</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token comment">// L'isolation est préservée dynamiquement</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">getValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Int</span> <span class="token punctuation">{</span> value <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Fonction qui accepte n’importe quelle isolation</span>
+<span class="token keyword">func</span> <span class="token function-definition function">scheduleWork</span><span class="token punctuation">(</span>
+    <span class="token omit keyword">_</span> operation<span class="token punctuation">:</span> <span class="token attribute atrule">@isolated</span><span class="token punctuation">(</span>any<span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span>
+<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// On peut inspecter l’isolation</span>
+    <span class="token keyword">if</span> <span class="token keyword">let</span> <span class="token keyword">actor</span> <span class="token operator">=</span> operation<span class="token punctuation">.</span>isolation <span class="token punctuation">{</span>
+        <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Operation isolée sur : </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation"><span class="token keyword">actor</span></span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Operation non-isolée"</span></span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token comment">// Appel : toujours await car isolation dynamique</span>
+    <span class="token class-name">Task</span> <span class="token punctuation">{</span>
+        <span class="token keyword">await</span> <span class="token function">operation</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>La syntaxe <code>@isolated(any)</code> permet à la fonction <code>operation</code> de transporter l'information de son isolation. Cela permet au code appelant (comme <code>Task.init</code>) de récupérer l'acteur via <code>operation.isolation</code> et de planifier l'exécution directement sur le bon <code>executor</code>, évitant des commutations de contexte inutiles et préservant l'ordre d'exécution des tâches sur l'acteur.</p>
+<p>La fonction <code>scheduleWork</code> utilise désormais le type <code>@isolated(any)</code> pour accepter une fonction dont l'isolation est inconnue statiquement. Elle peut utiliser la propriété <code>.isolation</code> pour identifier l'acteur et l'appel reste asynchrone (<code>await</code>) car le changement d'isolation est dynamique.</p>
+<h4 id="cas-d'utilisation-vari%C3%A9s" tabindex="-1"><a href="#cas-d'utilisation-vari%C3%A9s" class="header-anchor">Cas d'utilisation variés</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@MainActor</span>
+<span class="token keyword">func</span> <span class="token function-definition function">mainActorWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Travail sur MainActor"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">demo</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> counter <span class="token operator">=</span> <span class="token class-name">Counter</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    
+    <span class="token comment">// 1. Closure isolée à un acteur spécifique</span>
+    scheduleWork <span class="token punctuation">{</span> <span class="token punctuation">[</span><span class="token keyword">isolated</span> counter<span class="token punctuation">]</span> <span class="token keyword">in</span>
+        counter<span class="token punctuation">.</span><span class="token function">increment</span><span class="token punctuation">(</span><span class="token punctuation">)</span>          <span class="token comment">// synchrone car on est isolé</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token comment">// 2. Closure @MainActor</span>
+    scheduleWork <span class="token punctuation">{</span>
+        <span class="token attribute atrule">@MainActor</span> <span class="token keyword">in</span>
+        <span class="token function">mainActorWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token comment">// 3. Closure non-isolée</span>
+    scheduleWork <span class="token punctuation">{</span>
+        <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Travail concurrent"</span></span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token comment">// 4. Utilisation avec Task (maintenant optimisé)</span>
+    <span class="token class-name">Task</span> <span class="token punctuation">{</span> <span class="token attribute atrule">@MainActor</span> <span class="token keyword">in</span>
+        <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Task 1 démarrée sur MainActor (ordre garanti)"</span></span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token keyword">try</span><span class="token operator">?</span> <span class="token keyword">await</span> <span class="token class-name">Task</span><span class="token punctuation">.</span><span class="token function">sleep</span><span class="token punctuation">(</span><span class="token keyword">for</span><span class="token punctuation">:</span> <span class="token punctuation">.</span><span class="token function">milliseconds</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    
+    <span class="token class-name">Task</span> <span class="token punctuation">{</span> <span class="token attribute atrule">@MainActor</span> <span class="token keyword">in</span>
+        <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Task 2 démarrée sur MainActor (après Task 1)"</span></span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token comment">// Accès à l’isolation d’une méthode d’acteur</span>
+    <span class="token keyword">let</span> method<span class="token punctuation">:</span> <span class="token attribute atrule">@isolated</span><span class="token punctuation">(</span>any<span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Void</span> <span class="token operator">=</span> counter<span class="token punctuation">.</span>increment
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Isolation de la méthode : </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation"><span class="token class-name">String</span><span class="token punctuation">(</span>describing<span class="token punctuation">:</span> method<span class="token punctuation">.</span>isolation<span class="token punctuation">)</span></span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
+    
+    <span class="token keyword">await</span> <span class="token function">method</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Lancement</span>
+<span class="token class-name">Task</span> <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> <span class="token function">demo</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition résout le problème en permettant trois comportements distincts avec une même signature :</p>
+<ol>
+<li><strong>Isolation par capture</strong> : Une closure peut être isolée à un acteur spécifique (via <code>[isolated counter]</code>), ce qui permet d'appeler des méthodes de l'acteur de manière synchrone à l'intérieur de la closure.</li>
+<li><strong>Isolation par attribut</strong> : Une closure peut être explicitement liée à un global actor (comme <code>@MainActor</code>).</li>
+<li><strong>Isolation dynamique via référence</strong> : On peut transformer une méthode d'acteur (<code>counter.increment</code>) en une valeur de type <code>@isolated(any)</code>. L'isolation est conservée dynamiquement, permettant au système de savoir que cette fonction appartient à l'acteur <code>Counter</code>, même si elle est manipulée comme une simple variable. Cela garantit également que les <code>Task</code> créées avec des attributs d'isolation sont enqueued directement sur le bon <code>executor</code>, préservant l'ordre d'exécution.</li>
+</ol>
 
   </div>
 </article>
