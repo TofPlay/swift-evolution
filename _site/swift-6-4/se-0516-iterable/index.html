@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0516 - Iterable</title>
+
+    <meta data-pagefind-meta="parent:Swift 6.4">
+    <meta data-pagefind-meta="parent_url:/swift-6-4/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-6-4/se-0516-iterable/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Swift Evolution">
+<meta property="og:description" content="Site dédié à Swift Evolution">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-6-4/se-0516-iterable/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Site dédié à Swift Evolution">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-6-4/">
+                  Swift 6.4
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0516 - Iterable</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0516 - Iterable" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0516 - Iterable">
+  
+  <div class="post-body">
+    <h1>SE-0516 - Iterable</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.4</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0516-borrowing-sequence.md">SE-0516 - Iterable</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit le protocole <code>Iterable</code>, un nouveau point d'entrée pour l'itération synchrone dans Swift. Contrairement au protocole <code>Sequence</code> classique, <code>Iterable</code> est conçu pour supporter les types non-copyable (<code>~Copyable</code>) et non-escapable (<code>~Escapable</code>).</p>
+<p>Le mécanisme repose sur une itération par blocs via <code>Span&lt;Element&gt;</code> au lieu de retourner les éléments individuellement via une méthode <code>next()</code>. Le protocole <code>Iterable</code> définit un <code>BorrowingIterator</code> qui fournit un <code>Span</code> représentant un groupe d'éléments contigus. Cette approche permet de manipuler des types comme <code>Span</code> ou <code>InlineArray</code> sans nécessiter de copie des éléments. Le protocole supporte également l'itération avec gestion d'erreurs grâce à un type associé <code>Failure: Error</code>.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0516" tabindex="-1"><a href="#avant-se-0516" class="header-anchor">Avant SE-0516</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le protocole Sequence impose que les éléments soient copyable </span>
+<span class="token comment">// pour permettre l'utilisation de next() qui retourne Element?</span>
+<span class="token keyword">struct</span> <span class="token class-name">NonCopyableContainer</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Difficulté pour itérer sur des types non-copyable </span>
+    <span class="token comment">// sans consommer (consuming) l'élément.</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// L'itération classique ne permet pas de "borrow" des éléments</span>
+<span class="token comment">// non-copyable sans passer par des mécanismes complexes.</span>
+</code></pre>
+<p>Les types utilisant les nouvelles fonctionnalités de possession (ownership) comme <code>~Copyable</code> posent problème avec le protocole <code>Sequence</code>. La méthode <code>next()</code> retourne un élément optionnel, ce qui force soit la copie de l'élément, soit la consommation (ownership transfer) de celui-ci. Cela rend l'itération sur des types comme <code>Span</code> ou <code>InlineArray</code> inefficace ou impossible sans détruire la collection.</p>
+<h3 id="apr%C3%A8s-se-0516" tabindex="-1"><a href="#apr%C3%A8s-se-0516" class="header-anchor">Après SE-0516</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Le protocole Iterable permet l'accès par emprunt (borrowing)</span>
+<span class="token keyword">public</span> <span class="token keyword">protocol</span> <span class="token class-name">Iterable</span><span class="token operator">&lt;</span><span class="token class-name">Element</span><span class="token punctuation">,</span> <span class="token class-name">Failure</span><span class="token operator">&gt;</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span><span class="token punctuation">,</span> <span class="token operator">~</span><span class="token class-name">Escapable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">associatedtype</span> <span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span>
+    <span class="token keyword">associatedtype</span> <span class="token class-name">Failure</span><span class="token punctuation">:</span> <span class="token class-name">Error</span> <span class="token operator">=</span> <span class="token class-name">Never</span>
+    <span class="token keyword">associatedtype</span> <span class="token class-name">BorrowingIterator</span><span class="token punctuation">:</span> <span class="token class-name">BorrowingIteratorProtocol</span><span class="token operator">&lt;</span><span class="token class-name">Element</span><span class="token punctuation">,</span> <span class="token class-name">Failure</span><span class="token operator">&gt;</span> <span class="token operator">&amp;</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token operator">&amp;</span> <span class="token operator">~</span><span class="token class-name">Escapable</span>
+    
+    <span class="token attribute atrule">@_lifetime</span><span class="token punctuation">(</span>borrow <span class="token keyword">self</span><span class="token punctuation">)</span> 
+    <span class="token keyword">func</span> <span class="token function-definition function">makeBorrowingIterator</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">BorrowingIterator</span>
+    
+    <span class="token keyword">var</span> underestimatedCount<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token punctuation">{</span> <span class="token keyword">get</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Utilisation de l'itération par Span</span>
+<span class="token keyword">protocol</span> <span class="token class-name">BorrowingIteratorProtocol</span><span class="token operator">&lt;</span><span class="token class-name">Element</span><span class="token punctuation">,</span> <span class="token class-name">Failure</span><span class="token operator">&gt;</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span><span class="token punctuation">,</span> <span class="token operator">~</span><span class="token class-name">Escapable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">associatedtype</span> <span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span>
+    <span class="token keyword">associatedtype</span> <span class="token class-name">Failure</span><span class="token punctuation">:</span> <span class="token class-name">Error</span> <span class="token operator">=</span> <span class="token class-name">Never</span>
+    
+    <span class="token attribute atrule">@_lifetime</span><span class="token punctuation">(</span><span class="token operator">&amp;</span><span class="token keyword">self</span><span class="token punctuation">)</span> 
+    <span class="token keyword">mutating</span> <span class="token keyword">func</span> <span class="token function-definition function">nextSpan</span><span class="token punctuation">(</span>maxCount<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token keyword">throws</span><span class="token punctuation">(</span><span class="token class-name">Failure</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Span</span><span class="token operator">&lt;</span><span class="token class-name">Element</span><span class="token operator">&gt;</span>
+    
+    <span class="token keyword">mutating</span> <span class="token keyword">func</span> <span class="token function-definition function">skip</span><span class="token punctuation">(</span>by maximumOffset<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token keyword">throws</span><span class="token punctuation">(</span><span class="token class-name">Failure</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Int</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Exemple d'utilisation via la syntaxe for-in</span>
+<span class="token comment">// Le compilateur désucre (desugar) la boucle pour utiliser nextSpan()</span>
+<span class="token keyword">for</span> <span class="token keyword">try</span> element <span class="token keyword">in</span> myIterable <span class="token punctuation">{</span>
+    <span class="token comment">// Utilisation de l'élément par emprunt</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'introduction de <code>Iterable</code> permet de parcourir des collections de types non-copyable en empruntant les éléments via des <code>Span</code>. Cela élimine le besoin de copier les éléments et permet une optimisation accrue pour les structures stockées de manière contiguë en mémoire. La syntaxe <code>for try ... in</code> est compatible avec l'itération pouvant lever des erreurs, et le mécanisme de <code>Span</code> permet de traiter des blocs d'éléments de manière performante.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

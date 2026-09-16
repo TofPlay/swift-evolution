@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0517 - UniqueBox</title>
+
+    <meta data-pagefind-meta="parent:Swift 6.4">
+    <meta data-pagefind-meta="parent_url:/swift-6-4/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-6-4/se-0517-uniquebox/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Swift Evolution">
+<meta property="og:description" content="Site dédié à Swift Evolution">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-6-4/se-0517-uniquebox/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Site dédié à Swift Evolution">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-6-4/">
+                  Swift 6.4
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0517 - UniqueBox</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0517 - UniqueBox" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0517 - UniqueBox">
+  
+  <div class="post-body">
+    <h1>SE-0517 - UniqueBox</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.4</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0517-uniquebox.md">SE-0517 - UniqueBox</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition introduit <code>UniqueBox</code>, un nouveau type dans la bibliothèque standard qui agit comme un pointeur intelligent (smart pointer) possédant une propriété unique sur une instance située sur le heap. Ce type est défini comme étant <code>~Copyable</code> (non-copiable), garantissant qu'un seul <code>UniqueBox</code> possède la valeur. Il assure la gestion automatique de la mémoire en libérant l'allocation sur le heap lorsque le <code>UniqueBox</code> sort de la portée ou est consommé. Le type supporte les opérations de lecture et d'écriture via une propriété <code>value</code> (utilisant <code>borrow mutate</code>) et permet de récupérer la valeur possédée via une méthode <code>consume()</code>. Pour les types supportant la copie, une méthode <code>clone()</code> est disponible.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0517" tabindex="-1"><a href="#avant-se-0517" class="header-anchor">Avant SE-0517</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de pointeurs bruts pour déplacer une valeur sur le heap</span>
+<span class="token keyword">let</span> ptr <span class="token operator">=</span> <span class="token class-name">UnsafeMutablePointer</span><span class="token operator">&lt;</span><span class="token punctuation">[</span><span class="token number">512</span> of <span class="token class-name">Int</span><span class="token punctuation">]</span><span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token function">allocate</span><span class="token punctuation">(</span>capacity<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span>
+<span class="token keyword">defer</span> <span class="token punctuation">{</span>
+    ptr<span class="token punctuation">.</span><span class="token function">deinitialize</span><span class="token punctuation">(</span>count<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span>
+    ptr<span class="token punctuation">.</span><span class="token function">deallocate</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+ptr<span class="token punctuation">.</span><span class="token function">initialize</span><span class="token punctuation">(</span>to<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+ptr<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">+=</span> <span class="token number">123</span>
+<span class="token function">print</span><span class="token punctuation">(</span>ptr<span class="token punctuation">.</span>pointee<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+</code></pre>
+<p>L'utilisation de <code>UnsafeMutablePointer</code> impose une gestion manuelle de la mémoire via <code>allocate</code>, <code>deinitialize</code> et <code>deallocate</code>. Ce processus est risqué car une erreur dans la gestion du cycle de vie entraîne des fuites mémoire ou des accès invalides. L'utilisation d'une <code>class</code> pour obtenir un comportement similaire introduit un overhead supplémentaire lié au comptage de références (reference counting).</p>
+<h3 id="apr%C3%A8s-se-0517" tabindex="-1"><a href="#apr%C3%A8s-se-0517" class="header-anchor">Après SE-0517</a></h3>
+<h4 id="stockage-d'un-tableau-sur-le-heap" tabindex="-1"><a href="#stockage-d'un-tableau-sur-le-heap" class="header-anchor">Stockage d'un tableau sur le heap</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Stockage d'un tableau sur le heap</span>
+<span class="token keyword">var</span> box <span class="token operator">=</span> <span class="token class-name">UniqueBox</span><span class="token operator">&lt;</span><span class="token punctuation">[</span><span class="token number">3</span> of <span class="token class-name">Int</span><span class="token punctuation">]</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token function">print</span><span class="token punctuation">(</span>box<span class="token punctuation">.</span>value<span class="token punctuation">)</span> <span class="token comment">// [1, 2, 3]</span>
+box<span class="token punctuation">.</span>value<span class="token punctuation">.</span><span class="token function">swapAt</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span>
+<span class="token function">print</span><span class="token punctuation">(</span>box<span class="token punctuation">.</span>value<span class="token punctuation">)</span> <span class="token comment">// [3, 2, 1]</span>
+</code></pre>
+<p>L'utilisation de <code>UniqueBox</code> permet de déplacer un type <code>struct</code> (comme un tableau) sur le heap de manière sûre, tout en conservant une syntaxe simple pour modifier les éléments via la propriété <code>value</code>.</p>
+<h4 id="gestion-automatique-de-la-lib%C3%A9ration-de-m%C3%A9moire" tabindex="-1"><a href="#gestion-automatique-de-la-lib%C3%A9ration-de-m%C3%A9moire" class="header-anchor">Gestion automatique de la libération de mémoire</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">Foo</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">bar</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"bar"</span></span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+    <span class="token keyword">deinit</span> <span class="token punctuation">{</span> <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"foo"</span></span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> box <span class="token operator">=</span> <span class="token class-name">UniqueBox</span><span class="token punctuation">(</span><span class="token class-name">Foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    box<span class="token punctuation">.</span>value<span class="token punctuation">.</span><span class="token function">bar</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// "bar"</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"baz"</span></span><span class="token punctuation">)</span> <span class="token comment">// "baz"</span>
+    <span class="token comment">// "foo"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Le mécanisme garantit que l'instance est libérée et que son <code>deinit</code> est appelé automatiquement dès que la variable <code>box</code> sort de la portée, sans intervention manuelle.</p>
+<h4 id="consommation-de-la-valeur" tabindex="-1"><a href="#consommation-de-la-valeur" class="header-anchor">Consommation de la valeur</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">extension</span> <span class="token class-name">UniqueBox</span> <span class="token keyword">where</span> <span class="token class-name">Value</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">public</span> consuming <span class="token keyword">func</span> <span class="token function-definition function">consume</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Value</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">example</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> box <span class="token operator">=</span> <span class="token class-name">UniqueBox</span><span class="token punctuation">(</span><span class="token class-name">Foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token keyword">let</span> value <span class="token operator">=</span> box<span class="token punctuation">.</span><span class="token function">consume</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Le box est consommé et la valeur est extraite</span>
+    value<span class="token punctuation">.</span><span class="token function">bar</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La méthode <code>consume()</code> permet de transférer la propriété de la valeur contenue dans le <code>UniqueBox</code> vers une variable locale, mettant ainsi fin au cycle de vie du conteneur lui-même.</p>
+<h4 id="clonage-pour-les-types-copiables" tabindex="-1"><a href="#clonage-pour-les-types-copiables" class="header-anchor">Clonage pour les types copiables</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Un type qui supporte la copie</span>
+<span class="token keyword">struct</span> <span class="token class-name">Simple</span><span class="token punctuation">:</span> <span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> x<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> box1 <span class="token operator">=</span> <span class="token class-name">UniqueBox</span><span class="token punctuation">(</span><span class="token class-name">Simple</span><span class="token punctuation">(</span>x<span class="token punctuation">:</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> box2 <span class="token operator">=</span> box1<span class="token punctuation">.</span><span class="token function">clone</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Crée une nouvelle allocation sur le heap pour le même contenu</span>
+</code></pre>
+<p>Lorsqu'une valeur est <code>Copyable</code>, <code>UniqueBox</code> offre une méthode <code>clone()</code> pour dupliquer l'instance et l'allocation associée, créant ainsi un nouveau propriétaire indépendant.</p>
+<p>La proposition résout le problème en fournissant un type <code>~Copyable</code> qui garantit une propriété exclusive. L'allocation sur le heap est gérée de manière sûre et automatique par le système de gestion de la mémoire de Swift via le <code>deinit</code> du <code>UniqueBox</code>, éliminant le besoin de gérer manuellement les pointeurs bruts ou de subir l'overhead des classes pour des besoins de simple indirection.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>
