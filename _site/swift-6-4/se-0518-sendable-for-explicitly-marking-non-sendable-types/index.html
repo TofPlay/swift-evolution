@@ -125,38 +125,59 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0518-tilde-sendable.md">SE-0518 - ~Sendable for explicitly marking non-Sendable types</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>La proposition introduit la syntaxe de conformité <code>~Sendable</code> pour exprimer explicitement qu'un <code>type</code> ne doit pas être considéré comme <code>Sendable</code>. Cette fonctionnalité permet de supprimer l'inférence automatique de <code>Sendable</code> pour les <code>struct</code>, <code>enum</code> ou <code>class</code>, fournissant ainsi un moyen explicite de marquer un type comme non-<code>Sendable</code> sans impacter l'héritage des sous-classes. Contrairement à l'utilisation de <code>@available(*, unavailable) extension Type: Sendable {}</code>, la nouvelle syntaxe <code>~Sendable</code> ne s'applique pas aux sous-classes, permettant ainsi à une classe de base de déclarer explicitement sa nature non-<code>Sendable</code> tout en laissant la possibilité aux sous-classes de devenir <code>Sendable</code> si elles sont sécurisées.</p>
+<p>La proposition introduit le préfixe tilde (<code>~</code>) pour le protocole <code>Sendable</code>, permettant de marquer explicitement un <code>type</code> comme étant non-<code>Sendable</code>. Cette fonctionnalité vise à supprimer l'inférence automatique de conformité à <code>Sendable</code> pour un <code>type</code>, garantissant que l'intention de l'auteur est claire lors de l'audit des API publiques. Contrairement à l'utilisation de <code>@available(*, unavailable)</code> sur une <code>extension</code>, la conformité <code>~Sendable</code> est déclarée directement sur la déclaration du <code>type</code> (<code>class</code>, <code>struct</code>, <code>enum</code>) et ne bloque pas la capacité des <code>subclasses</code> à devenir <code>Sendable</code> via une conformité <code>@unchecked Sendable</code>. Le mécanisme est purement déclaratif au niveau du compilateur et n'a aucun impact sur l'ABI.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0518" tabindex="-1"><a href="#avant-se-0518" class="header-anchor">Avant SE-0518</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">class</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
     <span class="token comment">// ...</span>
 <span class="token punctuation">}</span>
 
-<span class="token comment">// Pour empêcher la conformité Sendable, il faut utiliser une extension unavailable</span>
-<span class="token attribute atrule">@available</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">,</span> unavailable<span class="token punctuation">)</span> <span class="token keyword">extension</span> <span class="token class-name">Base</span><span class="token punctuation">:</span> <span class="token class-name">Sendable</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
+<span class="token attribute atrule">@available</span><span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">,</span> unavailable<span class="token punctuation">)</span>
+<span class="token keyword">extension</span> <span class="token class-name">Base</span><span class="token punctuation">:</span> <span class="token class-name">Sendable</span> <span class="token punctuation">{</span>
+<span class="token punctuation">}</span>
 
-<span class="token comment">// Problème : L'utilisation de l'extension unavailable est héritée par les sous-classes.</span>
-<span class="token comment">// Il est impossible de déclarer une sous-classe sécurisée (thread-safe) si la base est marquée ainsi.</span>
-<span class="token comment">// class ThreadSafe: Base, @unchecked Sendable { ... } // Cela génère un warning car la conformité est unavailable</span>
+<span class="token comment">// Erreur de compilation : la conformité unavailable est héritée par les subclasses</span>
+<span class="token keyword">final</span> <span class="token keyword">class</span> <span class="token class-name">ThreadSafe</span><span class="token punctuation">:</span> <span class="token class-name">Base</span><span class="token punctuation">,</span> <span class="token attribute atrule">@unchecked</span> <span class="token class-name">Sendable</span> <span class="token punctuation">{</span>
+    <span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
 </code></pre>
-<p>L'utilisation de <code>unavailable</code> est restrictive car elle est héritée par toutes les sous-classes, empêchant un développeur de créer une sous-classe <code>Sendable</code> à partir d'une classe de base dont la non-conformité était intended (délibérée). De plus, il est difficile pour les auteurs de librairies de distinguer si un type n'est pas <code>Sendable</code> par accident ou par choix de conception.</p>
+<p>L'utilisation de <code>unavailable</code> sur une <code>extension</code> pour bloquer la conformité à <code>Sendable</code> est trop restrictive car cette contrainte est héritée par toutes les <code>subclasses</code>. Cela empêche une <code>subclass</code> de devenir <code>Sendable</code> même si elle garantit sa propre sécurité de threads, ce qui limite la flexibilité de l'architecture.</p>
 <h3 id="apr%C3%A8s-se-0518" tabindex="-1"><a href="#apr%C3%A8s-se-0518" class="header-anchor">Après SE-0518</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// La classe de base est explicitement non-Sendable</span>
-<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Base</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Sendable</span> <span class="token punctuation">{</span>
+<h4 id="suppression-de-l'inf%C3%A9rence-de-conformit%C3%A9" tabindex="-1"><a href="#suppression-de-l'inf%C3%A9rence-de-conformit%C3%A9" class="header-anchor">Suppression de l'inférence de conformité</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">public</span> <span class="token keyword">enum</span> <span class="token class-name">ExecutionResult</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Sendable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">case</span> success
+    <span class="token keyword">case</span> <span class="token function">failure</span><span class="token punctuation">(</span><span class="token class-name">NonSendableType</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de <code>~Sendable</code> indique explicitement que le <code>type</code> ne doit pas être considéré comme <code>Sendable</code>, même si sa structure interne ne le rend pas immédiatement problématique, afin de lever toute ambiguïté sur l'intention de l'API.</p>
+<h4 id="pr%C3%A9servation-de-la-flexibilit%C3%A9-pour-les-subclasses" tabindex="-1"><a href="#pr%C3%A9servation-de-la-flexibilit%C3%A9-pour-les-subclasses" class="header-anchor">Préservation de la flexibilité pour les subclasses</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Base</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Sendable</span> <span class="token punctuation">{</span>
     <span class="token comment">// ...</span>
 <span class="token punctuation">}</span>
 
-<span class="token comment">// Les sous-classes peuvent maintenant choisir de devenir Sendable</span>
+<span class="token comment">// La subclass peut devenir Sendable de manière sécurisée</span>
 <span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ThreadSafeImpl</span><span class="token punctuation">:</span> <span class="token class-name">Base</span><span class="token punctuation">,</span> <span class="token attribute atrule">@unchecked</span> <span class="token class-name">Sendable</span> <span class="token punctuation">{</span>
-    <span class="token comment">// La sous-classe est sécurisée et peut être Sendable</span>
+    <span class="token keyword">private</span> <span class="token keyword">var</span> lock <span class="token operator">=</span> <span class="token function">os_unfair_lock_s</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token comment">// Protection du state...</span>
 <span class="token punctuation">}</span>
 
+<span class="token comment">// La subclass reste non-Sendable par défaut</span>
 <span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">UnsafeImpl</span><span class="token punctuation">:</span> <span class="token class-name">Base</span> <span class="token punctuation">{</span>
     <span class="token keyword">var</span> x<span class="token punctuation">:</span> <span class="token class-name">NonSendableType</span>
-    <span class="token comment">// La sous-classe reste non-Sendable par défaut</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>La proposition résout le problème en introduisant <code>~Sendable</code>, qui supprime l'inférence de conformité uniquement pour le type déclaré. Cela permet de communiquer clairement l'intention de l'auteur de la librairie (le type est délibérément non-<code>Sendable</code>) tout en offrant la flexibilité nécessaire pour que les sous-classes puissent implémenter leur propre gestion de la synchronisation et devenir <code>Sendable</code>.</p>
+<p>La syntaxe <code>~Sendable</code> permet de marquer un <code>type</code> de base comme non-<code>Sendable</code> tout en permettant aux <code>subclasses</code> d'implémenter leur propre logique de synchronisation et de revendiquer une conformité <code>@unchecked Sendable</code>.</p>
+<h4 id="incompatibilit%C3%A9-des-double-conformit%C3%A9s" tabindex="-1"><a href="#incompatibilit%C3%A9-des-double-conformit%C3%A9s" class="header-anchor">Incompatibilité des double conformités</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Erreur de compilation : impossible de conformer et supprimer simultanément</span>
+<span class="token keyword">actor</span> <span class="token class-name">A</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Sendable</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">Container</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Sendable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> value<span class="token punctuation">:</span> <span class="token class-name">T</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">extension</span> <span class="token class-name">Container</span><span class="token punctuation">:</span> <span class="token class-name">Sendable</span> <span class="token punctuation">{</span> <span class="token punctuation">}</span> <span class="token comment">// Erreur</span>
+</code></pre>
+<p>Le compilateur interdit toute tentative de déclarer un <code>type</code> comme étant à la fois conforme et non conforme au protocole <code>Sendable</code>.</p>
+<p>L'introduction de la syntaxe <code>~Sendable</code> résout le problème de l'ambiguïté d'intention pour les auteurs de bibliothèques et offre une alternative élégante à l'usage de <code>@available(*, unavailable)</code> en permettant une hiérarchie de classes plus flexible concernant la sécurité des threads.</p>
 
   </div>
 </article>

@@ -145,6 +145,7 @@
 </code></pre>
 <p>L'utilisation de <code>Array</code> est incompatible avec les types non-copiables car <code>Array</code> repose sur des sémantiques de valeur avec <em>Copy-on-Write</em>, ce qui nécessite que les éléments puissent être copiés en cas de mutation partagée.</p>
 <h3 id="apr%C3%A8s-se-0527" tabindex="-1"><a href="#apr%C3%A8s-se-0527" class="header-anchor">Après SE-0527</a></h3>
+<h4 id="utilisation-de-uniquearray-pour-des-%C3%A9l%C3%A9ments-non-copiables" tabindex="-1"><a href="#utilisation-de-uniquearray-pour-des-%C3%A9l%C3%A9ments-non-copiables" class="header-anchor">Utilisation de UniqueArray pour des éléments non-copiables</a></h4>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">import</span> <span class="token class-name">Containers</span>
 
 <span class="token keyword">struct</span> <span class="token class-name">FileHandle</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
@@ -156,7 +157,6 @@
 <span class="token keyword">let</span> foo <span class="token operator">=</span> <span class="token class-name">FileHandle</span><span class="token punctuation">(</span>path<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"test.txt"</span></span><span class="token punctuation">)</span>
 <span class="token keyword">let</span> bar <span class="token operator">=</span> <span class="token class-name">FileHandle</span><span class="token punctuation">(</span>path<span class="token punctuation">:</span> <span class="token string-literal"><span class="token string">"bar.txt"</span></span><span class="token punctuation">)</span>
 
-<span class="token comment">// Utilisation de UniqueArray pour des éléments non-copiables</span>
 <span class="token keyword">var</span> a <span class="token operator">=</span> <span class="token class-name">UniqueArray</span><span class="token operator">&lt;</span><span class="token class-name">FileHandle</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 a<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>foo<span class="token punctuation">)</span>  <span class="token comment">// Consomme foo</span>
 a<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span>bar<span class="token punctuation">)</span>  <span class="token comment">// Consomme bar</span>
@@ -166,13 +166,15 @@ b<span class="token punctuation">.</span><span class="token function">append</sp
 
 <span class="token comment">// a.append(FileHandle(path: "err.txt")) // Erreur : 'a' a été consommé par le move</span>
 </code></pre>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Utilisation de RigidArray pour une capacité fixe et prévisible</span>
-<span class="token keyword">var</span> rigid <span class="token operator">=</span> <span class="token class-name">RigidArray</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>capacity<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span>
+<p><code>UniqueArray</code> permet de manipuler des ressources uniques sans risque de copie accidentelle. La sémantique de déplacement (<em>move</em>) est respectée : une fois l'instance déplacée vers une nouvelle variable, l'originale devient inutilisable.</p>
+<h4 id="utilisation-de-rigidarray-pour-une-capacit%C3%A9-fixe" tabindex="-1"><a href="#utilisation-de-rigidarray-pour-une-capacit%C3%A9-fixe" class="header-anchor">Utilisation de RigidArray pour une capacité fixe</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">var</span> rigid <span class="token operator">=</span> <span class="token class-name">RigidArray</span><span class="token operator">&lt;</span><span class="token class-name">Int</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>capacity<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span>
 rigid<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>
 rigid<span class="token punctuation">.</span><span class="token function">append</span><span class="token punctuation">(</span><span class="token number">20</span><span class="token punctuation">)</span>
 <span class="token comment">// rigid.append(30) // Runtime error: RigidArray capacity overflow</span>
 </code></pre>
-<p><code>UniqueArray</code> permet de manipuler des ressources uniques (comme des descripteurs de fichiers) sans risque de copie accidentelle, tandis que <code>RigidArray</code> garantit qu'aucune allocation supplémentaire n'aura lieu, assurant une performance déterministe.</p>
+<p><code>RigidArray</code> garantit qu'aucune allocation supplémentaire n'a lieu, assurant une performance déterministe indispensable dans les contextes où le budget mémoire est strict et les pics de latence sont proscrits.</p>
+<p>La proposition résout le problème de la gestion des types non-copiables en fournissant des conteneurs dont l'unicité est garantie au niveau du type lui-même, évitant ainsi les mécanismes de copie complexes et imprévisibles de l' <code>Array</code> standard.</p>
 
   </div>
 </article>

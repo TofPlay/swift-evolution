@@ -125,13 +125,8 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0520-discardableresult-task-initializers.md">SE-0520 - Discardable result use in Task initializers</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>La proposition introduit un nouveau mécanisme d'avertissement pour les initialisateurs de tâches non structurées (<code>Task</code>, <code>Task.detached</code>, etc.) lorsqu'ils contiennent une closure pouvant lever des erreurs (<code>throws</code>).</p>
-<p>Auparavant, l'attribut <code>@discardableResult</code> appliqué à tous les initialisateurs de <code>Task</code> permettait d'ignorer silencieusement les erreurs, ce qui pouvait mener à des bugs difficiles à détecter. Le nouveau comportement distingue les tâches :</p>
-<ul>
-<li>Si la closure ne lève aucune erreur (ou <code>throws(Never)</code>), aucun avertissement n'est émis.</li>
-<li>Si la closure peut lever une erreur et que le résultat de la tâche n'est pas utilisé, un avertissement est généré pour signaler que l'erreur pourrait être accidentellement ignorée.</li>
-</ul>
-<p>Pour supprimer l'avertissement, le développeur doit soit gérer l'erreur à l'intérieur de la tâche, soit stocker explicitement le résultat (ex: <code>let _ = Task { ... }</code>).</p>
+<p>La proposition modifie la gestion des diagnostics pour les initialisateurs de <code>Task</code> non structurées. Le comportement par défaut de l'attribut <code>@discardableResult</code> sur les initialisateurs de <code>Task</code> permet d'ignorer silencieusement le résultat d'une tâche, ce qui est problématique lorsque la closure de l'initialisateur est capable de lever une erreur (<code>throws</code>).</p>
+<p>La proposition introduit un nouveau type d'avertissement spécifique : un avertissement est émis si une <code>Task</code> non structurée est créée avec une closure capable de lever une erreur (où le type d'erreur n'est pas <code>Never</code>), mais que la valeur de retour de la <code>Task</code> n'est ni utilisée, ni explicitement ignorée. Ce mécanisme cible spécifiquement les cas où le type d'erreur est explicite, permettant de distinguer les tâches sûres (ne levant jamais d'erreur) des tâches potentiellement dangereuses.</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0520" tabindex="-1"><a href="#avant-se-0520" class="header-anchor">Avant SE-0520</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token class-name">Task</span> <span class="token punctuation">{</span>
@@ -139,25 +134,39 @@
 <span class="token punctuation">}</span>
 <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Yay!"</span></span><span class="token punctuation">)</span>
 </code></pre>
-<p>Dans l'état actuel, le code ci-dessus ne génère aucune erreur ni aucun avertissement, même si <code>boom()</code> lève une erreur, rendant l'erreur silencieuse.</p>
+<p>L'exécution d'une fonction capable de lever une erreur à l'intérieur d'une <code>Task</code> sans capturer ou utiliser le résultat de la tâche ne produit aucun avertissement. L'erreur est silencieusement ignorée par le système, ce qui peut masquer des bugs de logique ou des échecs critiques.</p>
 <h3 id="apr%C3%A8s-se-0520" tabindex="-1"><a href="#apr%C3%A8s-se-0520" class="header-anchor">Après SE-0520</a></h3>
+<h4 id="avertissement-pour-les-t%C3%A2ches-lan%C3%A7ant-une-erreur-non-g%C3%A9r%C3%A9e" tabindex="-1"><a href="#avertissement-pour-les-t%C3%A2ches-lan%C3%A7ant-une-erreur-non-g%C3%A9r%C3%A9e" class="header-anchor">Avertissement pour les tâches lançant une erreur non gérée</a></h4>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token class-name">Task</span> <span class="token punctuation">{</span>
     <span class="token keyword">try</span> <span class="token function">boom</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
-<span class="token comment">// Warning: Unstructured throwing task was not used, which may accidentally ignore errors thrown inside the task [#NoUseUnstructuredThrowingTask]</span>
-
-<span class="token comment">// Pour résoudre le problème, on peut faire :</span>
-<span class="token keyword">let</span> task <span class="token operator">=</span> <span class="token class-name">Task</span> <span class="token punctuation">{</span>
-    <span class="token keyword">try</span> <span class="token function">boom</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Le compilateur émet un avertissement indiquant qu'une <code>Task</code> non structurée lançant une erreur n'a pas été utilisée, ce qui peut ignorer accidentellement des erreurs levées à l'intérieur de la tâche.</p>
+<h4 id="silence-pour-les-t%C3%A2ches-ne-lan%C3%A7ant-jamais-d'erreur" tabindex="-1"><a href="#silence-pour-les-t%C3%A2ches-ne-lan%C3%A7ant-jamais-d'erreur" class="header-anchor">Silence pour les tâches ne lançant jamais d'erreur</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token class-name">Task</span> <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Success"</span></span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
-<span class="token keyword">let</span> <span class="token omit keyword">_</span> <span class="token operator">=</span> <span class="token keyword">try</span> <span class="token keyword">await</span> task<span class="token punctuation">.</span>value
-
-<span class="token comment">// Ou explicitement ignorer le résultat pour supprimer l'avertissement :</span>
-<span class="token keyword">let</span> <span class="token omit keyword">_</span> <span class="token operator">=</span> <span class="token class-name">Task</span> <span class="token punctuation">{</span>
+</code></pre>
+<p>L'absence d'erreur ou l'utilisation de <code>throws(Never)</code> ne déclenche aucun avertissement, car le risque d'ignorer une exception est inexistant.</p>
+<h4 id="ignorer-explicitement-le-r%C3%A9sultat-pour-supprimer-l'avertissement" tabindex="-1"><a href="#ignorer-explicitement-le-r%C3%A9sultat-pour-supprimer-l'avertissement" class="header-anchor">Ignorer explicitement le résultat pour supprimer l'avertissement</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token omit keyword">_</span> <span class="token operator">=</span> <span class="token class-name">Task</span> <span class="token punctuation">{</span>
     <span class="token keyword">try</span> <span class="token function">boom</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>La proposition permet de détecter les erreurs ignorées par défaut dans les tâches non structurées tout en offrant une syntaxe explicite pour confirmer que l'ignorance de l'erreur est intentionnelle.</p>
+<p>L'utilisation de l'underscore (<code>_</code>) indique au compilateur que l'utilisateur est conscient de l'existence du résultat et de la possibilité d'une erreur, permettant ainsi de supprimer l'avertissement de manière intentionnelle.</p>
+<h4 id="utilisation-explicite-de-la-valeur-pour-capturer-l'erreur" tabindex="-1"><a href="#utilisation-explicite-de-la-valeur-pour-capturer-l'erreur" class="header-anchor">Utilisation explicite de la valeur pour capturer l'erreur</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">let</span> task <span class="token operator">=</span> <span class="token class-name">Task</span> <span class="token punctuation">{</span>
+    <span class="token keyword">try</span> <span class="token function">boom</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">do</span> <span class="token punctuation">{</span>
+    <span class="token keyword">try</span> <span class="token keyword">await</span> task<span class="token punctuation">.</span>value
+<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Error handled: </span><span class="token interpolation-punctuation punctuation">\(</span><span class="token interpolation">error</span><span class="token interpolation-punctuation punctuation">)</span><span class="token string">"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de la propriété <code>value</code> avec <code>try await</code> permet de récupérer et de gérer correctement les erreurs levées au sein de la tâche.</p>
+<p>La proposition résout le problème de la gestion silencieuse des erreurs en forçant le développeur à être explicite lorsqu'il choisit de ne pas surveiller le résultat d'une tâche asynchrone capable de lever une erreur.</p>
 
   </div>
 </article>

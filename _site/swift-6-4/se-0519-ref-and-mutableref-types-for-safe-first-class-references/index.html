@@ -125,49 +125,67 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0519-ref-mutableref-types.md">SE-0519 - Ref and MutableRef types for safe, first-class references</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit deux nouveaux types génériques dans la bibliothèque standard pour permettre la création de références de premier ordre, de manière sûre et sans l'overhead lié aux classes (allocation, comptage de références) ou à l'utilisation de <code>UnsafePointer</code>.</p>
+<p>La proposition introduit deux nouveaux types génériques dans la bibliothèque standard : <code>Ref</code> et <code>MutableRef</code>. Ces types agissent comme des références de premier ordre (first-class) pour des valeurs de type <code>~Copyable</code>.</p>
 <ul>
-<li><strong><code>Ref&lt;Value&gt;</code></strong> : Représente un emprunt partagé (shared borrow) d'une valeur <code>~Copyable</code>. Il permet la lecture de la valeur cible mais interdit toute modification ou consommation de celle-ci.</li>
-<li><strong><code>MutableRef&lt;Value&gt;</code></strong> : Représente un accès exclusif (exclusive access) à une valeur <code>~Copyable</code>. Il permet de modifier la valeur cible et garantit l'exclusivité pendant la durée de vie de la référence.</li>
+<li><strong><code>Ref&lt;Value&gt;</code></strong> : Représente un emprunt partagé (shared borrow) d'une valeur. Il permet la lecture du contenu via la propriété <code>value</code>, mais interdit toute modification ou consommation de la valeur cible. Il est conforme à <code>Sendable</code> si <code>Value</code> est <code>Sendable</code>.</li>
+<li><strong><code>MutableRef&lt;Value&gt;</code></strong> : Représente un accès exclusif (exclusive access) à une valeur. Il permet la modification de la cible via la propriété <code>value</code>. Il est conforme à <code>Sendable</code> si <code>Value</code> est <code>Sendable</code>.</li>
 </ul>
-<p>Ces types utilisent les dépendances de durée de vie (<code>@lifetime</code>) pour garantir que la référence ne survit pas à la valeur qu'elle pointe, assurant ainsi la sécurité mémoire et la conformité avec le système d'exclusivité de Swift.</p>
+<p>Ces types possèdent une dépendance de durée de vie (<code>lifetime dependency</code>) envers la cible. Le système garantit la sécurité de l'accès en utilisant les mécanismes de gestion des durées de vie (<code>lifetimes</code>), empêchant l'accès direct à la valeur cible tant qu'une référence dépendante est active. L'utilisation de ces types évite l'utilisation de <code>class</code> (qui impose un allocation et un comptage de références) ou de <code>UnsafePointer</code> (qui n'est pas sécurisé).</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0519" tabindex="-1"><a href="#avant-se-0519" class="header-anchor">Avant SE-0519</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">updateTotal</span><span class="token punctuation">(</span><span class="token keyword">in</span> dictionary<span class="token punctuation">:</span> <span class="token keyword">inout</span> <span class="token punctuation">[</span><span class="token class-name">String</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token keyword">for</span> key<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">,</span> with values<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Int</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment">// On est obligé de rechercher la valeur dans le dictionnaire à chaque itération</span>
-    <span class="token comment">// ou d'utiliser un paramètre inout qui est limité au scope de l'appel</span>
-    <span class="token keyword">for</span> value <span class="token keyword">in</span> values <span class="token punctuation">{</span>
-        dictionary<span class="token punctuation">[</span>key<span class="token punctuation">,</span> <span class="token keyword">default</span><span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">+=</span> value
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
-</code></pre>
-<p>L'accès aux éléments d'un conteneur ou à des propriétés imbriquées est limité au contexte d'un appel de fonction (via <code>inout</code> ou <code>borrow</code>) et ne peut pas être facilement stocké ou manipulé en tant qu'objet indépendant sans passer par des classes (boxing).</p>
-<h3 id="apr%C3%A8s-se-0519" tabindex="-1"><a href="#apr%C3%A8s-se-0519" class="header-anchor">Après SE-0519</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">updateTotal</span><span class="token punctuation">(</span><span class="token keyword">in</span> dictionary<span class="token punctuation">:</span> <span class="token keyword">inout</span> <span class="token punctuation">[</span><span class="token class-name">String</span><span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token keyword">for</span> key<span class="token punctuation">:</span> <span class="token class-name">String</span><span class="token punctuation">,</span> with values<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Int</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
-    <span class="token comment">// On projette un MutableRef une seule fois sur l'élément du dictionnaire</span>
-    <span class="token keyword">var</span> entry <span class="token operator">=</span> <span class="token class-name">MutableRef</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>dictionary<span class="token punctuation">[</span>key<span class="token punctuation">,</span> <span class="token keyword">default</span><span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-    
-    <span class="token comment">// On modifie directement la valeur via la référence</span>
-    <span class="token keyword">for</span> value <span class="token keyword">in</span> values <span class="token punctuation">{</span>
-        entry<span class="token punctuation">.</span>value <span class="token operator">+=</span> value
-    <span class="token punctuation">}</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">Container</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> count<span class="token punctuation">:</span> <span class="token class-name">Int</span>
 <span class="token punctuation">}</span>
 
-<span class="token keyword">struct</span> <span class="token class-name">Vec3</span> <span class="token punctuation">{</span>
-    <span class="token keyword">var</span> x<span class="token punctuation">,</span> y<span class="token punctuation">,</span> z<span class="token punctuation">:</span> <span class="token class-name">Double</span>
-    
-    <span class="token attribute atrule">@_lifetime</span><span class="token punctuation">(</span><span class="token operator">&amp;</span><span class="token keyword">self</span><span class="token punctuation">)</span>
-    <span class="token keyword">mutating</span> <span class="token keyword">func</span> <span class="token function-definition function">at</span><span class="token punctuation">(</span>index<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">MutableRef</span><span class="token operator">&lt;</span><span class="token class-name">Double</span><span class="token operator">&gt;</span> <span class="token punctuation">{</span>
-        <span class="token keyword">switch</span> index <span class="token punctuation">{</span>
-        <span class="token keyword">case</span> <span class="token number">0</span><span class="token punctuation">:</span> <span class="token keyword">return</span> <span class="token class-name">MutableRef</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>x<span class="token punctuation">)</span>
-        <span class="token keyword">case</span> <span class="token number">1</span><span class="token punctuation">:</span> <span class="token keyword">return</span> <span class="token class-name">MutableRef</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>y<span class="token punctuation">)</span>
-        <span class="token keyword">case</span> <span class="token number">2</span><span class="token punctuation">:</span> <span class="token keyword">return</span> <span class="token class-name">MutableRef</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>z<span class="token punctuation">)</span>
-        <span class="token keyword">default</span><span class="token punctuation">:</span> <span class="token function">fatalError</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"out of bounds"</span></span><span class="token punctuation">)</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
+<span class="token comment">// Pour accéder à une valeur spécifique de manière persistante, </span>
+<span class="token comment">// il faut souvent passer par des classes ou des pointeurs non sécurisés.</span>
+<span class="token keyword">class</span> <span class="token class-name">Box</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+    <span class="token keyword">init</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> value<span class="token punctuation">:</span> <span class="token class-name">Int</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">self</span><span class="token punctuation">.</span>value <span class="token operator">=</span> value <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> container <span class="token operator">=</span> <span class="token class-name">Container</span><span class="token punctuation">(</span>count<span class="token punctuation">:</span> <span class="token number">10</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> box <span class="token operator">=</span> <span class="token class-name">Box</span><span class="token punctuation">(</span>container<span class="token punctuation">.</span>count<span class="token punctuation">)</span>
+<span class="token function">print</span><span class="token punctuation">(</span>box<span class="token punctuation">.</span>value<span class="token punctuation">)</span>
 </code></pre>
-<p>Les références permettent de "projeter" une valeur (une propriété ou un élément de collection) dans un type autonome (<code>Ref</code> ou <code>MutableRef</code>) qui peut être passé à des fonctions ou stocké temporairement, tout en maintenant des garanties de sécurité strictes sur l'exclusivité et la durée de vie de la donnée originale.</p>
+<p>L'utilisation de classes pour simuler des références introduit un surcoût lié à l'allocation mémoire et au comptage de références (<em>reference counting</em>). L'utilisation de pointeurs est dangereuse et ne respecte pas la sémantique de sécurité de Swift.</p>
+<h3 id="apr%C3%A8s-se-0519" tabindex="-1"><a href="#apr%C3%A8s-se-0519" class="header-anchor">Après SE-0519</a></h3>
+<h4 id="acc%C3%A8s-partag%C3%A9-avec-ref" tabindex="-1"><a href="#acc%C3%A8s-partag%C3%A9-avec-ref" class="header-anchor">Accès partagé avec Ref</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">DataContainer</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">var</span> myData <span class="token operator">=</span> <span class="token class-name">DataContainer</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> <span class="token number">100</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> sharedRef <span class="token operator">=</span> <span class="token class-name">Ref</span><span class="token punctuation">(</span>myData<span class="token punctuation">.</span>value<span class="token punctuation">)</span>
+
+<span class="token function">print</span><span class="token punctuation">(</span>sharedRef<span class="token punctuation">.</span>value<span class="token punctuation">)</span> 
+<span class="token comment">// Le système permet la lecture via la propriété value</span>
+</code></pre>
+<p><code>Ref</code> permet d'obtenir une référence en lecture seule d'une propriété ou d'une valeur, tout en maintenant la dépendance de durée de vie avec l'objet parent.</p>
+<h4 id="acc%C3%A8s-exclusif-avec-mutableref" tabindex="-1"><a href="#acc%C3%A8s-exclusif-avec-mutableref" class="header-anchor">Accès exclusif avec MutableRef</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">var</span> numbers <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span>
+<span class="token keyword">var</span> mutableRef <span class="token operator">=</span> <span class="token class-name">MutableRef</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>numbers<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+mutableRef<span class="token punctuation">.</span>value <span class="token operator">=</span> <span class="token number">42</span>
+
+<span class="token function">print</span><span class="token punctuation">(</span>numbers<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token comment">// Affiche 42</span>
+</code></pre>
+<p><code>MutableRef</code> permet de projeter un accès exclusif sur un élément spécifique d'une collection ou une propriété, permettant sa modification directe de manière sécurisée.</p>
+<h4 id="utilisation-dans-des-structures-et-types-g%C3%A9n%C3%A9riques" tabindex="-1"><a href="#utilisation-dans-des-structures-et-types-g%C3%A9n%C3%A9riques" class="header-anchor">Utilisation dans des structures et types génériques</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">Point</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> x<span class="token punctuation">:</span> <span class="token class-name">MutableRef</span><span class="token operator">&lt;</span><span class="token class-name">Double</span><span class="token operator">&gt;</span>
+    <span class="token keyword">var</span> y<span class="token punctuation">:</span> <span class="token class-name">MutableRef</span><span class="token operator">&lt;</span><span class="token class-name">Double</span><span class="token operator">&gt;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">var</span> posX <span class="token operator">=</span> <span class="token number">1.0</span>
+<span class="token keyword">var</span> posY <span class="token operator">=</span> <span class="token number">2.0</span>
+<span class="token keyword">let</span> point <span class="token operator">=</span> <span class="token class-name">Point</span><span class="token punctuation">(</span>x<span class="token punctuation">:</span> <span class="token class-name">MutableRef</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>posX<span class="token punctuation">)</span><span class="token punctuation">,</span> y<span class="token punctuation">:</span> <span class="token class-name">MutableRef</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>posY<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+point<span class="token punctuation">.</span>x<span class="token punctuation">.</span>value <span class="token operator">=</span> <span class="token number">10.0</span>
+<span class="token function">print</span><span class="token punctuation">(</span>posX<span class="token punctuation">)</span> <span class="token comment">// Affiche 10.0</span>
+</code></pre>
+<p>La proposition permet d'utiliser ces références comme membres de structures ou comme arguments de types génériques, facilitant la manipulation de données sans allocation supplémentaire.</p>
+<p>La proposition résout le problème de l'accès aux valeurs en introduisant des types de référence légers et sécurisés qui s'intègrent parfaitement dans le système de gestion des durées de vie (<em>lifetimes</em>) de Swift, offrant une alternative performante aux classes et une alternative sûre aux pointeurs.</p>
 
   </div>
 </article>

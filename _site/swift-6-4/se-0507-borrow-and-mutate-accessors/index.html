@@ -125,44 +125,103 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0507-borrow-accessors.md">SE-0507 - Borrow and Mutate Accessors</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit de nouveaux mots-clés, <code>borrow</code> et <code>mutate</code>, pour définir des accesseurs de propriétés calculées et de sous-scripts. Ces accesseurs permettent d'exposer des valeurs via leurs références (sans copie) tout en respectant les règles d'exclusivité de Swift.</p>
-<p>Points clés :</p>
+<p>La proposition introduit de nouveaux mots-clés, <code>borrow</code> et <code>mutate</code>, pour définir des accessors permettant d'exposer des valeurs par référence plutôt que par copie.</p>
+<p>Le mécanisme se décompose comme suit :</p>
 <ul>
-<li><strong>Performances :</strong> Contrairement aux accesseurs <code>yielding</code>, les accesseurs <code>borrow</code> n'utilisent pas de coroutines, évitant ainsi le surcoût lié à l'allocation d'espace de travail et aux appels de fonctions multiples.</li>
-<li><strong>Sémantique :</strong> <code>borrow</code> permet de retourner une référence à une valeur stockée sans la copier (essentiel pour les types non-copiables <code>~Copyable</code>). <code>mutate</code> permet un accès en lecture/écriture (inout) à la valeur stockée.</li>
-<li><strong>Restrictions :</strong> Ils ne peuvent pas retourner de valeurs locales ou temporaires. Ils ne sont pas autorisés pour les propriétés de classes ou d'acteurs (car ils ne permettent pas l'exécution de code après l'accès pour les contrôles d'exclusivité au runtime).</li>
-<li><strong>Interopérabilité :</strong> Si un accesseur <code>mutate</code> est défini, un accesseur <code>borrow</code> doit l'être aussi.</li>
+<li><strong><code>borrow</code></strong> : Permet d'exposer un <code>stored value</code> sans effectuer de copie. Contrairement à un accessor <code>get</code> classique, le système ne duplique pas la donnée, ce qui est crucial pour les types non-copyable (<code>~Copyable</code>).</li>
+<li><strong><code>mutate</code></strong> : Permet d'exposer une référence mutable (<code>&amp;</code>) de la valeur stockée, permettant des modifications "in-place".</li>
+<li><strong>Restrictions de sécurité</strong> : L'accessor doit retourner une valeur dont la durée de vie est garantie tant que le propriétaire n'est pas muté. Il est interdit de retourner une valeur locale ou temporaire.</li>
+<li><strong>Exclusivité</strong> : Le système impose des règles d'exclusivité strictes. Pendant qu'une valeur est empruntée via un accessor, le propriétaire ne peut pas être muté.</li>
 </ul>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0507" tabindex="-1"><a href="#avant-se-0507" class="header-anchor">Avant SE-0507</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token constant">NC</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token constant">NC</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+<span class="token punctuation">}</span>
 
 <span class="token keyword">struct</span> <span class="token class-name">ContainerOfNoncopyable</span> <span class="token punctuation">{</span>
     <span class="token keyword">private</span> <span class="token keyword">var</span> _element<span class="token punctuation">:</span> <span class="token constant">NC</span>
+    
     <span class="token keyword">var</span> element<span class="token punctuation">:</span> <span class="token constant">NC</span> <span class="token punctuation">{</span>
-        <span class="token keyword">return</span> _element <span class="token comment">// 🛑 ERROR: Impossibilité de copier `_element`</span>
+        <span class="token keyword">return</span> _element <span class="token comment">// 🛑 ERROR: Cannot copy `_element`</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'utilisation de <code>get</code> oblige à copier la valeur. Pour les types non-copiables (<code>~Copyable</code>), cela est impossible, empêchant l'exposition de ces éléments via des propriétés calculées standards.</p>
+<p>L'utilisation d'un accessor <code>get</code> impose une copie de la valeur. Pour les types qui ne supportent pas la copie (non-copyable), cette approche est impossible car la valeur ne peut pas être dupliquée pour être retournée.</p>
 <h3 id="apr%C3%A8s-se-0507" tabindex="-1"><a href="#apr%C3%A8s-se-0507" class="header-anchor">Après SE-0507</a></h3>
-<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token constant">NC</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
+<h4 id="utilisation-de-borrow-pour-les-types-non-copyable" tabindex="-1"><a href="#utilisation-de-borrow-pour-les-types-non-copyable" class="header-anchor">Utilisation de borrow pour les types non-copyable</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token constant">NC</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> value<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+<span class="token punctuation">}</span>
 
 <span class="token keyword">struct</span> <span class="token class-name">ContainerOfNoncopyable</span> <span class="token punctuation">{</span>
     <span class="token keyword">private</span> <span class="token keyword">var</span> _element<span class="token punctuation">:</span> <span class="token constant">NC</span>
+    
     <span class="token keyword">var</span> element<span class="token punctuation">:</span> <span class="token constant">NC</span> <span class="token punctuation">{</span>
         borrow <span class="token punctuation">{</span> <span class="token keyword">return</span> _element <span class="token punctuation">}</span>
     <span class="token punctuation">}</span>
-    <span class="token keyword">var</span> mutableElement<span class="token punctuation">:</span> <span class="token constant">NC</span> <span class="token punctuation">{</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation du mot-clé <code>borrow</code> permet de retourner la valeur <code>_element</code> par référence, évitant ainsi l'erreur de copie sur un type non-copyable.</p>
+<h4 id="utilisation-de-mutate-pour-la-modification-in-place" tabindex="-1"><a href="#utilisation-de-mutate-pour-la-modification-in-place" class="header-anchor">Utilisation de mutate pour la modification in-place</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">RigidWrapper</span><span class="token operator">&lt;</span><span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span><span class="token operator">&gt;</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> _element<span class="token punctuation">:</span> <span class="token class-name">Element</span>
+    
+    <span class="token keyword">var</span> element<span class="token punctuation">:</span> <span class="token class-name">Element</span> <span class="token punctuation">{</span>
+        borrow <span class="token punctuation">{</span> <span class="token keyword">return</span> _element <span class="token punctuation">}</span>
         mutate <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token operator">&amp;</span>_element <span class="token punctuation">}</span>
     <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 
-<span class="token keyword">var</span> owner <span class="token operator">=</span> <span class="token class-name">ContainerOfNoncopyable</span><span class="token punctuation">(</span><span class="token operator">...</span><span class="token punctuation">)</span>
-<span class="token function">doSomething</span><span class="token punctuation">(</span>with<span class="token punctuation">:</span> owner<span class="token punctuation">.</span>element<span class="token punctuation">)</span> <span class="token comment">// Accès par emprunt (sans copie)</span>
-<span class="token function">doSomething</span><span class="token punctuation">(</span>with<span class="token punctuation">:</span> <span class="token operator">&amp;</span>owner<span class="token punctuation">.</span>mutableElement<span class="token punctuation">)</span> <span class="token comment">// Accès avec mutation</span>
+<span class="token keyword">var</span> wrapper <span class="token operator">=</span> <span class="token class-name">RigidWrapper</span><span class="token punctuation">(</span>element<span class="token punctuation">:</span> <span class="token function">NC</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token function">doSomething</span><span class="token punctuation">(</span>with<span class="token punctuation">:</span> <span class="token operator">&amp;</span>wrapper<span class="token punctuation">.</span>element<span class="token punctuation">)</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">doSomeMutation</span><span class="token punctuation">(</span>with value<span class="token punctuation">:</span> <span class="token keyword">inout</span> <span class="token constant">NC</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Modification directe de la valeur stockée dans le wrapper</span>
+    value <span class="token operator">=</span> <span class="token function">NC</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> <span class="token number">20</span><span class="token punctuation">)</span> 
+<span class="token punctuation">}</span>
 </code></pre>
-<p>Les accesseurs <code>borrow</code> et <code>mutate</code> permettent d'accéder aux valeurs stockées sans les copier et sans l'overhead des coroutines, rendant possible l'utilisation de types non-copiables dans des propriétés calculées.</p>
+<p>L'accessor <code>mutate</code> permet d'obtenir une référence mutable de la propriété stockée via le symbole <code>&amp;</code>, permettant de modifier directement la donnée contenue dans le <code>struct</code> parent.</p>
+<h4 id="interdiction-des-valeurs-locales-et-temporaires" tabindex="-1"><a href="#interdiction-des-valeurs-locales-et-temporaires" class="header-anchor">Interdiction des valeurs locales et temporaires</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">InvalidExamples</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> _array <span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Int</span><span class="token punctuation">]</span>
+    
+    <span class="token keyword">var</span> local<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Int</span><span class="token punctuation">]</span> <span class="token punctuation">{</span>
+        borrow <span class="token punctuation">{</span>
+            <span class="token keyword">let</span> foo <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span>
+            <span class="token keyword">return</span> foo <span class="token comment">// 🛑 ERROR: Cannot return local value</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    
+    <span class="token keyword">var</span> temporary<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">Int</span><span class="token punctuation">]</span><span class="token operator">?</span> <span class="token punctuation">{</span>
+        borrow <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> _array <span class="token comment">// 🛑 ERROR: Cannot return temporary value</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Le système interdit le retour de variables locales ou de valeurs temporaires car leur durée de vie est limitée au scope de l'accessor, ce qui briserait la garantie de validité du <code>borrow</code>.</p>
+<h4 id="respect-des-r%C3%A8gles-d'exclusivit%C3%A9" tabindex="-1"><a href="#respect-des-r%C3%A8gles-d'exclusivit%C3%A9" class="header-anchor">Respect des règles d'exclusivité</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">Wrapper</span><span class="token operator">&lt;</span><span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span><span class="token operator">&gt;</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> _element<span class="token punctuation">:</span> <span class="token class-name">Element</span>
+    <span class="token keyword">var</span> element<span class="token punctuation">:</span> <span class="token class-name">Element</span> <span class="token punctuation">{</span>
+        borrow <span class="token punctuation">{</span> <span class="token keyword">return</span> _element <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">var</span> owner <span class="token operator">=</span> <span class="token class-name">Wrapper</span><span class="token punctuation">(</span>element<span class="token punctuation">:</span> <span class="token function">NC</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> <span class="token number">5</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token function">doSomething</span><span class="token punctuation">(</span>with<span class="token punctuation">:</span> owner<span class="token punctuation">.</span>element<span class="token punctuation">)</span> 
+
+<span class="token keyword">func</span> <span class="token function-definition function">doSomething</span><span class="token punctuation">(</span>with value<span class="token punctuation">:</span> borrowing <span class="token constant">NC</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// L'accès à 'value' est protégé</span>
+    value<span class="token punctuation">.</span><span class="token function">someMethod</span><span class="token punctuation">(</span><span class="token punctuation">)</span> 
+<span class="token punctuation">}</span>
+
+<span class="token comment">// 🛑 ERROR: L'exclusivité empêche la mutation du propriétaire pendant l'emprunt</span>
+owner <span class="token operator">=</span> <span class="token class-name">Wrapper</span><span class="token punctuation">(</span>element<span class="token punctuation">:</span> <span class="token function">NC</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">)</span> 
+</code></pre>
+<p>Le mécanisme garantit que le propriétaire de la valeur ne peut pas être muté tant que l'emprunt (borrow) est actif, assurant ainsi la cohérence de la mémoire.</p>
+<p>La proposition résout le problème de l'incapacité à accéder à des données non-copiables et réduit la surcharge liée aux coroutines (<code>yielding accessors</code>) en offrant une méthode performante pour l'accès par référence directe.</p>
 
   </div>
 </article>

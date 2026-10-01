@@ -125,32 +125,39 @@
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
 <p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0509-swift-sboms-via-swiftpm.md">SE-0509 - Software Bill of Materials (SBOM) Generation for Swift Package Manager</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition introduit la génération de <strong>Software Bill of Materials (SBOM)</strong> directement via Swift Package Manager (SwiftPM) pour améliorer la sécurité de la chaîne d'approvisionnement logicielle.</p>
-<p>La fonctionnalité supporte deux formats standards : <strong>CycloneDX</strong> et <strong>SPDX</strong>. Elle peut être utilisée de deux manières :</p>
+<p>La proposition introduit la génération de <em>Software Bill of Materials</em> (SBOM) via le <em>Swift Package Manager</em> (SwiftPM) dans les formats CycloneDX et SPDX. Cette fonctionnalité permet de créer un inventaire détaillé des composants logiciels, facilitant ainsi l'analyse de la sécurité de la <em>supply chain</em> et la conformité réglementaire.</p>
+<p>La fonctionnalité se décline en deux modes :</p>
 <ol>
-<li><strong>Via la commande <code>swift build</code></strong> : en utilisant le flag <code>--sbom-spec</code> (cyclonedx ou spdx) pour générer les fichiers lors de la compilation. Si le système <code>SwiftBuild</code> est utilisé, le SBOM reflétera le graphe de dépendances réellement compilé (incluant les dépendances conditionnelles selon l'OS).</li>
-<li><strong>Via une nouvelle commande <code>swift package generate-sbom</code></strong> : pour générer un SBOM de manière indépendante du processus de compilation, en se basant uniquement sur le graphe des modules résolus.</li>
+<li><strong>Intégration à la commande <code>swift build</code></strong> : via l'option <code>--sbom-spec</code>, permettant de générer les fichiers pendant la compilation. L'utilisation de l'option <code>--build-system swiftbuild</code> permet d'inclure le graphe de dépendances du système de construction pour une précision accrue (incluant les dépendances conditionnelles comme l'OS).</li>
+<li><strong>Commande dédiée <code>swift package generate-sbom</code></strong> : pour une génération autonome sans exécution de la compilation, utilisant uniquement le graphe de modules résolu.</li>
 </ol>
-<p>L'implémentation utilise une architecture en trois couches : un extracteur (lecture du graphe de dépendances), un convertisseur (formatage CycloneDX ou SPDX) et un validateur (vérification via schémas JSON).</p>
+<p>Le système supporte plusieurs niveaux de filtrage (<code>all</code>, <code>package</code>, <code>product</code>) et permet de spécifier un répertoire de sortie. Le processus utilise une couche d'extraction (graphe de modules ou de build), une couche de conversion (format JSON pour CycloneDX ou SPDX) et une couche de validation (JSON schema).</p>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0509" tabindex="-1"><a href="#avant-se-0509" class="header-anchor">Avant SE-0509</a></h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># SwiftPM ne possède pas de commande native pour générer des SBOM</span>
-<span class="token comment"># Les développeurs doivent utiliser des outils tiers qui analysent </span>
-<span class="token comment"># souvent uniquement Package.resolved, manquant ainsi les dépendances </span>
-<span class="token comment"># liées à la compilation (ex: dépendances spécifiques à un OS).</span>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Swift Package Manager ne possède pas de commande native pour générer des SBOM.</span>
+<span class="token comment">// Les développeurs doivent utiliser des outils tiers externes.</span>
+<span class="token comment">// Ces outils analysent Package.swift ou Package.resolved, mais </span>
+<span class="token comment">// manquent souvent de contexte sur les dépendances liées aux conditions </span>
+<span class="token comment">// (ex: dépendances spécifiques à un OS) ou sur la relation exacte produit/module.</span>
 </code></pre>
-<p>L'absence de support natif oblige à dépendre d'outils externes qui ne voient pas forcément le graphe de dépendances calculé par le système de build lors de la compilation.</p>
+<p>L'absence de support natif oblige à dépendre de processus externes qui ne voient pas toujours l'intégralité du graphe de dépendance effectif utilisé lors de la compilation.</p>
 <h3 id="apr%C3%A8s-se-0509" tabindex="-1"><a href="#apr%C3%A8s-se-0509" class="header-anchor">Après SE-0509</a></h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># Générer un SBOM CycloneDX pendant le build</span>
-$ swift build --sbom-spec cyclonedx
-
-<span class="token comment"># Générer un SBOM SPDX spécifique pour un produit donné</span>
-$ swift build <span class="token parameter variable">--product</span> MyProduct --sbom-spec spdx
-
-<span class="token comment"># Générer un SBOM via la commande dédiée (basé sur le graphe des modules)</span>
-$ swift package generate-sbom --sbom-spec spdx
+<h4 id="g%C3%A9n%C3%A9ration-via-la-commande-de-build-(avec-pr%C3%A9cision-du-syst%C3%A8me-de-construction)" tabindex="-1"><a href="#g%C3%A9n%C3%A9ration-via-la-commande-de-build-(avec-pr%C3%A9cision-du-syst%C3%A8me-de-construction)" class="header-anchor">Génération via la commande de build (avec précision du système de construction)</a></h4>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># Génération d'un SBOM CycloneDX en utilisant le graphe de build pour inclure les dépendances conditionnelles</span>
+$ swift build --build-system swiftbuild --sbom-spec cyclonedx
 </code></pre>
-<p>L'intégration native permet de générer des inventaires précis (CycloneDX ou SPDX) qui peuvent refléter fidèlement les dépendances utilisées réellement lors de la compilation, facilitant ainsi l'audit et la conformité réglementaire.</p>
+<p>L'utilisation de <code>--build-system swiftbuild</code> garantit que les dépendances spécifiques à la configuration de compilation (ex: OS spécifique) sont correctement listées.</p>
+<h4 id="g%C3%A9n%C3%A9ration-via-une-commande-d%C3%A9di%C3%A9e-(ind%C3%A9pendante-de-la-compilation)" tabindex="-1"><a href="#g%C3%A9n%C3%A9ration-via-une-commande-d%C3%A9di%C3%A9e-(ind%C3%A9pendante-de-la-compilation)" class="header-anchor">Génération via une commande dédiée (indépendante de la compilation)</a></h4>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># Génération d'un SBOM SPDX pour un produit spécifique via le graphe de modules</span>
+$ swift package generate-sbom <span class="token parameter variable">--product</span> MyProduct --sbom-spec spdx
+</code></pre>
+<p>La commande <code>generate-sbom</code> permet de produire un inventaire sans déclencher un processus de compilation complet, ce qui est utile dans les pipelines CI/CD.</p>
+<h4 id="utilisation-de-filtres-pour-limiter-le-p%C3%A9rim%C3%A8tre" tabindex="-1"><a href="#utilisation-de-filtres-pour-limiter-le-p%C3%A9rim%C3%A8tre" class="header-anchor">Utilisation de filtres pour limiter le périmètre</a></h4>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># Générer uniquement les informations relatives aux packages (pour réduire le bruit des vulnérabilités)</span>
+$ swift build --sbom-spec cyclonedx --sbom-filter package
+</code></pre>
+<p>Le filtre <code>package</code> permet de se concentrer sur les unités de mise à jour (les packages) plutôt que sur les produits finaux.</p>
+<p>La proposition résout le problème de la visibilité de la <em>supply chain</em> en intégrant directement la génération d'inventaires certifiés et standardisés au sein de l'outil de gestion de packages officiel, réduisant ainsi la dépendance à des outils tiers et augmentant la précision des données fournies.</p>
 
   </div>
 </article>
