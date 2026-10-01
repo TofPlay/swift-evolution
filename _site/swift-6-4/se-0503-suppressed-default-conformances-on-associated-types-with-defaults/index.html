@@ -123,15 +123,16 @@
 <h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
 <p>Swift 6.4</p>
 <h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
-<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0503-suppressed-associated-types.md">SE-0503 - Suppressed Default Conformances on Associated Types With Defaults</a></p>
+<p><a href="https://github.com/swiftlang/swift-proposals/blob/main/0503-suppressed-associated-types.md">SE-0503 - Suppressed Default Conformances on Associated Types With Defaults</a></p>
 <h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
-<p>Cette proposition étend la capacité de supprimer les conformités par défaut aux protocoles <code>Copyable</code> et <code>Escapable</code> aux <code>associated type</code> d'un protocole. Dans la syntaxe existante (introduite par SE-427), tout <code>associated type</code> primaire (présent dans la signature générique du protocole) se voit imposer implicitement une contrainte de conformité à <code>Copyable</code> et <code>Escapable</code>. La proposition introduit la possibilité d'utiliser l'opérateur de suppression <code>~</code> directement lors de la déclaration de l' <code>associated type</code> (ex: <code>associatedtype Element: ~Copyable</code>).</p>
-<p>Le mécanisme applique une logique de suppression spécifique :</p>
-<ol>
-<li>La suppression d'un <code>associated type</code> primaire annule automatiquement la contrainte de conformité par défaut sur le type lui-même lorsqu'il est utilisé comme contrainte générique.</li>
-<li>Les <code>associated type</code> non-primaires ne reçoivent pas de contrainte par défaut.</li>
-<li>La suppression peut s'effectuer via l'héritage, une clause <code>where</code> sur l' <code>associated type</code>, ou une clause <code>where</code> sur le protocole lui-même.</li>
-</ol>
+<p>La proposition introduit la capacité de supprimer les conformances par défaut aux protocoles <code>Copyable</code> et <code>Escapable</code> pour les <code>associated type</code> au sein des protocoles.</p>
+<p>Le mécanisme repose sur les points suivants :</p>
+<ul>
+<li><strong>Extension de la syntaxe de suppression :</strong> L'utilisation de l'opérateur de tilde (<code>~</code>) est désormais autorisée sur les déclarations d' <code>associated type</code>.</li>
+<li><strong>Comportement par défaut des types primaires :</strong> Le système impose automatiquement une contrainte de conformité à <code>Copyable</code> et <code>Escapable</code> pour les <code>associated type</code> primaires (déclarés entre chevrons) lors de l'utilisation du protocole comme contrainte générique.</li>
+<li><strong>Distinction des types secondaires :</strong> Les <code>associated type</code> ordinaires (non primaires) ne subissent pas l'imposition automatique de ces conformances.</li>
+<li><strong>Mécanisme d'inversion :</strong> Une déclaration de type inverse (ex: <code>~Copyable</code>) permet d'annuler la contrainte de conformité inférée par l'expansion de la signature générique.</li>
+</ul>
 <h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
 <h3 id="avant-se-0503" tabindex="-1"><a href="#avant-se-0503" class="header-anchor">Avant SE-0503</a></h3>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">protocol</span> <span class="token class-name">Queue</span><span class="token operator">&lt;</span><span class="token class-name">Element</span><span class="token operator">&gt;</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
@@ -143,12 +144,16 @@
     <span class="token keyword">mutating</span> <span class="token keyword">func</span> <span class="token function-definition function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Element</span>
 <span class="token punctuation">}</span>
 
+<span class="token keyword">struct</span> <span class="token class-name">DefaultAllocator</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
 <span class="token keyword">struct</span> <span class="token class-name">LinkedList</span><span class="token operator">&lt;</span><span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span><span class="token operator">&gt;</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span><span class="token punctuation">,</span> <span class="token class-name">Queue</span> <span class="token punctuation">{</span>
     <span class="token comment">// Erreur : Element est requis comme Copyable par le protocole Queue</span>
+    <span class="token comment">// car Element est un associated type primaire.</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>L'omission de spécification de conformité pour un <code>associated type</code> primaire entraîne l'inférence automatique d'une exigence <code>Copyable</code>. Cela empêche l'utilisation de types non-copyable comme membres d'un protocole qui ne sont pas eux-mêmes contraints par <code>~Copyable</code>.</p>
+<p>La contrainte implicite sur le <code>associated type</code> primaire <code>Element</code> empêche la conformité de protocoles qui utilisent des types non-copyables.</p>
 <h3 id="apr%C3%A8s-se-0503" tabindex="-1"><a href="#apr%C3%A8s-se-0503" class="header-anchor">Après SE-0503</a></h3>
+<h4 id="extension-de-la-syntaxe-de-suppression" tabindex="-1"><a href="#extension-de-la-syntaxe-de-suppression" class="header-anchor">Extension de la syntaxe de suppression</a></h4>
 <pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">protocol</span> <span class="token class-name">Queue</span><span class="token operator">&lt;</span><span class="token class-name">Element</span><span class="token operator">&gt;</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
     <span class="token keyword">associatedtype</span> <span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span>
     <span class="token keyword">associatedtype</span> <span class="token class-name">Allocator</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token operator">=</span> <span class="token class-name">DefaultAllocator</span>
@@ -158,11 +163,50 @@
     <span class="token keyword">mutating</span> <span class="token keyword">func</span> <span class="token function-definition function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token keyword">Self</span><span class="token punctuation">.</span><span class="token class-name">Element</span>
 <span class="token punctuation">}</span>
 
+<span class="token keyword">struct</span> <span class="token class-name">DefaultAllocator</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
 <span class="token keyword">struct</span> <span class="token class-name">LinkedList</span><span class="token operator">&lt;</span><span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span><span class="token operator">&gt;</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span><span class="token punctuation">,</span> <span class="token class-name">Queue</span> <span class="token punctuation">{</span>
-    <span class="token comment">// Code valide : la contrainte Copyable sur Element est supprimée</span>
+    <span class="token comment">// Succès : Element peut être un type non-copyable.</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>La syntaxe <code>associatedtype Element: ~Copyable</code> permet de lever l'obligation de conformité par défaut. Le langage permet ainsi de définir des protocoles dont les membres peuvent être des types non-copyable ou non-escapable, offrant une plus grande expressivité pour les types <code>noncopyable</code>.</p>
+<p>La syntaxe <code>~Copyable</code> sur l' <code>associated type</code> permet de lever l'obligation de conformité automatique.</p>
+<h4 id="comportement-par-d%C3%A9faut-des-types-primaires" tabindex="-1"><a href="#comportement-par-d%C3%A9faut-des-types-primaires" class="header-anchor">Comportement par défaut des types primaires</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">protocol</span> <span class="token class-name">Buffer</span><span class="token operator">&lt;</span><span class="token class-name">Data</span><span class="token operator">&gt;</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">associatedtype</span> <span class="token class-name">Data</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span>
+    <span class="token keyword">associatedtype</span> <span class="token class-name">Parser</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// L'extension automatique n'impose que la contrainte sur le type primaire 'Data'</span>
+<span class="token keyword">extension</span> <span class="token class-name">Buffer</span> <span class="token punctuation">{</span>
+    <span class="token keyword">func</span> <span class="token function-definition function">valid</span><span class="token punctuation">(</span><span class="token omit keyword">_</span> bytes<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token class-name">UInt8</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">-&gt;</span> <span class="token class-name">Bool</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token boolean">true</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Le système impose par défaut la contrainte uniquement sur les types primaires (ceux utilisés dans les chevrons), ce qui préserve l'usage commun.</p>
+<h4 id="distinction-des-types-secondaires" tabindex="-1"><a href="#distinction-des-types-secondaires" class="header-anchor">Distinction des types secondaires</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">TextParser</span> <span class="token punctuation">{</span> <span class="token operator">...</span> <span class="token punctuation">}</span>
+
+<span class="token comment">// Le type 'Parser' est un associated type ordinaire.</span>
+<span class="token comment">// Il ne reçoit pas de contrainte de conformité implicite (Copyable/Escapable)</span>
+<span class="token comment">// par défaut, même si le protocole est utilisé comme contrainte.</span>
+<span class="token keyword">struct</span> <span class="token class-name">Reader</span><span class="token operator">&lt;</span><span class="token class-name">Data</span><span class="token operator">&gt;</span><span class="token punctuation">:</span> <span class="token class-name">Buffer</span> <span class="token keyword">where</span> <span class="token class-name">Data</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">typealias</span> <span class="token class-name">Parser</span> <span class="token operator">=</span> <span class="token class-name">TextParser</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Les <code>associated type</code> ordinaires ne subissent pas l'imposition automatique de conformité, évitant ainsi de bloquer les extensions de protocoles.</p>
+<h4 id="m%C3%A9canisme-d'inversion" tabindex="-1"><a href="#m%C3%A9canisme-d'inversion" class="header-anchor">Mécanisme d'inversion</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">protocol</span> <span class="token class-name">Iterable</span><span class="token operator">&lt;</span><span class="token class-name">Element</span><span class="token operator">&gt;</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">associatedtype</span> <span class="token class-name">Element</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">Cursor</span><span class="token operator">&lt;</span><span class="token class-name">Value</span><span class="token operator">&gt;</span><span class="token punctuation">:</span> <span class="token class-name">Iterable</span><span class="token operator">&lt;</span><span class="token class-name">Value</span><span class="token operator">&gt;</span> <span class="token keyword">where</span> <span class="token class-name">Value</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token comment">// L'utilisation d'une contrainte inverse sur le type associé</span>
+    <span class="token comment">// permet d'annuler l'inférence de conformité par défaut.</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'utilisation de contraintes inverses permet d'annuler les exigences générées par l'expansion des signatures génériques.</p>
+<p>La proposition résout le problème de l'expressivité en permettant aux développeurs de définir des protocoles dont les types associés ne sont pas obligatoirement <code>Copyable</code> ou <code>Escapable</code>, tout en maintenant la sécurité et les valeurs par défaut prévisibles.</p>
 
   </div>
 </article>
