@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0537 - Section Placement Control for Functions</title>
+
+    <meta data-pagefind-meta="parent:Swift 6.5">
+    <meta data-pagefind-meta="parent_url:/swift-6-5/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-6-5/se-0537-section-placement-control-for-functions/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Swift Evolution">
+<meta property="og:description" content="Site dédié à Swift Evolution">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-6-5/se-0537-section-placement-control-for-functions/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Site dédié à Swift Evolution">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-6-5/">
+                  Swift 6.5
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0537 - Section Placement Control for Functions</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0537 - Section Placement Control for Functions" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0537 - Section Placement Control for Functions">
+  
+  <div class="post-body">
+    <h1>SE-0537 - Section Placement Control for Functions</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.5</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0537-function-sections.md">SE-0537 - Section Placement Control for Functions</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>L'attribution <code>@section</code> permet de spécifier l'emplacement d'une entité dans un fichier objet. La proposition SE-0537 étend cette capacité aux fonctions, ce qui est crucial pour les systèmes embarqués où certains points d'entrée (comme le code de démarrage d'un firmware) doivent résider dans une section binaire spécifique. Cette extension s'applique aux <code>func</code>, <code>init</code>, <code>deinit</code>, <code>closure</code>, ainsi qu'aux accesseurs (<code>get</code>, <code>set</code>).</p>
+<p>Le mécanisme repose sur trois piliers :</p>
+<ol>
+<li><strong>Application étendue</strong> : L'attribut est applicable à tous les types de fonctions, y compris les fonctions génériques et les fonctions d'instance.</li>
+<li><strong>Inférence intelligente</strong> : L'attribut est automatiquement transmis aux éléments imbriqués (fonctions locales, <code>closure</code>) ou aux accesseurs synthétisés par le compilateur.</li>
+<li><strong>Contrôle explicite</strong> : L'utilisation de <code>@section(default)</code> permet de rompre la chaîne d'inférence et de forcer l'utilisation de la section par défaut de la plateforme.</li>
+</ol>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0537" tabindex="-1"><a href="#avant-se-0537" class="header-anchor">Avant SE-0537</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">func</span> <span class="token function-definition function">firmwareBootEntrypoint</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Le code est placé dans la section par défaut (ex: __TEXT)</span>
+    <span class="token comment">// Il est impossible de forcer ce code dans une section spécifique comme "__TEXT,boot"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'impossibilité de cibler une section spécifique empêche le placement du code de démarrage dans les zones mémoire requises par les chargeurs de démarrage (bootloaders) ou les processeurs matériels, rendant l'utilisation de Swift difficile dans des environnements de bas niveau exigeants.</p>
+<h3 id="apr%C3%A8s-se-0537" tabindex="-1"><a href="#apr%C3%A8s-se-0537" class="header-anchor">Après SE-0537</a></h3>
+<h4 id="attribution-aux-fonctions-et-initialisateurs" tabindex="-1"><a href="#attribution-aux-fonctions-et-initialisateurs" class="header-anchor">Attribution aux fonctions et initialisateurs</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@section</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"__TEXT,boot"</span></span><span class="token punctuation">)</span>
+<span class="token keyword">func</span> <span class="token function-definition function">firmwareBootEntrypoint</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> 
+    <span class="token comment">// Code placé dans la section "__TEXT,boot"</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">struct</span> <span class="token class-name">MyBootConfig</span><span class="token punctuation">:</span> <span class="token operator">~</span><span class="token class-name">Copyable</span> <span class="token punctuation">{</span>
+    <span class="token attribute atrule">@section</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"__TEXT,boot"</span></span><span class="token punctuation">)</span> 
+    <span class="token keyword">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> 
+        <span class="token comment">// L'initialiseur est placé dans la section spécifiée</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token attribute atrule">@section</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"__TEXT,boot"</span></span><span class="token punctuation">)</span> 
+    <span class="token keyword">deinit</span> <span class="token punctuation">{</span> 
+        <span class="token comment">// Le déinitialisateur est également placé dans la section</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'attribut <code>@section</code> est applicable directement sur les déclarations de fonctions (<code>func</code>), les initialiseurs (<code>init</code>) et les déinitialisateurs (<code>deinit</code>). Cela permet de garantir que le code exécutable critique se trouve dans la section mémoire appropriée définie par le linker.</p>
+<h4 id="application-aux-accesseurs-et-closures" tabindex="-1"><a href="#application-aux-accesseurs-et-closures" class="header-anchor">Application aux accesseurs et closures</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">MySensor</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> bootPhase<span class="token punctuation">:</span> <span class="token class-name">Int</span> <span class="token punctuation">{</span>
+        <span class="token attribute atrule">@section</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"__TEXT,boot"</span></span><span class="token punctuation">)</span> <span class="token keyword">get</span> <span class="token punctuation">{</span> 
+            <span class="token keyword">return</span> <span class="token number">1</span> 
+        <span class="token punctuation">}</span>
+        <span class="token attribute atrule">@section</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"__TEXT,boot"</span></span><span class="token punctuation">)</span> <span class="token keyword">set</span> <span class="token punctuation">{</span> 
+            <span class="token comment">// Le setter est placé dans la section spécifiée</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">func</span> <span class="token function-definition function">setup</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">let</span> task <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token attribute atrule">@section</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"__TEXT,boot"</span></span><span class="token punctuation">)</span> <span class="token keyword">in</span>
+            <span class="token comment">// La closure est placée dans la section spécifiée</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'attribut peut être appliqué explicitement aux accesseurs (<code>get</code>, <code>set</code>) ou aux <code>closure</code>. De plus, l'attribut est transmis par inférence : une <code>closure</code> ou une fonction locale hérite de la section de la fonction parente, et les accesseurs synthétisés (comme un <code>get</code> automatique) héritent de l'accesseur explicitement annoté.</p>
+<h4 id="utilisation-de-l'option-par-d%C3%A9faut" tabindex="-1"><a href="#utilisation-de-l'option-par-d%C3%A9faut" class="header-anchor">Utilisation de l'option par défaut</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@section</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"__TEXT,boot"</span></span><span class="token punctuation">)</span>
+<span class="token keyword">func</span> <span class="token function-definition function">firmwareBootEntrypoint</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token attribute atrule">@section</span><span class="token punctuation">(</span><span class="token keyword">default</span><span class="token punctuation">)</span> 
+    <span class="token keyword">func</span> <span class="token function-definition function">helper</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// La fonction helper ignore l'attribut de la parente </span>
+        <span class="token comment">// et utilise la section par défaut du système</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>L'expression <code>@section(default)</code> permet de suspendre l'inférence de l'attribut. Cela est utile lorsque l'on souhaite que des fonctions utilitaires contenues dans une fonction critique ne soient pas déplacées dans la section spéciale, évitant ainsi de polluer la section réservée au boot.</p>
+<h4 id="support-des-fonctions-asynchrones-et-g%C3%A9n%C3%A9riques" tabindex="-1"><a href="#support-des-fonctions-asynchrones-et-g%C3%A9n%C3%A9riques" class="header-anchor">Support des fonctions asynchrones et génériques</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token attribute atrule">@section</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"__TEXT,boot"</span></span><span class="token punctuation">)</span>
+<span class="token keyword">func</span> <span class="token function-definition function">asyncBoot</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">async</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Les fonctions partielles générées par le compilateur pour l'async</span>
+    <span class="token comment">// respectent l'attribut "__TEXT,boot"</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">func</span> <span class="token function-definition function">genericFunction</span><span class="token operator">&lt;</span><span class="token class-name">T</span><span class="token operator">&gt;</span><span class="token punctuation">(</span>value<span class="token punctuation">:</span> <span class="token class-name">T</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// La spécialisation de cette fonction générique </span>
+    <span class="token comment">// respectera l'attribut si il est appliqué</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>La proposition résout le problème de la complexité des fonctions génériques et asynchrones en garantissant que toutes les implémentations produites par le compilateur (spécialisations ou fonctions partielles pour l'asynchronisme) conservent l'attribution de la section d'origine.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

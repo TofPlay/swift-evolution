@@ -1977,6 +1977,46 @@
     <lastmod>2026-06-04T16:28:47.269Z</lastmod>
   </url>
   <url>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-5/</loc>
+    <lastmod>2026-11-13T21:37:56.937Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-5/se-0484-allow-additional-arguments-to-dynamicmemberlookup-subscripts/</loc>
+    <lastmod>2026-11-13T21:22:01.618Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-5/se-0501-html-coverage-report/</loc>
+    <lastmod>2026-11-13T21:24:52.669Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-5/se-0537-section-placement-control-for-functions/</loc>
+    <lastmod>2026-11-13T21:25:19.368Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-5/se-0541-flexible-swift-c-interoperability-for-packages/</loc>
+    <lastmod>2026-11-13T21:26:04.219Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-5/se-0543-inlinearray-hashable/</loc>
+    <lastmod>2026-11-13T21:26:43.627Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-5/se-0545-swiftpm-build-performance-debugging-options/</loc>
+    <lastmod>2026-11-13T21:27:25.122Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-5/se-0547-swiftpm-support-for-compilation-caching/</loc>
+    <lastmod>2026-11-13T21:28:10.423Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-5/se-0551-span-over-a-single-value/</loc>
+    <lastmod>2026-11-13T21:28:38.656Z</lastmod>
+  </url>
+  <url>
+    <loc>https://tofplay.github.io/swift-evolution/swift-6-5/se-0552-rounding-of-float-pi/</loc>
+    <lastmod>2026-11-13T21:29:02.480Z</lastmod>
+  </url>
+  <url>
     <loc>https://tofplay.github.io/swift-evolution/swiftpm/</loc>
     <lastmod>2026-08-05T18:19:52.621Z</lastmod>
   </url>

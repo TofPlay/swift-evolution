@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0501 - HTML Coverage Report</title>
+
+    <meta data-pagefind-meta="parent:Swift 6.5">
+    <meta data-pagefind-meta="parent_url:/swift-6-5/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-6-5/se-0501-html-coverage-report/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Swift Evolution">
+<meta property="og:description" content="Site dédié à Swift Evolution">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-6-5/se-0501-html-coverage-report/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Site dédié à Swift Evolution">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-6-5/">
+                  Swift 6.5
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0501 - HTML Coverage Report</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0501 - HTML Coverage Report" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0501 - HTML Coverage Report">
+  
+  <div class="post-body">
+    <h1>SE-0501 - HTML Coverage Report</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.5</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0501-swiftpm-html-coverage-report.md">SE-0501 - HTML Coverage Report</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition SE-0501 introduit la génération de rapports de couverture de code au format HTML via <code>swift test</code>, en s'appuyant sur les outils <code>llvm-cov</code>. Cette évolution permet de passer d'un format JSON exclusivement destiné aux outils d'analyse à un format HTML lisible par l'humain. La proposition inclut également la possibilité de passer des arguments personnalisés à l'outil sous-jacent via une syntaxe spécifique et harmonise les options de commande relatives à la couverture.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0501" tabindex="-1"><a href="#avant-se-0501" class="header-anchor">Avant SE-0501</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// La commande ne permet de générer que le rapport JSON par défaut</span>
+swift test <span class="token operator">--</span>enable<span class="token operator">-</span>coverage
+
+<span class="token comment">// Pour obtenir un rapport HTML, l'utilisateur doit appeler manuellement llvm-cov</span>
+llvm<span class="token operator">-</span>cov show <span class="token punctuation">\</span>
+  <span class="token operator">--</span>project<span class="token operator">-</span>title<span class="token operator">=</span><span class="token string-literal"><span class="token string">"HelloWorld"</span></span> <span class="token punctuation">\</span>
+  <span class="token operator">--</span>format<span class="token operator">=</span><span class="token string-literal"><span class="token string">"html"</span></span> <span class="token punctuation">\</span>
+  <span class="token operator">--</span>output<span class="token operator">-</span>dir<span class="token operator">=</span><span class="token string-literal"><span class="token string">".coverage"</span></span> <span class="token punctuation">\</span>
+  <span class="token operator">--</span>instr<span class="token operator">-</span>profile<span class="token operator">=</span><span class="token string-literal"><span class="token string">".build/.../default.profdata"</span></span> <span class="token punctuation">\</span>
+  <span class="token string-literal"><span class="token string">".build/.../HelloWorldPackageTests.xctest/Contents/MacOS/HelloWorldPackageTests"</span></span> <span class="token punctuation">\</span>
+  <span class="token string-literal"><span class="token string">"Sources"</span></span>
+</code></pre>
+<p>L'utilisateur doit effectuer une démarche manuelle complexe pour obtenir une visualisation graphique. Le format JSON est difficilement exploitable pour une inspection visuelle rapide lors du développement itératif.</p>
+<h3 id="apr%C3%A8s-se-0501" tabindex="-1"><a href="#apr%C3%A8s-se-0501" class="header-anchor">Après SE-0501</a></h3>
+<h4 id="s%C3%A9lection-du-format-de-couverture" tabindex="-1"><a href="#s%C3%A9lection-du-format-de-couverture" class="header-anchor">Sélection du format de couverture</a></h4>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># Génération du rapport JSON (comportement par défaut)</span>
+swift <span class="token builtin class-name">test</span> --enable-coverage
+
+<span class="token comment"># Génération d'un rapport HTML</span>
+swift <span class="token builtin class-name">test</span> --enable-coverage --coverage-format html
+
+<span class="token comment"># Génération simultanée de formats multiples</span>
+swift <span class="token builtin class-name">test</span> --enable-coverage --coverage-format html --coverage-format json
+</code></pre>
+<p>La commande <code>swift test</code> supporte un nouvel argument <code>--coverage-format</code> acceptant les valeurs <code>json</code> ou <code>html</code>. Cet argument peut être utilisé plusieurs fois pour générer plusieurs types de rapports lors d'une seule exécution des tests.</p>
+<h4 id="configuration-avanc%C3%A9e-via-des-arguments-personnalis%C3%A9s" tabindex="-1"><a href="#configuration-avanc%C3%A9e-via-des-arguments-personnalis%C3%A9s" class="header-anchor">Configuration avancée via des arguments personnalisés</a></h4>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># Utilisation d'un argument commun à tous les formats</span>
+swift <span class="token builtin class-name">test</span> --enable-coverage --coverage-format html --coverage-format json <span class="token parameter variable">-Xcov</span> <span class="token parameter variable">--title</span> <span class="token string">"Mon Projet"</span>
+
+<span class="token comment"># Utilisation d'un argument spécifique au format HTML uniquement</span>
+swift <span class="token builtin class-name">test</span> --enable-coverage --coverage-format html --coverage-format json <span class="token parameter variable">-Xcov</span> <span class="token assign-left variable">html</span><span class="token operator">=</span>--title<span class="token operator">=</span><span class="token string">"Mon Projet"</span>
+
+<span class="token comment"># Utilisation d'un argument spécifique au format JSON uniquement</span>
+swift <span class="token builtin class-name">test</span> --enable-coverage --coverage-format html --coverage-format json <span class="token parameter variable">-Xcov</span> <span class="token assign-left variable">json</span><span class="token operator">=</span>--option-specifique
+</code></pre>
+<p>L'introduction de l'option <code>-Xcov</code> permet de transmettre des arguments directement à l'utilitaire <code>llvm-cov</code>. La syntaxe <code>[&lt;coverage-format&gt;=]&lt;value&gt;</code> permet de cibler un format spécifique ou d'appliquer une option de manière globale à tous les formats générés. Cela résout la limitation de personnalisation de l'outil de couverture sans surcharger l'interface de <code>swift test</code>.</p>
+<h4 id="affichage-du-chemin-de-couverture" tabindex="-1"><a href="#affichage-du-chemin-de-couverture" class="header-anchor">Affichage du chemin de couverture</a></h4>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># Affichage sous forme de texte (par défaut)</span>
+swift <span class="token builtin class-name">test</span> --show-coverage-path text --coverage-format html --coverage-format json
+<span class="token comment"># Sortie :</span>
+<span class="token comment"># Html: /chemin/vers/rapport.html</span>
+<span class="token comment"># Json: /chemin/vers/rapport.json</span>
+
+<span class="token comment"># Affichage sous forme d'objet JSON</span>
+swift <span class="token builtin class-name">test</span> --show-coverage-path json --coverage-format html --coverage-format json
+<span class="token comment"># Sortie :</span>
+<span class="token comment"># { "html" : "/chemin/vers/rapport.html", "json" : "/chemin/vers/rapport.json" }</span>
+</code></pre>
+<p>L'option <code>--show-coverage-path</code> est enrichie pour accepter un mode (<code>text</code> ou <code>json</code>). Cela permet une intégration plus souple dans les scripts ou les environnements de CI (Continuous Integration) lorsque plusieurs fichiers de couverture sont générés.</p>
+<h4 id="harmonisation-des-options-de-commande" tabindex="-1"><a href="#harmonisation-des-options-de-commande" class="header-anchor">Harmonisation des options de commande</a></h4>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># Utilisation des nouvelles options unifiées</span>
+swift <span class="token builtin class-name">test</span> --enable-coverage
+swift <span class="token builtin class-name">test</span> --show-coverage-path
+</code></pre>
+<p>La proposition unifie les diverses options existantes (comme <code>--enable-code-coverage</code> ou <code>--show-codecov-path</code>) vers des noms plus cohérents (<code>--enable-coverage</code> et <code>--show-coverage-path</code>). Cette simplification améliore la clarté de l'interface en ligne de commande de SwiftPM.</p>
+<p>La proposition permet de transformer une tâche manuelle et complexe (exécution de <code>llvm-cov</code> avec des chemins absolatoires) en une commande native et simple, facilitant l'inspection visuelle de la couverture de code directement pendant le cycle de développement.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

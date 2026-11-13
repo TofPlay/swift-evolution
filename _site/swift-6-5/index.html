@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - Swift 6.5</title>
+
+    <meta data-pagefind-meta="parent:Swift 6.5">
+    <meta data-pagefind-meta="parent_url:/swift-6-5/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-6-5/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Swift Evolution">
+<meta property="og:description" content="Site dédié à Swift Evolution">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-6-5/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Site dédié à Swift Evolution">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <span aria-current="page">Swift 6.5</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="Swift 6.5" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:Swift 6.5">
+  
+  <div class="post-body">
+    <h1>Swift 6.5</h1>
+<h2 id="introduction" tabindex="-1"><a href="#introduction" class="header-anchor">Introduction</a></h2>
+<p>Cette page liste l'ensemble des propositions d'évolution de la version Swift 6.5</p>
+<h2 id="liste-des-se" tabindex="-1"><a href="#liste-des-se" class="header-anchor">Liste des SE</a></h2>
+<p>Il y a 9 propositions :</p>
+<ul>
+<li><a href="/swift-evolution/swift-6-5/se-0484-allow-additional-arguments-to-dynamicmemberlookup-subscripts/">SE-0484 Allow Additional Arguments to @dynamicMemberLookup Subscripts</a></li>
+<li><a href="/swift-evolution/swift-6-5/se-0501-html-coverage-report/">SE-0501 HTML Coverage Report</a></li>
+<li><a href="/swift-evolution/swift-6-5/se-0537-section-placement-control-for-functions/">SE-0537 Section Placement Control for Functions</a></li>
+<li><a href="/swift-evolution/swift-6-5/se-0541-flexible-swift-c-interoperability-for-packages/">SE-0541 Flexible Swift-C Interoperability for Packages</a></li>
+<li><a href="/swift-evolution/swift-6-5/se-0543-inlinearray-hashable/">SE-0543 InlineArray - Hashable</a></li>
+<li><a href="/swift-evolution/swift-6-5/se-0545-swiftpm-build-performance-debugging-options/">SE-0545 SwiftPM Build Performance Debugging Options</a></li>
+<li><a href="/swift-evolution/swift-6-5/se-0547-swiftpm-support-for-compilation-caching/">SE-0547 SwiftPM Support for Compilation Caching</a></li>
+<li><a href="/swift-evolution/swift-6-5/se-0551-span-over-a-single-value/">SE-0551 Span over a single value</a></li>
+<li><a href="/swift-evolution/swift-6-5/se-0552-rounding-of-float-pi/">SE-0552 Rounding of Float.pi</a></li>
+</ul>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

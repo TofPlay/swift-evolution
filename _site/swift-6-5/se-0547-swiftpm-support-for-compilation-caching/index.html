@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0547 - SwiftPM Support for Compilation Caching</title>
+
+    <meta data-pagefind-meta="parent:Swift 6.5">
+    <meta data-pagefind-meta="parent_url:/swift-6-5/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-6-5/se-0547-swiftpm-support-for-compilation-caching/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Swift Evolution">
+<meta property="og:description" content="Site dédié à Swift Evolution">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-6-5/se-0547-swiftpm-support-for-compilation-caching/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Site dédié à Swift Evolution">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-6-5/">
+                  Swift 6.5
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0547 - SwiftPM Support for Compilation Caching</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0547 - SwiftPM Support for Compilation Caching" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0547 - SwiftPM Support for Compilation Caching">
+  
+  <div class="post-body">
+    <h1>SE-0547 - SwiftPM Support for Compilation Caching</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.5</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0547-swiftpm-compilation-caching.md">SE-0547 - SwiftPM Support for Compilation Caching</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>Cette proposition introduit le support du cache de compilation au sein de Swift Package Manager (SwiftPM) en exploitant un <em>Content Addressable Store</em> (CAS). Le système permet de mémoriser les résultats de compilation pour les réutiliser lors de sessions de build ultérieures, en se basant sur une clé de hachage dérivée des entrées (fichiers sources, lignes de commande du compilateur, modules importés, etc.). Cette fonctionnalité est optionnelle (<em>opt-in</em>) et peut être configurée à trois niveaux de granularité : global, par package ou par commande unique. Elle inclut également le <em>prefix mapping</em> pour permettre le partage de cache entre différents chemins de fichiers et la gestion automatique de la taille du cache.</p>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0547" tabindex="-1"><a href="#avant-se-0547" class="header-anchor">Avant SE-0547</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Scénario 1 : Changement de branche Git</span>
+<span class="token comment">// L'utilisateur effectue un 'git checkout feature-branch'</span>
+<span class="token comment">// Le répertoire de build est considéré comme invalide ou nettoyé</span>
+swift build 
+<span class="token comment">// Le compilateur doit recompiler l'intégralité des modules et sources.</span>
+
+<span class="token comment">// Scénario 2 : Environnement de CI (Continuous Integration)</span>
+<span class="token comment">// La CI effectue un 'clean build' à chaque exécution pour garantir l'isolation.</span>
+swift package clean
+swift build
+<span class="token comment">// Chaque build est traité comme une compilation totalement nouvelle.</span>
+</code></pre>
+<p>L'absence de mécanisme de cache de compilation oblige le compilateur à reconstruire systématiquement les artefacts, même si les fichiers sources et les dépendances n'ont pas changé. Cela entraîne une perte de temps considérable lors des changements de branches, de l'utilisation de <code>git worktrees</code> ou dans les pipelines de CI qui privilégient des environnements propres. Le système de build traditionnel repose sur l'horodatage (<em>timestamp-based invalidation</em>), ce qui est inefficace pour ces cas de figure.</p>
+<h3 id="apr%C3%A8s-se-0547" tabindex="-1"><a href="#apr%C3%A8s-se-0547" class="header-anchor">Après SE-0547</a></h3>
+<h4 id="configuration-globale-du-cache" tabindex="-1"><a href="#configuration-globale-du-cache" class="header-anchor">Configuration globale du cache</a></h4>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># Activation du cache pour tous les packages sur la machine</span>
+swift package build-cache configure --enable-caching <span class="token parameter variable">--global</span>
+
+<span class="token comment"># Définition d'un chemin spécifique et d'une limite de taille globale</span>
+swift package build-cache configure <span class="token parameter variable">--path</span> /path/to/large/disk --size-limit 50G <span class="token parameter variable">--global</span>
+</code></pre>
+<p>La proposition permet de définir un comportement par défaut pour l'ensemble du système via un fichier de configuration stocké dans le répertoire de configuration partagé de SwiftPM. Cela évite de devoir spécifier les paramètres de cache pour chaque projet individuel.</p>
+<h4 id="configuration-locale-au-package" tabindex="-1"><a href="#configuration-locale-au-package" class="header-anchor">Configuration locale au package</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token comment">// Dans le répertoire du package (via .swiftpm/configuration/build-cache-config.json)</span>
+<span class="token comment">// On peut limiter la taille du cache spécifiquement pour ce projet</span>
+swift package build<span class="token operator">-</span>cache configure <span class="token operator">--</span>size<span class="token operator">-</span>limit 10G
+</code></pre>
+<p>Un développeur peut définir des paramètres spécifiques à un projet via un fichier de configuration situé dans le dossier <code>.swiftpm</code> du package. Cette configuration est stockée localement et peut être gérée indépendamment de la configuration globale, offrant une flexibilité pour les projets nécessitant des gestionnaires de cache distincts.</p>
+<h4 id="configuration-par-commande-(per-build)" tabindex="-1"><a href="#configuration-par-commande-(per-build)" class="header-anchor">Configuration par commande (Per-build)</a></h4>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># Build avec activation du cache et mapping de préfixes pour les chemins absolus</span>
+swift build --enable-build-caching --enable-build-cache-prefix-mapping --build-cache-path ./my-cache
+
+<span class="token comment"># Build sans cache pour une isolation totale</span>
+swift build --disable-build-caching
+</code></pre>
+<p>Il est possible de surcharger toute configuration existante (globale ou locale) en passant des arguments directement lors de l'exécution de la commande <code>swift build</code>. Cela est particulièrement utile dans les scripts de CI pour garantir un état de build spécifique.</p>
+<h4 id="gestion-et-diagnostic-du-cache" tabindex="-1"><a href="#gestion-et-diagnostic-du-cache" class="header-anchor">Gestion et diagnostic du cache</a></h4>
+<pre class="language-bash" tabindex="0"><code class="language-bash"><span class="token comment"># Consulter la configuration effective appliquée au package actuel</span>
+swift package build-cache get-configuration
+
+<span class="token comment"># Obtenir des informations sur l'état du cache (taille, etc.)</span>
+swift package build-cache info
+
+<span class="token comment"># Nettoyer le cache de compilation du package</span>
+swift package build-cache clean
+
+<span class="token comment"># Réinitialiser la configuration vers les valeurs par défaut</span>
+swift package build-cache reset-configuration
+</code></pre>
+<p>La proposition inclut un ensemble de commandes pour administrer le cache. Ces outils permettent de vérifier l'utilisation des ressources, de purger les données stockées ou de réinitialiser les paramètres, offrant ainsi un contrôle total sur l'espace disque utilisé par les artefacts de compilation.</p>
+<p>La proposition résout le problème de l'inefficacité des builds en introduisant une identification basée sur le contenu plutôt que sur les horodatages. En utilisant le <em>prefix mapping</em>, le système peut reconnaître que le même code source est compilé dans un répertoire différent, permettant ainsi de réutiliser le même artefact mis en cache. Cela accélère considérablement les itérations de développement et réduit le temps de cycle dans les environnements de CI.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>

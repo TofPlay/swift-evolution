@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TofPlay - SE-0543 - InlineArray - Hashable</title>
+
+    <meta data-pagefind-meta="parent:Swift 6.5">
+    <meta data-pagefind-meta="parent_url:/swift-6-5/">
+
+    <meta name="supported-color-schemes" content="light dark">
+    <meta name="theme-color" content="hsl(220, 20%, 100%)" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="hsl(220, 20%, 10%)" media="(prefers-color-scheme: dark)">
+
+    <link rel="stylesheet" href="/swift-evolution/styles.css">
+    <link rel="alternate" href="/swift-evolution/feed.xml" type="application/atom+xml" title="TofPlay">
+    <link rel="alternate" href="/swift-evolution/feed.json" type="application/json" title="TofPlay">
+    <link rel="icon" type="image/png" sizes="32x32" href="/swift-evolution/favicon.png">
+    <link rel="canonical" href="https://tofplay.github.io/swift-evolution/swift-6-5/se-0543-inlinearray-hashable/">
+    <script src="/swift-evolution/js/main.js" type="module"></script>
+    <link rel="stylesheet" href="/swift-evolution/styles/custom.css">
+  <meta property="og:type" content="website">
+<meta property="og:site_name" content="TofPlay">
+<meta property="og:locale" content="fr">
+<meta property="og:title" content="Swift Evolution">
+<meta property="og:description" content="Site dédié à Swift Evolution">
+<meta property="og:url" content="https://tofplay.github.io/swift-evolution/swift-6-5/se-0543-inlinearray-hashable/">
+<meta name="twitter:card" content="summary">
+<meta name="description" content="Site dédié à Swift Evolution">
+<meta name="generator" content="Lume 3.3.0">
+</head>
+  <body>
+    <nav class="navbar">
+      <a href="/swift-evolution/" class="navbar-home">
+          <strong>TofPlay</strong>
+      </a>
+
+      <ol class="breadcrumb">
+      <li><a href="/swift-evolution/">Swift Evolution</a></li>
+
+          <li>
+              <a href="/swift-evolution/swift-6-5/">
+                  Swift 6.5
+              </a>
+          </li>
+          <li>
+              <span aria-current="page">SE-0543 - InlineArray - Hashable</span>
+          </li>
+      </ol>
+
+      <ul class="navbar-links">        <li>
+          <!-- ========== Zone traduction ========== -->
+          <div class="translate-toolbar" role="region" aria-label="Traduction de la page">
+            <!-- Combobox custom de langue -->
+            <div class="lang-switcher" id="lang-switcher">
+              <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="lang-list" role="listbox" id="lang-list" hidden=""></ul>
+            </div>
+
+            <!-- Combobox custom pour les services -->
+            <div class="service-switcher" id="service-switcher">
+              <button type="button" class="service-btn" id="service-btn" aria-haspopup="listbox" aria-expanded="false">
+                <!-- rempli par JS -->
+              </button>
+              <ul class="service-list" role="listbox" id="service-list" hidden=""></ul>
+            </div>
+
+            <!-- Bouton restaurer -->
+            <button type="button" id="restore-btn" class="restore-btn" hidden="">
+              Restaurer l’original
+            </button>
+
+          </div>
+        </li>
+        <li>
+          <script>
+            let theme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+            document.documentElement.dataset.theme = theme;
+            function changeTheme() {
+              theme = theme === "dark" ? "light" : "dark";
+              localStorage.setItem("theme", theme);
+              document.documentElement.dataset.theme = theme;
+            }
+          </script>
+          <button class="button" onclick="changeTheme()">
+            <span class="icon">◐</span>
+          </button>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Zone de réservation d'espace pour le statut (hauteur fixe) -->
+    <div class="status-placeholder" id="status-placeholder"></div>
+
+    <!-- Panneau de statut (positionné absolument dans le placeholder) -->
+    <div class="status-toast" id="status-container" hidden="">
+      <div class="status-content">
+        <span class="status" id="status" aria-live="polite"></span>
+        <button class="status-close" id="status-close" aria-label="Fermer le statut" type="button">
+          <svg viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+        <div class="status-bar" id="status-bar"></div>
+      </div>
+    </div>
+
+    <header class="site-welcome">
+      <h1 class="page-title">Swift Evolution</h1>
+    </header>
+    
+    <main id="content" class="body-tag" data-original-lang="fr">
+      <article class="post" data-pagefind-body="" data-title="SE-0543 - InlineArray - Hashable" data-pagefind-index-attrs="data-title" data-pagefind-sort="title:SE-0543 - InlineArray - Hashable">
+  
+  <div class="post-body">
+    <h1>SE-0543 - InlineArray - Hashable</h1>
+<h2 id="g%C3%A9n%C3%A9r%C3%A9-avec" tabindex="-1"><a href="#g%C3%A9n%C3%A9r%C3%A9-avec" class="header-anchor">Généré avec</a></h2>
+<p>LM Studio/Gemma 4</p>
+<h2 id="disponible-%C3%A0-partir-de" tabindex="-1"><a href="#disponible-%C3%A0-partir-de" class="header-anchor">Disponible à partir de</a></h2>
+<p>Swift 6.5</p>
+<h2 id="lien" tabindex="-1"><a href="#lien" class="header-anchor">Lien</a></h2>
+<p><a href="https://github.com/swiftlang/swift-evolution/blob/main/proposals/0543-inline-array-hashable.md">SE-0543 - InlineArray - Hashable</a></p>
+<h2 id="r%C3%A9sum%C3%A9" tabindex="-1"><a href="#r%C3%A9sum%C3%A9" class="header-anchor">Résumé</a></h2>
+<p>La proposition SE-0543 introduit la conformité conditionnelle de <code>InlineArray</code> aux protocoles <code>Equatable</code> et <code>Hashable</code>. Cette évolution permet aux collections de type <code>InlineArray</code> de participer aux opérations de comparaison et de hachage dès lors que le type <code>Element</code> respecte eux-mêmes ces protocoles.</p>
+<p>Le mécanisme repose sur les principes suivants :</p>
+<ul>
+<li><strong>Conformité conditionnelle</strong> : <code>InlineArray</code> est <code>Equatable</code> et <code>Hashable</code> si et seulement si son <code>Element</code> l'est.</li>
+<li><strong>Égalité par contenu</strong> : L'égalité est vérifiée élément par élément (<code>elementwise equality</code>) et non par identité.</li>
+<li><strong>Complexité algorithmique</strong> : Les opérations de comparaison et de hachage possèdent une complexité de $O(n)$, où $n$ représente le nombre d'éléments.</li>
+<li><strong>Hachage exhaustif</strong> : La valeur de hachage inclut chaque élément contenu dans l' <code>InlineArray</code>.</li>
+</ul>
+<h2 id="exemple" tabindex="-1"><a href="#exemple" class="header-anchor">Exemple</a></h2>
+<h3 id="avant-se-0543" tabindex="-1"><a href="#avant-se-0543" class="header-anchor">Avant SE-0543</a></h3>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">MyData</span><span class="token punctuation">:</span> <span class="token class-name">Hashable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> id<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// L'utilisation d'InlineArray avec un type Hashable pose problème</span>
+<span class="token keyword">let</span> array1 <span class="token operator">=</span> <span class="token class-name">InlineArray</span><span class="token operator">&lt;</span><span class="token class-name">MyData</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token class-name">MyData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token class-name">MyData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> array2 <span class="token operator">=</span> <span class="token class-name">InlineArray</span><span class="token operator">&lt;</span><span class="token class-name">MyData</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token class-name">MyData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token class-name">MyData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+<span class="token comment">// L'erreur suivante se produit car InlineArray ne possède pas de conformité Equatable/Hashable</span>
+<span class="token keyword">if</span> array1 <span class="token operator">==</span> array2 <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Égalité confirmée"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> <span class="token keyword">set</span><span class="token punctuation">:</span> <span class="token class-name">Set</span><span class="token operator">&lt;</span><span class="token class-name">InlineArray</span><span class="token operator">&lt;</span><span class="token class-name">MyData</span><span class="token operator">&gt;&gt;</span> <span class="token operator">=</span> <span class="token punctuation">[</span>array1<span class="token punctuation">]</span>
+</code></pre>
+<p>L'absence de conformité aux protocoles <code>Equatable</code> et <code>Hashable</code> pour le type <code>InlineArray</code> empêche l'utilisation directe de ce type dans des structures exigeant ces protocoles, comme <code>Set</code> ou <code>Dictionary</code>. La comparaison de deux instances nécessite une implémentation manuelle complexe pour vérifier l'égalité des éléments.</p>
+<h3 id="apr%C3%A8s-se-0543" tabindex="-1"><a href="#apr%C3%A8s-se-0543" class="header-anchor">Après SE-0543</a></h3>
+<h4 id="conformit%C3%A9-%C3%A0-equatable" tabindex="-1"><a href="#conformit%C3%A9-%C3%A0-equatable" class="header-anchor">Conformité à Equatable</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">MyData</span><span class="token punctuation">:</span> <span class="token class-name">Equatable</span><span class="token punctuation">,</span> <span class="token class-name">Hashable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> id<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> array1 <span class="token operator">=</span> <span class="token class-name">InlineArray</span><span class="token operator">&lt;</span><span class="token class-name">MyData</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token class-name">MyData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token class-name">MyData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> array2 <span class="token operator">=</span> <span class="token class-name">InlineArray</span><span class="token operator">&lt;</span><span class="token class-name">MyData</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token class-name">MyData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token class-name">MyData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+<span class="token comment">// L'égalité est désormais supportée nativement</span>
+<span class="token keyword">if</span> array1 <span class="token operator">==</span> array2 <span class="token punctuation">{</span>
+    <span class="token function">print</span><span class="token punctuation">(</span><span class="token string-literal"><span class="token string">"Les tableaux sont identiques"</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Le type <code>InlineArray</code> supporte désormais l'opérateur de comparaison <code>==</code>. L'égalité est calculée en comparant chaque élément de manière séquentielle. Cette conformité permet une syntaxe naturelle pour la comparaison de collections de données contiguës stockées dans un <code>InlineArray</code>.</p>
+<h4 id="conformit%C3%A9-%C3%A0-hashable" tabindex="-1"><a href="#conformit%C3%A9-%C3%A0-hashable" class="header-anchor">Conformité à Hashable</a></h4>
+<pre class="language-swift" tabindex="0"><code class="language-swift"><span class="token keyword">struct</span> <span class="token class-name">MyData</span><span class="token punctuation">:</span> <span class="token class-name">Hashable</span> <span class="token punctuation">{</span>
+    <span class="token keyword">let</span> id<span class="token punctuation">:</span> <span class="token class-name">Int</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> array1 <span class="token operator">=</span> <span class="token class-name">InlineArray</span><span class="token operator">&lt;</span><span class="token class-name">MyData</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token class-name">MyData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token class-name">MyData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> array2 <span class="token operator">=</span> <span class="token class-name">InlineArray</span><span class="token operator">&lt;</span><span class="token class-name">MyData</span><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token class-name">MyData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token class-name">MyData</span><span class="token punctuation">(</span>id<span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+<span class="token comment">// L'utilisation dans un Set ou comme clé de Dictionary est possible</span>
+<span class="token keyword">let</span> storage <span class="token operator">=</span> <span class="token class-name">Set</span><span class="token punctuation">(</span><span class="token punctuation">[</span>array1<span class="token punctuation">,</span> array2<span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+<span class="token function">print</span><span class="token punctuation">(</span>storage<span class="token punctuation">.</span>count<span class="token punctuation">)</span> <span class="token comment">// Affiche 1 car les éléments sont considérés comme identiques</span>
+</code></pre>
+<p><code>InlineArray</code> est désormais capable de générer une valeur de hachage unique basée sur le contenu de ses éléments. La proposition garantit que chaque élément de l' <code>InlineArray</code> contribue au résultat final du hachage. Cette fonctionnalité permet l'utilisation de l' <code>InlineArray</code> comme clé dans un <code>Dictionary</code> ou comme membre d'un <code>Set</code>, optimisant ainsi la gestion des collections de types contigus.</p>
+<p>L'introduction de ces conformités résout le manque d'interopérabilité du type <code>InlineArray</code> avec les fonctions et structures standards du langage Swift qui dépendent de l'égalité et du hachage des éléments.</p>
+
+  </div>
+</article>
+    </main>
+
+    <footer class="ai-disclaimer">
+      ⚠️ Ce contenu a été généré par une IA. Il peut contenir des erreurs. Vérifiez les informations. ⚠️ 
+    </footer>    
+
+    <script src="/swift-evolution/js/locales.js"></script>
+    <script src="/swift-evolution/js/translate.js"></script>
+
+  
+</body></html>
